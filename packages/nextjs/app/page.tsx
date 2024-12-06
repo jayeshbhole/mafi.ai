@@ -1,12 +1,9 @@
-"use client";
+import AuthScreen from "@/components/AuthScreen";
 
-import type { NextPage } from "next";
-import { useAccount } from "wagmi";
-
-const Home: NextPage = () => {
-  const { address: connectedAddress } = useAccount();
-
-  return <>hello</>;
-};
-
-export default Home;
+export default function Home() {
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center p-24">
+      <AuthScreen />
+    </main>
+  );
+}
