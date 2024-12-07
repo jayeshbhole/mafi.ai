@@ -1,13 +1,9 @@
-import { API } from "@huddle01/server-sdk/api";
 import { roomsDb } from "../db/index.js";
-import { broadcastMessageToRoom } from "../huddle/rtcMessages.js";
 import type { GameState, PlayerRole } from "@mafia/types/game";
 import type { GameRoom } from "@mafia/types/api";
-import type { GameMessage } from "@mafia/types/rtc";
+import { MessageType, type GameMessage } from "@mafia/types/rtc";
 import { randomUUID } from "crypto";
-
-const API_KEY = process.env.HUDDLE01_API_KEY;
-if (!API_KEY) throw new Error("HUDDLE01_API_KEY is not set");
+import { broadcastMessageToRoom } from "../routes/rtc.js";
 
 export class GameManager {
   private roomId: string;
@@ -28,7 +24,7 @@ export class GameManager {
       payload: {
         message: content,
       },
-      type: "system",
+      type: MessageType.SYSTEM_CHAT,
     };
 
     await this.saveAndBroadcastMessage(message);
@@ -49,7 +45,7 @@ export class GameManager {
 
   async handlePlayerMessage(playerId: string, content: string): Promise<boolean> {
     // Check if player is alive
-    if (this.gameState.deadPlayers.includes(playerId)) {
+    if (this.gameState.players.find(p => p.id === playerId && !p.isAlive)) {
       return false;
     }
 
@@ -64,7 +60,7 @@ export class GameManager {
       payload: {
         message: content,
       },
-      type: "chat",
+      type: MessageType.SYSTEM_CHAT,
     };
 
     await this.saveAndBroadcastMessage(message);
@@ -75,22 +71,23 @@ export class GameManager {
     // Validate vote
     if (
       this.gameState.phase !== "VOTING" ||
-      this.gameState.deadPlayers.includes(voterId) ||
-      this.gameState.deadPlayers.includes(targetId)
+      this.gameState.players.find(p => p.id === voterId && !p.isAlive) ||
+      this.gameState.players.find(p => p.id === targetId && !p.isAlive)
     ) {
       return false;
     }
 
     // Record vote
-    this.gameState.votes[voterId] = targetId;
+    // this.gameState.votes[voterId] = targetId;
 
     const message: GameMessage = {
       playerId: voterId,
-      // playerName: voterId,
+      id: randomUUID(),
+      timestamp: Date.now(),
       payload: {
-        message: `voted for ${targetId}`,
+        vote: targetId,
       },
-      type: "vote",
+      type: MessageType.VOTE,
     };
 
     await this.saveAndBroadcastMessage(message);

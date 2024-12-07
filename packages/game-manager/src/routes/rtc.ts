@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { WebSocket, WebSocketServer } from "ws";
 import { handleRTCMessage } from "../huddle/rtcHandler.js";
-import type { RTCMessage } from "@mafia/types/rtc";
+import type { GameMessage } from "@mafia/types/rtc";
 
 const router = new Hono();
 const connectedClients = new Map<string, Set<WebSocket>>();
@@ -25,8 +25,8 @@ export function setupWebSocketHandlers(wss: WebSocketServer) {
 
     ws.on("message", async data => {
       try {
-        const message = JSON.parse(data.toString()) as RTCMessage;
-        const success = await handleRTCMessage(message);
+        const message = JSON.parse(data.toString()) as GameMessage;
+        const success = await handleRTCMessage(message, roomId);
 
         if (success) {
           // Broadcast message to all clients in the room except sender
@@ -54,7 +54,7 @@ export function setupWebSocketHandlers(wss: WebSocketServer) {
 }
 
 // Export function to broadcast messages
-export function broadcastToRoom(roomId: string, message: RTCMessage, excludeWs?: WebSocket) {
+export function broadcastToRoom(roomId: string, message: GameMessage, excludeWs?: WebSocket) {
   const roomClients = connectedClients.get(roomId);
   if (!roomClients) return;
 
@@ -64,6 +64,15 @@ export function broadcastToRoom(roomId: string, message: RTCMessage, excludeWs?:
       client.send(messageStr);
     }
   });
+}
+
+export async function broadcastMessageToRoom(roomId: string, message: GameMessage) {
+  try {
+    broadcastToRoom(roomId, message);
+  } catch (error) {
+    console.error("Failed to broadcast message:", error);
+    throw error;
+  }
 }
 
 export default router;

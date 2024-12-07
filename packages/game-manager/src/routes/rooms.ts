@@ -1,31 +1,18 @@
 import { Hono } from "hono";
-import { API } from "@huddle01/server-sdk/api";
-import { AccessToken, Role } from "@huddle01/server-sdk/auth";
 import dotenv from "dotenv";
 import { roomsDb } from "../db/index.js";
 import type { GameRoom } from "@mafia/types/api";
+import { randomUUID } from "crypto";
 
 dotenv.config();
 
 const router = new Hono();
-const API_KEY = process.env.HUDDLE01_API_KEY;
-if (!API_KEY) throw new Error("HUDDLE01_API_KEY is not set");
 
 // Create a new room
 router.post("/create-room", async c => {
   try {
-    const api = new API({
-      apiKey: API_KEY,
-    });
-
-    const huddle01Room = await api.createRoom({
-      roomLocked: false,
-      metadata: JSON.stringify({
-        title: "Mafia Game",
-      }),
-    });
     const room: GameRoom = {
-      roomId: huddle01Room.roomId,
+      roomId: randomUUID(),
       gameState: {
         phase: "LOBBY",
         round: 0,
@@ -98,30 +85,6 @@ router.post("/join-room/:roomId", async c => {
       );
     }
 
-    const accessToken = new AccessToken({
-      apiKey: API_KEY,
-      roomId: roomId,
-      role: Role.GUEST,
-      permissions: {
-        admin: true,
-        canConsume: true,
-        canProduce: true,
-        canProduceSources: {
-          cam: true,
-          mic: true,
-          screen: true,
-        },
-        canRecvData: true,
-        canSendData: true,
-        canUpdateMetadata: true,
-      },
-      options: {
-        metadata: { playerId },
-      },
-    });
-
-    const token = await accessToken.toJwt();
-
     await new Promise<void>((resolve, reject) => {
       roomsDb.update({ roomId }, { $push: { players: playerId } }, {}, err => {
         if (err) reject(err);
@@ -131,7 +94,6 @@ router.post("/join-room/:roomId", async c => {
 
     return c.json({
       success: true,
-      token,
       roomId,
       message: "Successfully joined room",
     });
