@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { gameService } from "../services/gameService";
 import { NIGHT_MESSAGES, PHASE_DURATION, useGameStore } from "../stores/gameStore";
@@ -9,7 +9,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { AlertCircle, Check, Moon, Skull, Sun, Users } from "lucide-react";
+import { Moon, Skull, Sun, Users } from "lucide-react";
 
 export default function GameChatRoom({ gameId }: { gameId: string }) {
   const router = useRouter();
@@ -36,7 +36,12 @@ export default function GameChatRoom({ gameId }: { gameId: string }) {
     eliminatePlayer,
   } = useGameStore();
 
-  // Mutations
+  // Queries and Mutations
+  const { data: gameState } = useQuery({
+    queryKey: ["gameState", gameId],
+    queryFn: () => gameService.fetchGameState(gameId),
+  });
+
   const sendMessageMutation = useMutation({
     mutationFn: gameService.sendMessage,
     onSuccess: message => {
@@ -86,52 +91,70 @@ export default function GameChatRoom({ gameId }: { gameId: string }) {
     }
   }, [messages]);
 
-  const handlePhaseEnd = useCallback(() => {
-    setTimerActive(false);
+  // Timer effect
+  useEffect(() => {
+    if (!isTimerActive) return;
 
-    if (phase === "day") {
-      setPhase("voting");
-      setOverlayCard("voting");
-      addMessage({
-        sender: "System",
-        content: "🗳️ Time to vote! Choose wisely...",
-        type: "system",
-      });
-      setTimeLeft(PHASE_DURATION.voting);
-      setTimerActive(true);
-    } else if (phase === "voting") {
-      const voteResults = players
-        .filter(p => p.votes && p.votes > 0)
-        .map(p => `${p.name}: ${p.votes} votes`)
-        .join("\n");
+    const handlePhaseEnd = () => {
+      setTimerActive(false);
 
-      addMessage({
-        sender: "System",
-        content: `📊 Vote Results:\n${voteResults}`,
-        type: "system-alert",
-      });
+      if (phase === "day") {
+        setPhase("voting");
+        setOverlayCard("voting");
+        addMessage({
+          sender: "System",
+          content: "🗳️ Time to vote! Choose wisely...",
+          type: "system",
+        });
+        setTimeLeft(PHASE_DURATION.voting);
+        setTimerActive(true);
+      } else if (phase === "voting") {
+        const voteResults = players
+          .filter(p => p.votes && p.votes > 0)
+          .map(p => `${p.name}: ${p.votes} votes`)
+          .join("\n");
 
-      setOverlayCard("night");
-      setPhase("night");
-      setTimeLeft(PHASE_DURATION.night);
-      setNightMessage(NIGHT_MESSAGES[Math.floor(Math.random() * NIGHT_MESSAGES.length)]);
-      setTimerActive(true);
-      resetVotes();
+        addMessage({
+          sender: "System",
+          content: `📊 Vote Results:\n${voteResults}`,
+          type: "system-alert",
+        });
 
-      // Trigger mafia kill after voting
-      mafiaKillMutation.mutate();
-    } else if (phase === "night") {
-      setOverlayCard(null);
-      setPhase("day");
-      setTimeLeft(PHASE_DURATION.day);
-      setTimerActive(true);
+        setOverlayCard("night");
+        setPhase("night");
+        setTimeLeft(PHASE_DURATION.night);
+        setNightMessage(NIGHT_MESSAGES[Math.floor(Math.random() * NIGHT_MESSAGES.length)]);
+        setTimerActive(true);
+        resetVotes();
 
-      // Trigger AI responses in day phase
-      aiResponseMutation.mutate();
-    }
+        // Trigger mafia kill after voting
+        mafiaKillMutation.mutate();
+      } else if (phase === "night") {
+        setOverlayCard(null);
+        setPhase("day");
+        setTimeLeft(PHASE_DURATION.day);
+        setTimerActive(true);
+
+        // Trigger AI responses in day phase
+        aiResponseMutation.mutate();
+      }
+    };
+
+    const timer = setInterval(() => {
+      const prev = useGameStore.getState().timeLeft;
+      if (prev <= 0) {
+        clearInterval(timer);
+        handlePhaseEnd();
+      } else {
+        setTimeLeft(prev - 1);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
   }, [
     addMessage,
     aiResponseMutation,
+    isTimerActive,
     mafiaKillMutation,
     phase,
     players,
@@ -142,36 +165,6 @@ export default function GameChatRoom({ gameId }: { gameId: string }) {
     setTimeLeft,
     setTimerActive,
   ]);
-
-  // Timer effect
-  useEffect(() => {
-    if (!isTimerActive) return;
-
-    const timer = setInterval(() => {
-      // setTimeLeft(prev => {
-      //   if (prev <= 0) {
-      //     clearInterval(timer);
-      //     handlePhaseEnd();
-      //     return phase === "day"
-      //       ? PHASE_DURATION.day
-      //       : phase === "night"
-      //         ? PHASE_DURATION.night
-      //         : PHASE_DURATION.voting;
-      //   }
-      //   return prev - 1;
-      // });
-      const timeleft = useGameStore.getState().timeLeft;
-      if (timeleft <= 0) {
-        clearInterval(timer);
-        handlePhaseEnd();
-        setTimeLeft(
-          phase === "day" ? PHASE_DURATION.day : phase === "night" ? PHASE_DURATION.night : PHASE_DURATION.voting,
-        );
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [handlePhaseEnd, isTimerActive, phase, setTimeLeft]);
 
   // Get phase-specific styles
   const getPhaseStyles = () => {
@@ -228,7 +221,6 @@ export default function GameChatRoom({ gameId }: { gameId: string }) {
     <>
       <div className={`min-h-screen w-full p-8 transition-colors duration-1000 ${phaseStyles.background}`}>
         <div className="max-w-[500px] mx-auto relative">
-          {/* Overlay Cards */}
           {overlayCard && (
             <div className="absolute inset-0 z-10 animate-in fade-in zoom-in duration-300">
               <Card
@@ -293,7 +285,7 @@ export default function GameChatRoom({ gameId }: { gameId: string }) {
                 <div
                   className={`h-full bg-gradient-to-r ${phaseStyles.timerColor} transition-all duration-1000 ease-linear`}
                   style={{
-                    width: `${(timeLeft / (phase === "day" ? PHASE_DURATION.day : phase === "night" ? PHASE_DURATION.night : PHASE_DURATION.voting)) * 100}%`,
+                    width: `${(timeLeft / PHASE_DURATION[phase]) * 100}%`,
                   }}
                 />
               </div>
@@ -336,40 +328,27 @@ export default function GameChatRoom({ gameId }: { gameId: string }) {
                         <div
                           className={`relative max-w-[80%] p-4 shadow-md ${
                             message.type?.startsWith("system")
-                              ? `bg-destructive/20 text-destructive-foreground border-2 border-destructive font-medium rounded-lg mx-auto text-center`
+                              ? "bg-destructive/20 text-destructive-foreground border-2 border-destructive font-medium rounded-lg mx-auto text-center"
                               : message.sender === "You"
                                 ? "bg-primary text-primary-foreground rounded-[20px] rounded-br-none"
                                 : "bg-secondary rounded-[20px] rounded-bl-none"
                           }`}
                         >
-                          {message.type?.startsWith("system") ? (
-                            <>
-                              <div className="flex items-center justify-center gap-2 mb-2">
-                                {message.type === "system-alert" && <AlertCircle className="w-5 h-5" />}
-                                {message.type === "system-success" && <Check className="w-5 h-5" />}
-                                <p className="font-bold">{message.sender}</p>
-                              </div>
-                              <p className="whitespace-pre-line">{message.content}</p>
-                            </>
-                          ) : (
-                            <>
-                              <p className="font-semibold mb-1">{message.sender}</p>
-                              <p>{message.content}</p>
-                              {message.type !== "system" && (
-                                <div
-                                  className={`absolute bottom-0 ${
-                                    message.sender === "You"
-                                      ? "right-0 border-l-[12px] border-l-transparent border-t-[12px] border-t-primary"
-                                      : "left-0 border-r-[12px] border-r-transparent border-t-[12px] border-t-secondary"
-                                  }`}
-                                  style={{
-                                    transform: "translateY(100%)",
-                                    width: 0,
-                                    height: 0,
-                                  }}
-                                />
-                              )}
-                            </>
+                          <p className="font-semibold mb-1">{message.sender}</p>
+                          <p className="whitespace-pre-line">{message.content}</p>
+                          {message.type !== "system" && (
+                            <div
+                              className={`absolute bottom-0 ${
+                                message.sender === "You"
+                                  ? "right-0 border-l-[12px] border-l-transparent border-t-[12px] border-t-primary"
+                                  : "left-0 border-r-[12px] border-r-transparent border-t-[12px] border-t-secondary"
+                              }`}
+                              style={{
+                                transform: "translateY(100%)",
+                                width: 0,
+                                height: 0,
+                              }}
+                            />
                           )}
                         </div>
                       </div>
@@ -379,6 +358,7 @@ export default function GameChatRoom({ gameId }: { gameId: string }) {
                 </div>
               </ScrollArea>
             </CardContent>
+
             <CardFooter className="p-4 bg-secondary/50">
               <div className="flex w-full space-x-2">
                 <Input
