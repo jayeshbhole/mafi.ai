@@ -8,7 +8,7 @@ const app = new Hono();
 
 // Mount routers
 app.route("/rooms", roomsRouter);
-app.route("/rooms", messagesRouter);
+app.route("/messages", messagesRouter);
 
 // Run cleanup every hour
 setInterval(cleanupOldRooms, 60 * 60 * 1000);

@@ -12,7 +12,7 @@ const API_KEY = process.env.HUDDLE01_API_KEY;
 if (!API_KEY) throw new Error("HUDDLE01_API_KEY is not set");
 
 // Create a new room
-router.post("/", async c => {
+router.post("/create-room", async c => {
   try {
     const api = new API({
       apiKey: API_KEY,
@@ -55,7 +55,7 @@ router.post("/", async c => {
 });
 
 // Join a room
-router.post("/:roomId/join", async c => {
+router.post("/join-room/:roomId", async c => {
   try {
     const roomId = c.req.param("roomId");
     const { playerId } = await c.req.json();

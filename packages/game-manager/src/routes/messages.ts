@@ -1,11 +1,12 @@
 import { Hono } from "hono";
 import db from "../db/index.js";
 import type { Message, Room } from "../types/index.js";
+import { broadcastMessageToRoom } from "../huddle/rtcMessages.js";
 
 const router = new Hono();
 
 // Post a message
-router.post("/:roomId/messages", async c => {
+router.post("/:roomId/new-message", async c => {
   try {
     const roomId = c.req.param("roomId");
     const { type, sender, content } = await c.req.json();
@@ -28,12 +29,21 @@ router.post("/:roomId/messages", async c => {
       timestamp: new Date(),
     };
 
+    // Store in database
     await new Promise<void>((resolve, reject) => {
       db.update({ roomId }, { $push: { messages: message } }, {}, err => {
         if (err) reject(err);
         else resolve();
       });
     });
+
+    // Broadcast to RTC
+    try {
+      await broadcastMessageToRoom(roomId, message);
+    } catch (error) {
+      console.error("RTC broadcast failed:", error);
+      // Continue even if RTC broadcast fails - message is still stored in DB
+    }
 
     return c.json({
       success: true,
@@ -51,7 +61,7 @@ router.post("/:roomId/messages", async c => {
 });
 
 // Get messages for a room
-router.get("/:roomId/messages", async c => {
+router.get("/:roomId/get-messages", async c => {
   try {
     const roomId = c.req.param("roomId");
 
