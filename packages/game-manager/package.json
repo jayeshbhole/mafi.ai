@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "test": "vitest"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.7",
@@ -15,6 +16,8 @@
   "devDependencies": {
     "@types/nedb": "^*",
     "@types/node": "^20.11.17",
-    "tsx": "^4.7.1"
+    "node-fetch": "^3.3.2",
+    "tsx": "^4.7.1",
+    "vitest": "^2.1.8"
   }
 }
