@@ -17,6 +17,7 @@ export const useGameController = (gameId: string) => {
   const setOverlayCard = useGameStore(state => state.setOverlayCard);
   const setNightMessage = useGameStore(state => state.setNightMessage);
   const setTimeLeft = useGameStore(state => state.setTimeLeft);
+  const setKilledPlayer = useGameStore(state => state.setKilledPlayer);
   const timerRef = useRef<NodeJS.Timeout>();
 
   // Mutations
@@ -88,9 +89,22 @@ export const useGameController = (gameId: string) => {
   }, [setPhase, setOverlayCard, setNightMessage, resetVotes]);
 
   const transitionToDay = useCallback(() => {
-    setOverlayCard(null);
-    setPhase("day");
-  }, [setPhase, setOverlayCard]);
+    if (mafiaKillMutation.data) {
+      // Show death overlay first
+      setOverlayCard("death");
+      setKilledPlayer(mafiaKillMutation.data);
+
+      // After 5 seconds, transition to day phase
+      setTimeout(() => {
+        setOverlayCard(null);
+        setPhase("day");
+        setKilledPlayer(null);
+      }, 5000);
+    } else {
+      setOverlayCard(null);
+      setPhase("day");
+    }
+  }, [setPhase, setOverlayCard, setKilledPlayer, mafiaKillMutation.data]);
 
   const stopTimer = useCallback(() => {
     if (timerRef.current) {

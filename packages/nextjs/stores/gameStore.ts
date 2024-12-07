@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type GamePhase = "day" | "night" | "voting";
+export type GamePhase = "day" | "night" | "voting" | "death";
 export type Player = {
   name: string;
   role: "mafia" | "villager";
@@ -21,6 +21,7 @@ export const PHASE_DURATION = {
   day: 20,
   night: 5,
   voting: 15,
+  death: 10,
 } as const;
 
 export const NIGHT_MESSAGES = [
@@ -37,14 +38,15 @@ interface GameState {
   isTimerActive: boolean;
   players: Player[];
   messages: Message[];
-  overlayCard: "voting" | "night" | null;
+  overlayCard: GamePhase | null;
   nightMessage: string;
+  killedPlayer: string | null;
 
   // Actions
   setPhase: (phase: GamePhase) => void;
   setTimeLeft: (time: number) => void;
   setTimerActive: (active: boolean) => void;
-  setOverlayCard: (card: "voting" | "night" | null) => void;
+  setOverlayCard: (card: GamePhase | null) => void;
   setNightMessage: (message: string) => void;
   addMessage: (message: Omit<Message, "id" | "timestamp">) => void;
   updatePlayer: (name: string, updates: Partial<Player>) => void;
@@ -52,6 +54,7 @@ interface GameState {
   voteForPlayer: (name: string) => void;
   resetVotes: () => void;
   eliminatePlayer: (name: string) => void;
+  setKilledPlayer: (name: string | null) => void;
 }
 
 const INITIAL_PLAYERS: Player[] = [
@@ -78,6 +81,7 @@ export const useGameStore = create<GameState>(set => ({
   ],
   overlayCard: null,
   nightMessage: "",
+  killedPlayer: null,
 
   setPhase: phase => set({ phase }),
   setTimeLeft: timeLeft => set({ timeLeft }),
@@ -124,4 +128,6 @@ export const useGameStore = create<GameState>(set => ({
     set(state => ({
       players: state.players.map(p => (p.name === name ? { ...p, isAlive: false } : p)),
     })),
+
+  setKilledPlayer: killedPlayer => set({ killedPlayer }),
 }));
