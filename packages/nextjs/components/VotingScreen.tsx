@@ -5,14 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useGameStore } from "@/stores/gameStore";
+import { useGameStore } from "@/services/store/gameStore";
 import { useMutation } from "@tanstack/react-query";
 
 export default function VotingScreen({ gameId }: { gameId: string }) {
   const [selectedPlayer, setSelectedPlayer] = useState<string>();
 
   const players = useGameStore(state => state.players);
-
   const round = useGameStore(state => state.round);
 
   const {

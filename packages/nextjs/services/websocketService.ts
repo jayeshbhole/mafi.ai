@@ -1,4 +1,4 @@
-import type { GameMessage, RTCMessage } from "@mafia/types/rtc";
+import { type GameMessage, MessageType } from "@mafia/types/rtc";
 import { create } from "zustand";
 
 interface WebSocketStore {
@@ -40,8 +40,7 @@ export const useWebSocketStore = create<WebSocketStore>((set, get) => ({
 
     ws.onmessage = event => {
       try {
-        const rtcMessage = JSON.parse(event.data) as RTCMessage;
-        const message = rtcMessage.data;
+        const message = JSON.parse(event.data) as GameMessage;
 
         // Handle different message types
         switch (message.type) {
@@ -78,12 +77,7 @@ export const useWebSocketStore = create<WebSocketStore>((set, get) => ({
   sendMessage: (message: GameMessage) => {
     const { socket, roomId } = get();
     if (socket && socket.readyState === WebSocket.OPEN && roomId) {
-      const rtcMessage: RTCMessage = {
-        type: "GAME_MESSAGE",
-        data: message,
-        roomId,
-      };
-      socket.send(JSON.stringify(rtcMessage));
+      socket.send(JSON.stringify(message));
     }
   },
   addMessage: (message: GameMessage) => {

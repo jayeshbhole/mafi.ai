@@ -1,8 +1,8 @@
 import { memo } from "react";
-import { PHASE_DURATION, useGameStore } from "../../stores/gameStore";
 import PlayerList from "./PlayerList";
 import TimerProgress from "./TimerProgress";
 import { Card, CardTitle } from "@/components/ui/card";
+import { PHASE_DURATION, useGameStore } from "@/services/store/gameStore";
 import { Gavel, Moon, Skull, Users } from "lucide-react";
 
 interface OverlayCardProps {
@@ -58,7 +58,7 @@ const OverlayCard = memo(({ onVote }: OverlayCardProps) => {
     );
   }
 
-  if (overlayCard === "RESULT") {
+  if (overlayCard === "VOTING_RESULT") {
     const votedOutPlayer = players.reduce(
       (prev, current) => (!prev || (current.votes || 0) > (prev.votes || 0) ? current : prev),
       players[0],

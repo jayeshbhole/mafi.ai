@@ -9,10 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useGameRTC } from "@/hooks/useGameRTC";
-import { useGameStore } from "@/stores/gameStore";
-import { useRTCStore } from "@/stores/rtcStore";
-import { GameMessage } from "@mafia/types";
+import { useGameStore } from "@/services/store/gameStore";
+import { GameMessage, MessageType } from "@mafia/types";
 import { randomUUID } from "crypto";
 
 const GameChatRoom = () => {
@@ -40,24 +38,31 @@ const Messages = () => {
   return (
     <ScrollArea className="flex-1 px-6">
       <div className="space-y-4 py-4">
-        {messages.map((message, i) => (
-          <div key={i} className={`flex ${message.type === "chat" ? "justify-end" : "justify-start"}`}>
-            <div
-              className={`max-w-[80%] rounded-lg px-4 py-2 animate-in slide-in-from-bottom-2 duration-300 ${
-                message.type === "chat"
-                  ? "bg-primary text-primary-foreground"
-                  : message.type === "system-alert"
-                    ? "bg-destructive/10 text-destructive border border-destructive/20"
-                    : message.type === "system-success"
-                      ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
-                      : "bg-muted"
-              }`}
-            >
-              {message.type === "chat" && <div className="text-xs opacity-75 mb-1">{message.playerId}</div>}
-              <div className="whitespace-pre-wrap">{message.payload.message}</div>
+        {messages
+          .filter(m => {
+            if ("message" in m.payload) return true;
+            return false;
+          })
+          .map((message, i) => (
+            <div key={i} className={`flex ${message.type === MessageType.CHAT ? "justify-end" : "justify-start"}`}>
+              <div
+                className={`max-w-[80%] rounded-lg px-4 py-2 animate-in slide-in-from-bottom-2 duration-300 ${
+                  message.type === MessageType.CHAT
+                    ? "bg-primary text-primary-foreground"
+                    : message.type === MessageType.SYSTEM_ALERT
+                      ? "bg-destructive/10 text-destructive border border-destructive/20"
+                      : message.type === MessageType.SYSTEM_SUCCESS
+                        ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
+                        : "bg-muted"
+                }`}
+              >
+                {message.type === MessageType.CHAT && <div className="text-xs opacity-75 mb-1">{message.playerId}</div>}
+                {message.type === MessageType.CHAT && (
+                  <div className="whitespace-pre-wrap">{message.payload.message}</div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
       </div>
     </ScrollArea>
   );
@@ -68,8 +73,8 @@ const ChatInput = () => {
 
   const [input, setInput] = useState("");
   const addMessage = useGameStore(state => state.addMessage);
-  const { isConnected } = useRTCStore();
-  const { sendMessage } = useGameRTC(roomId);
+  const sendMessage = useGameStore(state => state.sendMessage);
+  const isConnected = useGameStore(state => state.socket);
 
   const handleMessage = useCallback(
     (content: string) => {
@@ -80,16 +85,12 @@ const ChatInput = () => {
           message: content,
         },
         timestamp: Date.now(),
-        type: "chat" as const,
+        type: MessageType.CHAT,
       };
       addMessage(message);
 
       if (isConnected) {
-        sendMessage({
-          payload: JSON.stringify(message),
-          to: "*",
-          label: "chat",
-        });
+        sendMessage(message.payload.message);
       }
     },
     [addMessage, sendMessage, isConnected],

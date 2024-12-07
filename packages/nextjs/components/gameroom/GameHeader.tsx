@@ -1,9 +1,9 @@
 import { memo } from "react";
 import { useSearchParams } from "next/navigation";
-import { PHASE_DURATION, useGameStore } from "../../stores/gameStore";
 import PlayerList from "./PlayerList";
 import TimerProgress from "./TimerProgress";
 import { CardHeader, CardTitle } from "@/components/ui/card";
+import { PHASE_DURATION, useGameStore } from "@/services/store/gameStore";
 import type { GamePhase } from "@mafia/types";
 import { Moon, Skull, Sun, Users } from "lucide-react";
 

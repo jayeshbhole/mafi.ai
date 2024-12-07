@@ -1,5 +1,5 @@
 import { useWebSocketStore } from "./websocketService";
-import type { GameMessage, GameRoom, JoinRoomResponse } from "@mafia/types";
+import { type GameMessage, type GameRoom, type JoinRoomResponse, MessageType } from "@mafia/types";
 import { randomUUID } from "crypto";
 
 const API_URL = "http://localhost:9999";
@@ -49,8 +49,7 @@ export const roomService = {
   // Send a chat message
   sendChatMessage: async (roomId: string, playerId: string, content: string): Promise<void> => {
     const message: GameMessage = {
-      type: "chat",
-      //   roomId,
+      type: MessageType.CHAT,
       id: randomUUID(),
       timestamp: Date.now(),
       playerId,
@@ -65,8 +64,7 @@ export const roomService = {
   // Send a vote
   sendVote: async (roomId: string, playerId: string, targetPlayerId: string): Promise<void> => {
     const message: GameMessage = {
-      type: "vote",
-      //   roomId,
+      type: MessageType.VOTE,
       playerId,
       id: randomUUID(),
       timestamp: Date.now(),

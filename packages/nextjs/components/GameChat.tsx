@@ -3,18 +3,18 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { roomService } from "@/services/roomService";
-import { useWebSocketStore } from "@/services/websocketService";
+import { useGameStore } from "@/services/store/gameStore";
+import { MessageType } from "@mafia/types/rtc";
 
 interface GameChatProps {
   roomId: string;
   playerId: string;
 }
 
-export function GameChat({ roomId, playerId }: GameChatProps) {
+export function GameChat({ playerId }: GameChatProps) {
   const [message, setMessage] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const { messages, currentPhase, systemState } = useWebSocketStore();
+  const { messages, currentPhase, sendMessage, sendVote } = useGameStore();
 
   // Auto scroll to bottom when new messages arrive
   useEffect(() => {
@@ -26,7 +26,7 @@ export function GameChat({ roomId, playerId }: GameChatProps) {
     if (!message.trim()) return;
 
     try {
-      await roomService.sendChatMessage(roomId, playerId, message);
+      sendMessage(message);
       setMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
@@ -35,7 +35,7 @@ export function GameChat({ roomId, playerId }: GameChatProps) {
 
   const handleVote = async (targetPlayerId: string) => {
     try {
-      await roomService.sendVote(roomId, playerId, targetPlayerId);
+      sendVote(targetPlayerId);
     } catch (error) {
       console.error("Error sending vote:", error);
     }
@@ -46,23 +46,11 @@ export function GameChat({ roomId, playerId }: GameChatProps) {
       {/* Phase Banner */}
       <div className="bg-primary/10 p-2 text-center text-primary font-semibold">Current Phase: {currentPhase}</div>
 
-      {/* System Messages */}
-      {systemState.lastAlert && (
-        <Alert variant="destructive" className="mb-2">
-          {systemState.lastAlert}
-        </Alert>
-      )}
-      {systemState.lastSuccess && (
-        <Alert variant="default" className="mb-2 bg-green-500/10 text-green-500 border-green-500/20">
-          {systemState.lastSuccess}
-        </Alert>
-      )}
-
       {/* Chat Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((msg, index) => {
           switch (msg.type) {
-            case "chat":
+            case MessageType.CHAT:
               return (
                 <div key={index} className={cn("flex", msg.playerId === playerId ? "justify-end" : "justify-start")}>
                   <div
@@ -72,20 +60,20 @@ export function GameChat({ roomId, playerId }: GameChatProps) {
                     )}
                   >
                     <div className="text-sm font-medium">Player {msg.playerId}</div>
-                    <div>{msg.payload?.message}</div>
+                    <div>{msg.payload.message}</div>
                   </div>
                 </div>
               );
-            case "vote":
+            case MessageType.VOTE:
               return (
                 <div key={index} className="text-center text-muted-foreground">
                   Player {msg.playerId} voted for {msg.payload.vote}
                 </div>
               );
-            case "system":
+            case MessageType.SYSTEM_CHAT:
               return (
                 <div key={index} className="text-center text-primary italic">
-                  {msg.payload?.message}
+                  {msg.payload.message}
                 </div>
               );
             default:

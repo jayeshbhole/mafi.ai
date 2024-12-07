@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef } from "react";
-import { NIGHT_MESSAGES, PHASE_DURATION, useGameStore } from "../stores/gameStore";
-import { Player } from "@mafia/types";
+import { NIGHT_MESSAGES, PHASE_DURATION, useGameStore } from "@/services/store/gameStore";
+import { MessageType, Player } from "@mafia/types";
 
 export const useGameController = (gameId: string) => {
   // Game state from store
-  const phase = useGameStore(state => state.phase);
+  const phase = useGameStore(state => state.currentPhase);
   const players = useGameStore(state => state.players);
   const overlayCard = useGameStore(state => state.overlayCard);
   const nightMessage = useGameStore(state => state.nightMessage);
@@ -25,8 +25,8 @@ export const useGameController = (gameId: string) => {
   }, [setPhase, setOverlayCard]);
 
   const transitionToResult = useCallback(() => {
-    setPhase("RESULT");
-    setOverlayCard("RESULT");
+    setPhase("VOTING_RESULT");
+    setOverlayCard("VOTING_RESULT");
   }, [setPhase, setOverlayCard]);
 
   const transitionToNight = useCallback(() => {
@@ -81,7 +81,7 @@ export const useGameController = (gameId: string) => {
         case "VOTING":
           transitionToResult();
           break;
-        case "RESULT":
+        case "VOTING_RESULT":
           transitionToNight();
           break;
         case "NIGHT":
@@ -138,7 +138,7 @@ export const useGameController = (gameId: string) => {
         payload: {
           message: "🎉 Village wins! All mafia have been eliminated.",
         },
-        type: "system-success",
+        type: MessageType.SYSTEM_SUCCESS,
       });
       return true;
     }
@@ -149,7 +149,7 @@ export const useGameController = (gameId: string) => {
         payload: {
           message: "🎭 Mafia wins! They have taken over the village.",
         },
-        type: "system-alert",
+        type: MessageType.SYSTEM_ALERT,
       });
       return true;
     }

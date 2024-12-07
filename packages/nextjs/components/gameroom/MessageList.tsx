@@ -1,6 +1,6 @@
 import { memo, useEffect, useRef } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { GameMessage } from "@mafia/types";
+import { GameMessage, MessageType } from "@mafia/types/rtc";
 
 interface MessageListProps {
   messages: GameMessage[];
@@ -21,7 +21,7 @@ const MessageList = memo(({ messages }: MessageListProps) => {
       <div className="space-y-6 p-4">
         {messages
           .filter(m => {
-            if (m.payload.message) return true;
+            if ("message" in m.payload) return true;
             return false;
           })
           .map(message => (
@@ -37,7 +37,9 @@ const MessageList = memo(({ messages }: MessageListProps) => {
                   }`}
                 >
                   <p className="font-semibold mb-1">{message.playerId}</p>
-                  <p className="whitespace-pre-line">{message.payload.message}</p>
+                  {message.type === MessageType.CHAT && (
+                    <p className="whitespace-pre-line">{message.payload.message}</p>
+                  )}
                   {!message.type?.startsWith("system") && (
                     <div
                       className={`absolute bottom-0 ${
