@@ -1,4 +1,4 @@
-import type { APIResponse, GameRoom, JoinRoomResponse } from "@mafia/types";
+import type { GameRoom, JoinRoomResponse } from "@mafia/types";
 
 const API_URL = "http://localhost:9999";
 
@@ -6,9 +6,11 @@ export const roomService = {
   // Get all active rooms
   getActiveRooms: async (): Promise<GameRoom[]> => {
     const response = await fetch(`${API_URL}/rooms`);
-    const data: APIResponse<{ rooms: GameRoom[] }> = await response.json();
-    if (!data.success) throw new Error(data.error);
-    return data.data?.rooms || [];
+    const data: { rooms: GameRoom[]; success: boolean; message: string } = await response.json();
+
+    if (!data.success) throw new Error(data.message);
+
+    return data.rooms;
   },
 
   // Create a new room
@@ -16,9 +18,11 @@ export const roomService = {
     const response = await fetch(`${API_URL}/rooms/create-room`, {
       method: "POST",
     });
-    const data: APIResponse<{ room: GameRoom }> = await response.json();
-    if (!data.success) throw new Error(data.error);
-    return data.data!.room;
+    debugger;
+    const data: { success: boolean; room: GameRoom; message: string } = await response.json();
+    if (!data.success) throw new Error(data.message);
+
+    return data.room;
   },
 
   // Join a room
@@ -28,8 +32,12 @@ export const roomService = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ playerId }),
     });
-    const data: APIResponse<JoinRoomResponse> = await response.json();
-    if (!data.success) throw new Error(data.error);
-    return data.data!;
+
+    console.log("Join room response", response);
+
+    const data: { success: boolean; token: string; roomId: string; message: string } = await response.json();
+    if (!data.success) throw new Error(data.message);
+
+    return data;
   },
 };

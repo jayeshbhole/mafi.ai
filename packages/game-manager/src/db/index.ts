@@ -1,12 +1,13 @@
+import type { GameRoom } from "@mafia/types/api";
+import type { GameState } from "@mafia/types/game";
 import Datastore from "nedb";
 import path from "path";
 import { fileURLToPath } from "url";
-import type { GameState, Room } from "../types/game.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const roomsDb = new Datastore<Room>({
+const roomsDb = new Datastore<GameRoom>({
   filename: path.join(__dirname, "../../data/rooms.db"),
   autoload: true,
 });

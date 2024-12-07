@@ -10,12 +10,6 @@ export interface GameRoom {
   settings: GameSettings;
 }
 
-export interface APIResponse<T = any> {
-  success: boolean;
-  data?: T;
-  error?: string;
-}
-
 export interface JoinRoomResponse {
   token: string;
   roomId: string;

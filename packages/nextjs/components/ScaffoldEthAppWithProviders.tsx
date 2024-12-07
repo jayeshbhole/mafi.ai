@@ -8,6 +8,7 @@ import "@coinbase/onchainkit/styles.css";
 import { HuddleClient, HuddleProvider } from "@huddle01/react";
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { AppProgressBar as ProgressBar } from "next-nprogress-bar";
 import { Toaster } from "react-hot-toast";
 import { base } from "viem/chains";
@@ -66,6 +67,7 @@ export const ScaffoldEthAppWithProviders = ({ children }: { children: React.Reac
               <ProgressBar height="3px" color="#2299dd" />
 
               {children}
+              <ReactQueryDevtools initialIsOpen={false} />
             </RainbowKitProvider>
           </OnchainKitProvider>
         </WagmiProvider>

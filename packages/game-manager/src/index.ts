@@ -1,11 +1,23 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import roomsRouter from "./routes/rooms.js";
 import rtcRouter from "./routes/rtc.js";
 import "ws";
 // import { cleanupOldRooms } from "./db/index.js";
 
 const app = new Hono();
+
+// Add CORS middleware
+app.use(
+  "/*",
+  cors({
+    origin: ["http://localhost:3000"],
+    credentials: true,
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    maxAge: 600,
+  }),
+);
 
 // Mount routers
 app.route("/rooms", roomsRouter);
