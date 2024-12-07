@@ -1,5 +1,3 @@
-import type { Message, MessageType } from "./game";
-
 export interface RTCMessage {
   type: "GAME_MESSAGE";
   roomId: string;
@@ -8,12 +6,27 @@ export interface RTCMessage {
 
 export interface GameMessage {
   type: MessageType;
+  playerId: string;
+  id: string;
+  timestamp: number;
   payload: {
-    playerId: string;
-    playerName: string;
-    message?: Omit<Message, "id" | "timestamp">;
+    message?: string;
+    vote?: any;
+    deathId?: string;
+    eliminateId?: string;
   };
 }
+
+export type MessageType =
+  | "chat"
+  | "system"
+  | "system-alert"
+  | "system-success"
+  | "vote"
+  | "death"
+  | "phase_change"
+  | "ready"
+  | "game_start";
 
 export interface RTCPayload {
   to: string[] | "*";

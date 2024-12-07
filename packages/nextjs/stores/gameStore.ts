@@ -1,4 +1,5 @@
-import type { GamePhase, Message, Player } from "@mafia/types";
+import type { GameMessage, GamePhase, Player } from "@mafia/types";
+import { randomUUID } from "crypto";
 import { create } from "zustand";
 
 // export { type GamePhase, type Message, type Player };
@@ -27,7 +28,7 @@ interface GameState {
   round: number;
   isTimerActive: boolean;
   players: Player[];
-  messages: Message[];
+  messages: GameMessage[];
   overlayCard: GamePhase | null;
   nightMessage: string;
   killedPlayer: Player | null;
@@ -39,7 +40,7 @@ interface GameState {
   setTimerActive: (active: boolean) => void;
   setOverlayCard: (card: GamePhase | null) => void;
   setNightMessage: (message: string) => void;
-  addMessage: (message: Omit<Message, "id" | "timestamp">) => void;
+  addMessage: (message: Omit<GameMessage, "id" | "timestamp">) => void;
   updatePlayer: (id: string, updates: Partial<Player>) => void;
   updateAllPlayers: (updates: Partial<Player>) => void;
   voteForPlayer: (id: string) => void;
@@ -64,9 +65,11 @@ export const useGameStore = create<GameState>(set => ({
   players: INITIAL_PLAYERS,
   messages: [
     {
-      id: 1,
-      sender: "System",
-      content: "Welcome to Mafia! The game is about to begin...",
+      id: "1",
+      playerId: "system",
+      payload: {
+        message: "Welcome to Mafia! The game is about to begin...",
+      },
       type: "system",
       timestamp: Date.now(),
     },
@@ -88,7 +91,7 @@ export const useGameStore = create<GameState>(set => ({
         ...state.messages,
         {
           ...message,
-          id: state.messages.length + 1,
+          id: randomUUID(),
           timestamp: Date.now(),
         },
       ],

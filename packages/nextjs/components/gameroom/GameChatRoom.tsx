@@ -12,6 +12,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useGameRTC } from "@/hooks/useGameRTC";
 import { useGameStore } from "@/stores/gameStore";
 import { useRTCStore } from "@/stores/rtcStore";
+import { GameMessage } from "@mafia/types";
+import { randomUUID } from "crypto";
 
 const GameChatRoom = () => {
   const roomId = useSearchParams().get("roomId") ?? "room-id";
@@ -51,8 +53,8 @@ const Messages = () => {
                       : "bg-muted"
               }`}
             >
-              {message.type === "chat" && <div className="text-xs opacity-75 mb-1">{message.sender}</div>}
-              <div className="whitespace-pre-wrap">{message.content}</div>
+              {message.type === "chat" && <div className="text-xs opacity-75 mb-1">{message.playerId}</div>}
+              <div className="whitespace-pre-wrap">{message.payload.message}</div>
             </div>
           </div>
         ))}
@@ -71,9 +73,13 @@ const ChatInput = () => {
 
   const handleMessage = useCallback(
     (content: string) => {
-      const message = {
-        sender: "You",
-        content,
+      const message: GameMessage = {
+        playerId: "You",
+        id: randomUUID(),
+        payload: {
+          message: content,
+        },
+        timestamp: Date.now(),
         type: "chat" as const,
       };
       addMessage(message);

@@ -1,12 +1,5 @@
-import { API } from "@huddle01/server-sdk/api";
 import type { GameMessage, RTCMessage } from "@mafia/types/rtc";
-
-const API_KEY = process.env.HUDDLE01_API_KEY;
-if (!API_KEY) throw new Error("HUDDLE01_API_KEY is not set");
-
-export const huddle01Api = new API({
-  apiKey: API_KEY,
-});
+import { broadcastToRoom } from "../routes/rtc.js";
 
 export async function broadcastMessageToRoom(roomId: string, message: GameMessage) {
   try {
@@ -16,12 +9,9 @@ export async function broadcastMessageToRoom(roomId: string, message: GameMessag
       roomId,
     };
 
-    await huddle01Api.sendData({
-      roomId,
-      payload: rtcMessage,
-    });
+    broadcastToRoom(roomId, rtcMessage);
   } catch (error) {
-    console.error("Failed to broadcast message to RTC:", error);
+    console.error("Failed to broadcast message:", error);
     throw error;
   }
 }

@@ -4,6 +4,7 @@ import { broadcastMessageToRoom } from "../huddle/rtcMessages.js";
 import type { GameState, PlayerRole } from "@mafia/types/game";
 import type { GameRoom } from "@mafia/types/api";
 import type { GameMessage } from "@mafia/types/rtc";
+import { randomUUID } from "crypto";
 
 const API_KEY = process.env.HUDDLE01_API_KEY;
 if (!API_KEY) throw new Error("HUDDLE01_API_KEY is not set");
@@ -21,14 +22,11 @@ export class GameManager {
 
   private async broadcastSystemMessage(content: string, metadata = {}) {
     const message: GameMessage = {
+      playerId: "system",
+      id: randomUUID(),
+      timestamp: Date.now(),
       payload: {
-        playerId: "system",
-        playerName: "system",
-        message: {
-          sender: "system",
-          content,
-          type: "system",
-        },
+        message: content,
       },
       type: "system",
     };
@@ -61,14 +59,10 @@ export class GameManager {
     }
 
     const message: GameMessage = {
+      playerId,
+      // playerName: playerId,
       payload: {
-        playerId,
-        playerName: playerId,
-        message: {
-          sender: playerId,
-          content,
-          type: "chat",
-        },
+        message: content,
       },
       type: "chat",
     };
@@ -91,14 +85,10 @@ export class GameManager {
     this.gameState.votes[voterId] = targetId;
 
     const message: GameMessage = {
+      playerId: voterId,
+      // playerName: voterId,
       payload: {
-        playerId: voterId,
-        playerName: voterId,
-        message: {
-          sender: voterId,
-          content: `voted for ${targetId}`,
-          type: "vote",
-        },
+        message: `voted for ${targetId}`,
       },
       type: "vote",
     };
@@ -138,14 +128,10 @@ export class GameManager {
     this.gameState.alivePlayers = this.gameState.alivePlayers.filter(p => p !== playerId);
 
     const message: GameMessage = {
+      playerId: "system",
+      // playerName: "system",
       payload: {
-        playerId: "system",
-        playerName: "system",
-        message: {
-          sender: "system",
-          content: `${playerId} has been eliminated by ${reason}`,
-          type: "death",
-        },
+        message: `${playerId} has been eliminated by ${reason}`,
       },
       type: "death",
     };
@@ -212,16 +198,12 @@ export class GameManager {
     const target = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
 
     const message: GameMessage = {
+      playerId: aiMafiaPlayers[0], // Use first AI as sender
+      // playerName: aiMafiaPlayers[0],
       payload: {
-        playerId: aiMafiaPlayers[0], // Use first AI as sender
-        playerName: aiMafiaPlayers[0],
-        message: {
-          sender: aiMafiaPlayers[0],
-          content: `eliminated ${target}`,
-          type: "ai_action",
-        },
+        message: `eliminated ${target}`,
       },
-      type: "ai_action",
+      type: "death",
     };
 
     await this.saveAndBroadcastMessage(message);
@@ -251,14 +233,10 @@ export class GameManager {
     // Notify human players of their roles
     for (const playerId of humanPlayers) {
       const message: GameMessage = {
+        playerId: "system",
+        playerName: "system",
         payload: {
-          playerId: "system",
-          playerName: "system",
-          message: {
-            sender: "system",
-            content: `You are a VILLAGER`,
-            type: "system",
-          },
+          message: `You are a VILLAGER`,
         },
         type: "system",
       };
@@ -284,14 +262,10 @@ export class GameManager {
     }
 
     const message: GameMessage = {
+      playerId: "system",
+      // playerName: "system",
       payload: {
-        playerId: "system",
-        playerName: "system",
-        message: {
-          sender: playerId,
-          content,
-          type: "chat",
-        },
+        message: content,
       },
       type: "chat",
     };
@@ -337,14 +311,10 @@ export class GameManager {
 
     // Create ready status message
     const message: GameMessage = {
+      playerId: "system",
+      playerName: "system",
       payload: {
-        playerId: "system",
-        playerName: "system",
-        message: {
-          sender: playerId,
-          content: ready ? "is ready" : "is not ready",
-          type: "ready",
-        },
+        message: ready ? "isReady" : "notReady",
       },
       type: "ready",
     };

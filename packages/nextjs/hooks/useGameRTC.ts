@@ -73,23 +73,23 @@ export const useGameRTC = (roomId: string) => {
         const message = JSON.parse(payload) as GameMessage;
         switch (message.type) {
           case "vote":
-            if (message.payload.playerId) {
-              voteForPlayer(message.payload.playerId);
+            if (message.playerId) {
+              voteForPlayer(message.playerId);
             }
             break;
           case "phase_change":
             if (message.payload.message) {
-              setPhase(message.payload.message.content as GamePhase);
+              setPhase(message.payload.message as GamePhase);
             }
             break;
           case "death":
-            if (message.payload.playerId) {
-              eliminatePlayer(message.payload.playerId);
+            if (message.playerId) {
+              eliminatePlayer(message.playerId);
             }
             break;
           case "chat":
             if (message.payload.message) {
-              addMessage(message.payload.message);
+              addMessage(message);
             }
             break;
         }

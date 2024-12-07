@@ -134,8 +134,10 @@ export const useGameController = (gameId: string) => {
 
     if (mafiaCount === 0) {
       addMessage({
-        sender: "System",
-        content: "🎉 Village wins! All mafia have been eliminated.",
+        playerId: "System",
+        payload: {
+          message: "🎉 Village wins! All mafia have been eliminated.",
+        },
         type: "system-success",
       });
       return true;
@@ -143,8 +145,10 @@ export const useGameController = (gameId: string) => {
 
     if (mafiaCount >= villagerCount) {
       addMessage({
-        sender: "System",
-        content: "🎭 Mafia wins! They have taken over the village.",
+        playerId: "System",
+        payload: {
+          message: "🎭 Mafia wins! They have taken over the village.",
+        },
         type: "system-alert",
       });
       return true;
