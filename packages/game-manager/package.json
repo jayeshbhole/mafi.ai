@@ -10,15 +10,15 @@
   "dependencies": {
     "@hono/node-server": "^1.13.7",
     "@mafia/types": "workspace:*",
+    "@seald-io/nedb": "^4.0.4",
     "dotenv": "^16.4.7",
     "hono": "^4.6.13",
-    "nedb": "^1.8.0",
-    "ws": "^8.18.0"
+    "nedb-promises": "^6.2.3",
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "@types/nedb": "^*",
     "@types/node": "^20.11.17",
-    "@types/ws": "^8",
     "node-fetch": "^3.3.2",
     "tsx": "^4.7.1",
     "vitest": "^2.1.8"
