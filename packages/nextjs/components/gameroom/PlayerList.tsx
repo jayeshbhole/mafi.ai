@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Player } from "../../stores/gameStore";
+import { Player } from "@mafia/types";
 
 interface PlayerListProps {
   players: Player[];

@@ -36,7 +36,10 @@
     "verify": "yarn workspace @mafia/foundry verify",
     "game:dev": "yarn workspace @mafia/game-manager dev",
     "game:build": "yarn workspace @mafia/game-manager build",
-    "game:start": "yarn workspace @mafia/game-manager start"
+    "game:start": "yarn workspace @mafia/game-manager start",
+    "dev": "yarn workspaces foreach -pi run dev",
+    "build": "yarn workspaces foreach -pi run build",
+    "prepare": "yarn workspace @mafia/types build"
   },
   "devDependencies": {
     "husky": "~8.0.3",

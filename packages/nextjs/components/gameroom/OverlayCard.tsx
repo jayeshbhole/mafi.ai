@@ -19,7 +19,7 @@ const OverlayCard = memo(({ onVote }: OverlayCardProps) => {
   const duration = PHASE_DURATION[phase];
   const timeLeft = useGameStore(state => state.timeLeft);
 
-  if (overlayCard === "death") {
+  if (overlayCard === "DEATH") {
     return (
       <div className="absolute inset-0 z-10 animate-in fade-in zoom-in duration-1000">
         <Card className="w-full h-full flex flex-col items-center justify-center text-white relative overflow-hidden bg-gradient-to-br from-black via-red-950 to-black">
@@ -40,7 +40,7 @@ const OverlayCard = memo(({ onVote }: OverlayCardProps) => {
     );
   }
 
-  if (overlayCard === "voting") {
+  if (overlayCard === "VOTING") {
     return (
       <div className="absolute inset-0 z-10 animate-in fade-in zoom-in duration-300">
         <Card className="w-full h-full flex flex-col items-center justify-center text-white relative overflow-hidden bg-gradient-to-br from-rose-900 via-red-900 to-rose-900">
@@ -58,7 +58,7 @@ const OverlayCard = memo(({ onVote }: OverlayCardProps) => {
     );
   }
 
-  if (overlayCard === "result") {
+  if (overlayCard === "RESULT") {
     const votedOutPlayer = players.reduce(
       (prev, current) => (!prev || (current.votes || 0) > (prev.votes || 0) ? current : prev),
       players[0],
@@ -96,7 +96,7 @@ const OverlayCard = memo(({ onVote }: OverlayCardProps) => {
     );
   }
 
-  if (overlayCard === "night") {
+  if (overlayCard === "NIGHT") {
     return (
       <div className="absolute inset-0 z-10 animate-in fade-in zoom-in duration-300">
         <Card className="w-full h-full flex flex-col items-center justify-center text-white relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900">

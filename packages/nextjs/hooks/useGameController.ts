@@ -45,59 +45,45 @@ export const useGameController = (gameId: string) => {
     },
   });
 
-  // const aiResponseMutation = useMutation({
-  //   mutationFn: () =>
-  //     gameService.getAIResponse(phase, {
-  //       players,
-  //       recentMessages: messages.slice(-5),
-  //     }),
-  //   onSuccess: message => {
-  //     addMessage(message);
-  //   },
-  // });
-
   // Phase transition handlers
   const transitionToVoting = useCallback(() => {
-    setPhase("voting");
-    setOverlayCard("voting");
-    // addMessage({
-    //   sender: "System",
-    //   content: "🗳️ Time to vote! Choose wisely...",
-    //   type: "system",
-    // });
+    setPhase("VOTING");
+    setOverlayCard("VOTING");
+  }, [setPhase, setOverlayCard]);
+
+  const transitionToResult = useCallback(() => {
+    setPhase("RESULT");
+    setOverlayCard("RESULT");
   }, [setPhase, setOverlayCard]);
 
   const transitionToNight = useCallback(() => {
+    setPhase("NIGHT");
+    setOverlayCard("NIGHT");
+    setNightMessage(NIGHT_MESSAGES[Math.floor(Math.random() * NIGHT_MESSAGES.length)]);
+
     const votedOutPlayer = players.reduce(
       (prev, current) => (!prev || (current.votes || 0) > (prev.votes || 0) ? current : prev),
       players[0],
     );
-
-    // Show voting results for 5 seconds
-    setTimeout(() => {
-      setOverlayCard("night");
-      setPhase("night");
-      setNightMessage(NIGHT_MESSAGES[Math.floor(Math.random() * NIGHT_MESSAGES.length)]);
-      eliminatePlayer(votedOutPlayer.name);
-      resetVotes();
-    }, 5000);
+    eliminatePlayer(votedOutPlayer.name);
+    resetVotes();
   }, [players, setPhase, setOverlayCard, setNightMessage, eliminatePlayer, resetVotes]);
 
   const transitionToDay = useCallback(() => {
     if (mafiaKillMutation.data) {
       // Show death overlay first
-      setOverlayCard("death");
+      setOverlayCard("DEATH");
       setKilledPlayer(mafiaKillMutation.data);
 
       // After 5 seconds, transition to day phase
       setTimeout(() => {
         setOverlayCard(null);
-        setPhase("day");
+        setPhase("DAY");
         setKilledPlayer(null);
       }, 5000);
     } else {
       setOverlayCard(null);
-      setPhase("day");
+      setPhase("DAY");
     }
   }, [setPhase, setOverlayCard, setKilledPlayer, mafiaKillMutation.data]);
 
@@ -112,17 +98,20 @@ export const useGameController = (gameId: string) => {
     stopTimer();
 
     switch (phase) {
-      case "day":
+      case "DAY":
         transitionToVoting();
         break;
-      case "voting":
+      case "VOTING":
+        transitionToResult();
+        break;
+      case "RESULT":
         transitionToNight();
         break;
-      case "night":
+      case "NIGHT":
         transitionToDay();
         break;
     }
-  }, [phase, transitionToVoting, transitionToNight, transitionToDay, stopTimer]);
+  }, [phase, transitionToVoting, transitionToResult, transitionToNight, transitionToDay, stopTimer]);
 
   // Vote handler
   const handleVote = useCallback(
@@ -159,8 +148,8 @@ export const useGameController = (gameId: string) => {
   // Check game end conditions
   const checkGameEnd = useCallback(() => {
     const alivePlayers = players.filter(p => p.isAlive);
-    const mafiaCount = alivePlayers.filter(p => p.role === "mafia").length;
-    const villagerCount = alivePlayers.filter(p => p.role === "villager").length;
+    const mafiaCount = alivePlayers.filter(p => p.role === "AI_MAFIA").length;
+    const villagerCount = alivePlayers.filter(p => p.role === "VILLAGER").length;
 
     if (mafiaCount === 0) {
       addMessage({
@@ -193,10 +182,9 @@ export const useGameController = (gameId: string) => {
     // Game actions
     handleVote,
     checkGameEnd,
-
     // Phase info
-    isNightPhase: phase === "night",
-    isVotingPhase: phase === "voting",
-    isDayPhase: phase === "day",
+    isNightPhase: phase === "NIGHT",
+    isVotingPhase: phase === "VOTING",
+    isDayPhase: phase === "DAY",
   };
 };

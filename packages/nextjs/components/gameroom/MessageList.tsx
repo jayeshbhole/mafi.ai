@@ -1,6 +1,6 @@
 import { memo, useEffect, useRef } from "react";
-import { Message } from "../../stores/gameStore";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import type { Message } from "@mafia/types";
 
 interface MessageListProps {
   messages: Message[];

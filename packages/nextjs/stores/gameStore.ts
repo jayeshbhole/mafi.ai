@@ -1,28 +1,16 @@
+import type { GamePhase, Message, Player } from "@mafia/types";
 import { create } from "zustand";
 
-export type GamePhase = "day" | "night" | "voting" | "result" | "death";
-export type Player = {
-  name: string;
-  role: "mafia" | "villager";
-  isAlive: boolean;
-  votes?: number;
-};
+// export { type GamePhase, type Message, type Player };
 
-export type Message = {
-  id: number;
-  sender: string;
-  content: string;
-  action?: string;
-  type?: "system" | "chat" | "system-alert" | "system-success";
-  timestamp: number;
-};
-
-export const PHASE_DURATION = {
-  day: 10,
-  night: 5,
-  voting: 20,
-  result: 10,
-  death: 10,
+export const PHASE_DURATION: Record<GamePhase, number> = {
+  LOBBY: 0,
+  STARTING: 5,
+  DAY: 10,
+  NIGHT: 5,
+  VOTING: 20,
+  RESULT: 10,
+  DEATH: 10,
 } as const;
 
 export const NIGHT_MESSAGES = [
@@ -36,6 +24,7 @@ export const NIGHT_MESSAGES = [
 interface GameState {
   phase: GamePhase;
   timeLeft: number;
+  round: number;
   isTimerActive: boolean;
   players: Player[];
   messages: Message[];
@@ -46,29 +35,31 @@ interface GameState {
   // Actions
   setPhase: (phase: GamePhase) => void;
   setTimeLeft: (time: number) => void;
+  setRound: (round: number) => void;
   setTimerActive: (active: boolean) => void;
   setOverlayCard: (card: GamePhase | null) => void;
   setNightMessage: (message: string) => void;
   addMessage: (message: Omit<Message, "id" | "timestamp">) => void;
-  updatePlayer: (name: string, updates: Partial<Player>) => void;
+  updatePlayer: (id: string, updates: Partial<Player>) => void;
   updateAllPlayers: (updates: Partial<Player>) => void;
-  voteForPlayer: (name: string) => void;
+  voteForPlayer: (id: string) => void;
   resetVotes: () => void;
-  eliminatePlayer: (name: string) => void;
-  setKilledPlayer: (name: string | null) => void;
+  eliminatePlayer: (id: string) => void;
+  setKilledPlayer: (id: string | null) => void;
 }
 
 const INITIAL_PLAYERS: Player[] = [
-  { name: "Alice", role: "villager", isAlive: true, votes: 0 },
-  { name: "Bob", role: "mafia", isAlive: true, votes: 0 },
-  { name: "Charlie", role: "villager", isAlive: true, votes: 0 },
-  { name: "David", role: "villager", isAlive: true, votes: 0 },
-  { name: "Eve", role: "mafia", isAlive: true, votes: 0 },
+  { name: "Alice", role: "VILLAGER", isAlive: true, votes: 0, id: "1" },
+  { name: "Bob", role: "AI_MAFIA", isAlive: true, votes: 0, id: "2" },
+  { name: "Charlie", role: "VILLAGER", isAlive: true, votes: 0, id: "3" },
+  { name: "David", role: "VILLAGER", isAlive: true, votes: 0, id: "4" },
+  { name: "Eve", role: "AI_MAFIA", isAlive: true, votes: 0, id: "5" },
 ];
 
 export const useGameStore = create<GameState>(set => ({
-  phase: "day",
-  timeLeft: PHASE_DURATION.day,
+  phase: "DAY",
+  round: 0,
+  timeLeft: PHASE_DURATION.DAY,
   isTimerActive: true,
   players: INITIAL_PLAYERS,
   messages: [
@@ -86,6 +77,7 @@ export const useGameStore = create<GameState>(set => ({
 
   setPhase: phase => set({ phase }),
   setTimeLeft: timeLeft => set({ timeLeft }),
+  setRound: round => set({ round }),
   setTimerActive: isTimerActive => set({ isTimerActive }),
   setOverlayCard: overlayCard => set({ overlayCard }),
   setNightMessage: nightMessage => set({ nightMessage }),

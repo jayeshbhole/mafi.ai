@@ -9,16 +9,19 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useGameRTC } from "@/hooks/useGameRTC";
 import { useGameStore } from "@/stores/gameStore";
+import { useRTCStore } from "@/stores/rtcStore";
 
 const GameChatRoom = () => {
-  const gameId = useSearchParams().get("gameId") ?? "game-id";
-  const { overlayCard, handleVote } = useGameController(gameId);
+  const roomId = useSearchParams().get("roomId") ?? "room-id";
+
+  const { overlayCard, handleVote } = useGameController(roomId);
 
   return (
     <div className="relative w-full transition-colors flex flex-col h-screen duration-1000 p-8 bg-background">
       <Card className="w-full max-w-4xl mx-auto flex-1 flex flex-col relative">
-        <GameHeader gameId={gameId} />
+        <GameHeader />
 
         <Messages />
 
@@ -59,19 +62,31 @@ const Messages = () => {
 };
 
 const ChatInput = () => {
+  const roomId = useSearchParams().get("roomId") ?? "room-id";
+
   const [input, setInput] = useState("");
   const addMessage = useGameStore(state => state.addMessage);
+  const { isConnected } = useRTCStore();
+  const { sendMessage } = useGameRTC(roomId);
 
-  // Message handler
   const handleMessage = useCallback(
     (content: string) => {
-      addMessage({
+      const message = {
         sender: "You",
         content,
-        type: "chat",
-      });
+        type: "chat" as const,
+      };
+      addMessage(message);
+
+      if (isConnected) {
+        sendMessage({
+          payload: JSON.stringify(message),
+          to: "*",
+          label: "chat",
+        });
+      }
     },
-    [addMessage],
+    [addMessage, sendMessage, isConnected],
   );
 
   const handleSubmit = useCallback(

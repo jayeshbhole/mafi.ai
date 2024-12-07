@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-import type { GameMessage, Room } from "../types/game.js";
 import { GameManager } from "../game/gameManager.js";
 import { roomsDb } from "../db/index.js";
 

@@ -1,4 +1,4 @@
-import { Message, Player } from "../stores/gameStore";
+import { Message, Player } from "@mafia/types";
 
 // Simulate API delays
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -16,7 +16,7 @@ export const gameService = {
   // Simulate mafia decision
   getMafiaKill: async (players: Player[]): Promise<string> => {
     await delay(2000);
-    const alivePlayers = players.filter(p => p.isAlive && p.role !== "mafia");
+    const alivePlayers = players.filter(p => p.isAlive && p.role !== "AI_MAFIA");
     return alivePlayers[Math.floor(Math.random() * alivePlayers.length)].name;
   },
 

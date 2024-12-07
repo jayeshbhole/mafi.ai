@@ -1,13 +1,11 @@
 import { memo } from "react";
-import { GamePhase, PHASE_DURATION, useGameStore } from "../../stores/gameStore";
+import { useSearchParams } from "next/navigation";
+import { PHASE_DURATION, useGameStore } from "../../stores/gameStore";
 import PlayerList from "./PlayerList";
 import TimerProgress from "./TimerProgress";
 import { CardHeader, CardTitle } from "@/components/ui/card";
+import type { GamePhase } from "@mafia/types";
 import { Moon, Skull, Sun, Users } from "lucide-react";
-
-interface GameHeaderProps {
-  gameId: string;
-}
 
 interface PhaseStyle {
   background: string;
@@ -18,21 +16,21 @@ interface PhaseStyle {
 
 const getPhaseStyles = (phase: GamePhase): PhaseStyle => {
   switch (phase) {
-    case "day":
+    case "DAY":
       return {
         background: "bg-background",
         icon: <Sun className="w-6 h-6" />,
         timerColor: "from-primary/20 to-primary/5",
         headerBg: "bg-card",
       };
-    case "night":
+    case "NIGHT":
       return {
         background: "bg-background",
         icon: <Moon className="w-6 h-6" />,
         timerColor: "from-secondary/20 to-secondary/5",
         headerBg: "bg-card",
       };
-    case "voting":
+    case "VOTING":
       return {
         background: "bg-background",
         icon: <Users className="w-6 h-6" />,
@@ -49,7 +47,9 @@ const getPhaseStyles = (phase: GamePhase): PhaseStyle => {
   }
 };
 
-const GameHeader = memo(({ gameId }: GameHeaderProps) => {
+const GameHeader = memo(() => {
+  const roomId = useSearchParams().get("roomId") ?? "room-id";
+
   const phase = useGameStore(state => state.phase);
   const phaseStyles = getPhaseStyles(phase);
 
@@ -66,10 +66,10 @@ const GameHeader = memo(({ gameId }: GameHeaderProps) => {
         <CardTitle className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             {phaseStyles.icon}
-            <span>Game Room {gameId}</span>
+            <span>Game Room {roomId}</span>
           </div>
           <div className="flex items-center gap-2 text-sm font-normal">
-            {phase === "night" && <Skull className="w-4 h-4" />}
+            {phase === "NIGHT" && <Skull className="w-4 h-4" />}
             {phase.charAt(0).toUpperCase() + phase.slice(1)} Phase: {timeLeft}s
           </div>
         </CardTitle>

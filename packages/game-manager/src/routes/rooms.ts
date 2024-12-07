@@ -2,8 +2,8 @@ import { Hono } from "hono";
 import { API } from "@huddle01/server-sdk/api";
 import { AccessToken, Role } from "@huddle01/server-sdk/auth";
 import dotenv from "dotenv";
-import type { Room } from "../types/game.js";
 import { roomsDb } from "../db/index.js";
+import { Room } from "@mafia/types";
 
 dotenv.config();
 
