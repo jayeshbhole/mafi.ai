@@ -1,4 +1,4 @@
-import GameChatRoom from "@/components/GameChatRoom";
+import GameChatRoom from "@/components/gameroom/GameChatRoom";
 
 export default function GamePage({ params }: { params: { id: string } }) {
   return (
