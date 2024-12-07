@@ -7,22 +7,6 @@
   background: oklch(var(--b2));
 }
 
-body {
-  min-height: 100vh;
-}
-
-h1,
-h2,
-h3,
-h4 {
-  margin-bottom: 0.5rem;
-  line-height: 1;
-}
-
-p {
-  margin: 1rem 0;
-}
-
 .btn {
   @apply shadow-md;
 }
@@ -86,13 +70,100 @@ p {
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
-}
-
-@layer base {
   * {
     @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .octagon-mask {
+    --corner-small: calc(var(--corner) / 2);
+    clip-path: polygon(
+      var(--corner) 0,
+      calc(100% - var(--corner-small)) 0,
+      100% var(--corner-small),
+      100% calc(100% - var(--corner)),
+      calc(100% - var(--corner)) 100%,
+      var(--corner-small) 100%,
+      0% calc(100% - var(--corner-small)),
+      0 var(--corner)
+    );
+  }
+
+  /*   
+    for border of 1 px 
+    corner of 2px will have content corner of 1.5px
+      4, 3.5
+      7, 6.5
+      10, 9.5
+
+    for border of 2px
+    corner of 2px will have content corner of 1px
+      4, 3
+      7, 6
+      10, 9
+  */
+  .octagon-mask > .mask-content {
+    clip-path: polygon(
+      calc(var(--corner) - var(--border-width) / 2) 0,
+      calc(100% - calc(var(--corner) - var(--border-width) / 2)) 0,
+      100% calc(var(--corner) - var(--border-width) / 2),
+      100% calc(100% - calc(var(--corner) - var(--border-width) / 2)),
+      calc(100% - calc(var(--corner) - var(--border-width) / 2)) 100%,
+      calc(var(--corner) - var(--border-width) / 2) 100%,
+      0% calc(100% - calc(var(--corner) - var(--border-width) / 2)),
+      0 calc(var(--corner) - var(--border-width) / 2)
+    );
+  }
+
+  /* only top mask */
+  .octagon-mask.mask-top {
+    clip-path: polygon(
+      var(--corner) 0,
+      calc(100% - var(--corner)) 0,
+      100% var(--corner),
+      100% 100%,
+      0 100%,
+      0 var(--corner)
+    );
+  }
+  .octagon-mask.mask-top > .mask-content {
+    clip-path: polygon(
+      calc(var(--corner) - var(--border-width) / 2) 0,
+      calc(100% - calc(var(--corner) - var(--border-width) / 2)) 0,
+      100% calc(var(--corner) - var(--border-width) / 2),
+      100% 100%,
+      0 100%,
+      0 calc(var(--corner) - var(--border-width) / 2)
+    );
+  }
+
+  /* only bottom mask */
+  .octagon-mask.mask-bottom {
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% var(--corner),
+      100% calc(100% - var(--corner)),
+      calc(100% - var(--corner)) 100%,
+      var(--corner) 100%,
+      0 calc(100% - var(--corner)),
+      0 var(--corner)
+    );
+  }
+  .octagon-mask.mask-bottom > .mask-content {
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% calc(var(--corner) - var(--border-width) / 2),
+      100% calc(100% - calc(var(--corner) - var(--border-width) / 2)),
+      calc(100% - calc(var(--corner) - var(--border-width) / 2)) 100%,
+      calc(var(--corner) - var(--border-width) / 2) 100%,
+      0 calc(100% - calc(var(--corner) - var(--border-width) / 2)),
+      0 calc(var(--corner) - var(--border-width) / 2)
+    );
   }
 }
