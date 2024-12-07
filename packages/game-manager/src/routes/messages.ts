@@ -1,8 +1,7 @@
 import { Hono } from "hono";
-import db from "../db/index.js";
 import type { GameMessage, Room } from "../types/game.js";
 import { GameManager } from "../game/gameManager.js";
-import roomsDb from "../db/index.js";
+import { roomsDb } from "../db/index.js";
 
 const router = new Hono();
 

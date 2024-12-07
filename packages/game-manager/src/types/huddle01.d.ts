@@ -57,31 +57,3 @@ declare module "@huddle01/server-sdk/webhooks" {
     verifySignature(signature: string, body: string): boolean;
   }
 }
-
-// declare module "@huddle01/web-core" {
-//   export class HuddleClient {
-//     constructor(config: {
-//       projectId: string;
-//       options?: {
-//         activeSpeakers?: {
-//           size?: number;
-//         };
-//       };
-//     });
-
-//     joinRoom(params: { roomId: string; token: string }): Promise<Room>;
-//     leaveRoom(): Promise<void>;
-//     sendData(params: { to: string; payload: any; type: string }): Promise<void>;
-//     on(event: string, callback: (data: any) => void): void;
-//     getPeers(): string[];
-//   }
-
-//   export namespace HuddleTypes {
-//     interface DataMessage {
-//       type: string;
-//       payload: any;
-//       from?: string;
-//       to?: string;
-//     }
-//   }
-// }

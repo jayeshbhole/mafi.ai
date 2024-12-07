@@ -1,8 +1,8 @@
 import { WebhookReceiver } from "@huddle01/server-sdk/webhooks";
+import { roomsDb } from "../db/index.js";
+import { GameManager } from "../game/gameManager.js";
 import type { GameMessage, MessageType, Room } from "../types/game.js";
 import type { RTCMessage } from "../types/rtc.js";
-import { GameManager } from "../game/gameManager.js";
-import db from "../db/index.js";
 
 const API_KEY = process.env.HUDDLE01_API_KEY;
 if (!API_KEY) throw new Error("HUDDLE01_API_KEY is not set");

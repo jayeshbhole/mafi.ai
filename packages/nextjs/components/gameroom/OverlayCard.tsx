@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { PHASE_DURATION, Player, useGameStore } from "../../stores/gameStore";
+import { PHASE_DURATION, useGameStore } from "../../stores/gameStore";
 import PlayerList from "./PlayerList";
 import TimerProgress from "./TimerProgress";
 import { Card, CardTitle } from "@/components/ui/card";

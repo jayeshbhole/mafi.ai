@@ -1,8 +1,7 @@
 import { API } from "@huddle01/server-sdk/api";
-import type { GameState, GameMessage, PlayerRole, Room } from "../types/game.js";
-import db from "../db/index.js";
+import { roomsDb } from "../db/index.js";
 import { broadcastMessageToRoom } from "../huddle/rtcMessages.js";
-import roomsDb from "../db/index.js";
+import type { GameMessage, GameState, PlayerRole, Room } from "../types/game.js";
 
 const API_KEY = process.env.HUDDLE01_API_KEY;
 if (!API_KEY) throw new Error("HUDDLE01_API_KEY is not set");
