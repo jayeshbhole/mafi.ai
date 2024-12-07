@@ -1,9 +1,10 @@
 import { Hono } from "hono";
 import { API } from "@huddle01/server-sdk/api";
 import { AccessToken, Role } from "@huddle01/server-sdk/auth";
-import type { Room } from "../types/index.js";
+
 import db from "../db/index.js";
 import dotenv from "dotenv";
+import type { Room } from "../types/game.js";
 
 dotenv.config();
 
@@ -26,9 +27,30 @@ router.post("/create-room", async c => {
     });
     const room: Room = {
       roomId: huddle01Room.roomId,
-      createdAt: new Date(),
-      players: [],
+      gameState: {
+        phase: "LOBBY",
+        round: 0,
+        alivePlayers: [],
+        deadPlayers: [],
+        aiPlayers: [],
+        roles: {},
+        votes: {},
+        readyPlayers: new Set(),
+        nightKills: [],
+        minPlayers: 5,
+        maxPlayers: 10,
+      },
       messages: [],
+      players: [],
+      settings: {
+        minPlayers: 5,
+        maxPlayers: 10,
+        aiCount: 1,
+        dayDuration: 10,
+        nightDuration: 10,
+        votingDuration: 10,
+      },
+      createdAt: new Date().getTime(),
     };
 
     await new Promise<void>((resolve, reject) => {

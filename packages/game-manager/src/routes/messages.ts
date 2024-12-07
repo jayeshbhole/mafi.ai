@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import db from "../db/index.js";
-import type { Message, Room } from "../types/index.js";
-import { broadcastMessageToRoom } from "../huddle/rtcMessages.js";
+import type { GameMessage, Room } from "../types/game.js";
+import { GameManager } from "../game/gameManager.js";
 
 const router = new Hono();
 
@@ -9,51 +9,82 @@ const router = new Hono();
 router.post("/:roomId/new-message", async c => {
   try {
     const roomId = c.req.param("roomId");
-    const { type, sender, content } = await c.req.json();
+    const { type, sender, content, target } = await c.req.json();
 
-    if (!["player", "system"].includes(type)) {
-      return c.json(
-        {
-          success: false,
-          error: "Invalid message type",
-        },
-        400,
-      );
-    }
-
-    const message: Message = {
-      id: `msg_${Date.now()}`,
-      type,
-      sender,
-      content,
-      timestamp: new Date(),
-    };
-
-    // Store in database
-    await new Promise<void>((resolve, reject) => {
-      db.update({ roomId }, { $push: { messages: message } }, {}, err => {
+    // Get room and game state
+    const room: Room | null = await new Promise((resolve, reject) => {
+      db.findOne({ roomId }, (err, doc) => {
         if (err) reject(err);
-        else resolve();
+        else resolve(doc);
       });
     });
 
-    // Broadcast to RTC
-    try {
-      await broadcastMessageToRoom(roomId, message);
-    } catch (error) {
-      console.error("RTC broadcast failed:", error);
-      // Continue even if RTC broadcast fails - message is still stored in DB
+    if (!room) {
+      return c.json(
+        {
+          success: false,
+          error: "Room not found",
+        },
+        404,
+      );
+    }
+
+    const gameManager = new GameManager(roomId, room.gameState, room.settings);
+
+    switch (type) {
+      case "player":
+        const success = await gameManager.handlePlayerMessage(sender, content);
+        if (!success) {
+          return c.json(
+            {
+              success: false,
+              error: "Cannot send message at this time",
+            },
+            400,
+          );
+        }
+        break;
+
+      case "vote":
+        if (!target) {
+          return c.json(
+            {
+              success: false,
+              error: "Vote target required",
+            },
+            400,
+          );
+        }
+        const voteSuccess = await gameManager.handleVote(sender, target);
+        if (!voteSuccess) {
+          return c.json(
+            {
+              success: false,
+              error: "Invalid vote",
+            },
+            400,
+          );
+        }
+        break;
+
+      default:
+        return c.json(
+          {
+            success: false,
+            error: "Invalid message type",
+          },
+          400,
+        );
     }
 
     return c.json({
       success: true,
-      message,
     });
   } catch (error) {
     return c.json(
       {
         success: false,
-        error: "Failed to post message",
+        error: "Failed to process message",
       },
       500,
     );
