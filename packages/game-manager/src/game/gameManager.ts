@@ -1,7 +1,9 @@
 import { API } from "@huddle01/server-sdk/api";
 import { roomsDb } from "../db/index.js";
 import { broadcastMessageToRoom } from "../huddle/rtcMessages.js";
-import type { GameMessage, GameState, PlayerRole, Room } from "../types/game.js";
+import type { GameState, PlayerRole } from "@mafia/types/game";
+import type { GameRoom } from "@mafia/types/api";
+import type { GameMessage } from "@mafia/types/rtc";
 
 const API_KEY = process.env.HUDDLE01_API_KEY;
 if (!API_KEY) throw new Error("HUDDLE01_API_KEY is not set");
@@ -13,9 +15,9 @@ const api = new API({
 export class GameManager {
   private roomId: string;
   private gameState: GameState;
-  private settings: Room["settings"];
+  private settings: GameRoom["settings"];
 
-  constructor(roomId: string, gameState: GameState, settings: Room["settings"]) {
+  constructor(roomId: string, gameState: GameState, settings: GameRoom["settings"]) {
     this.roomId = roomId;
     this.gameState = gameState;
     this.settings = settings;
@@ -23,12 +25,16 @@ export class GameManager {
 
   private async broadcastSystemMessage(content: string, metadata = {}) {
     const message: GameMessage = {
-      id: `msg_${Date.now()}`,
+      payload: {
+        playerId: "system",
+        playerName: "system",
+        message: {
+          sender: "system",
+          content,
+          type: "system",
+        },
+      },
       type: "system",
-      sender: "system",
-      content,
-      timestamp: new Date(),
-      metadata,
     };
 
     await this.saveAndBroadcastMessage(message);
@@ -59,15 +65,16 @@ export class GameManager {
     }
 
     const message: GameMessage = {
-      id: `msg_${Date.now()}`,
-      type: "chat",
-      sender: playerId,
-      content,
-      timestamp: new Date(),
-      metadata: {
-        phase: this.gameState.phase,
-        round: this.gameState.round,
+      payload: {
+        playerId,
+        playerName: playerId,
+        message: {
+          sender: playerId,
+          content,
+          type: "chat",
+        },
       },
+      type: "chat",
     };
 
     await this.saveAndBroadcastMessage(message);
@@ -88,16 +95,16 @@ export class GameManager {
     this.gameState.votes[voterId] = targetId;
 
     const message: GameMessage = {
-      id: `msg_${Date.now()}`,
-      type: "vote",
-      sender: voterId,
-      content: `voted for ${targetId}`,
-      timestamp: new Date(),
-      metadata: {
-        phase: this.gameState.phase,
-        round: this.gameState.round,
-        target: targetId,
+      payload: {
+        playerId: voterId,
+        playerName: voterId,
+        message: {
+          sender: voterId,
+          content: `voted for ${targetId}`,
+          type: "vote",
+        },
       },
+      type: "vote",
     };
 
     await this.saveAndBroadcastMessage(message);
@@ -135,15 +142,16 @@ export class GameManager {
     this.gameState.alivePlayers = this.gameState.alivePlayers.filter(p => p !== playerId);
 
     const message: GameMessage = {
-      id: `msg_${Date.now()}`,
-      type: "death",
-      sender: "system",
-      content: `${playerId} has been eliminated by ${reason}`,
-      timestamp: new Date(),
-      metadata: {
-        phase: this.gameState.phase,
-        round: this.gameState.round,
+      payload: {
+        playerId: "system",
+        playerName: "system",
+        message: {
+          sender: "system",
+          content: `${playerId} has been eliminated by ${reason}`,
+          type: "death",
+        },
       },
+      type: "death",
     };
 
     await this.saveAndBroadcastMessage(message);
@@ -208,17 +216,16 @@ export class GameManager {
     const target = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
 
     const message: GameMessage = {
-      id: `msg_${Date.now()}`,
-      type: "ai_action",
-      sender: aiMafiaPlayers[0], // Use first AI as sender
-      content: `eliminated ${target}`,
-      timestamp: new Date(),
-      metadata: {
-        phase: "NIGHT",
-        round: this.gameState.round,
-        target,
-        isAI: true,
+      payload: {
+        playerId: aiMafiaPlayers[0], // Use first AI as sender
+        playerName: aiMafiaPlayers[0],
+        message: {
+          sender: aiMafiaPlayers[0],
+          content: `eliminated ${target}`,
+          type: "ai_action",
+        },
       },
+      type: "ai_action",
     };
 
     await this.saveAndBroadcastMessage(message);
@@ -248,15 +255,16 @@ export class GameManager {
     // Notify human players of their roles
     for (const playerId of humanPlayers) {
       const message: GameMessage = {
-        id: `msg_${Date.now()}_${playerId}`,
-        type: "system",
-        sender: "system",
-        content: `You are a VILLAGER`,
-        timestamp: new Date(),
-        metadata: {
-          phase: "STARTING",
-          target: playerId, // Client should check this to show private messages
+        payload: {
+          playerId: "system",
+          playerName: "system",
+          message: {
+            sender: "system",
+            content: `You are a VILLAGER`,
+            type: "system",
+          },
         },
+        type: "system",
       };
 
       await this.saveAndBroadcastMessage(message);
@@ -280,15 +288,16 @@ export class GameManager {
     }
 
     const message: GameMessage = {
-      id: `msg_${Date.now()}`,
-      type: "chat",
-      sender: playerId,
-      content,
-      timestamp: new Date(),
-      metadata: {
-        phase: this.gameState.phase,
-        round: this.gameState.round,
+      payload: {
+        playerId: "system",
+        playerName: "system",
+        message: {
+          sender: playerId,
+          content,
+          type: "chat",
+        },
       },
+      type: "chat",
     };
 
     await this.saveAndBroadcastMessage(message);
@@ -332,15 +341,16 @@ export class GameManager {
 
     // Create ready status message
     const message: GameMessage = {
-      id: `msg_${Date.now()}`,
-      type: "ready",
-      sender: playerId,
-      content: ready ? "is ready" : "is not ready",
-      timestamp: new Date(),
-      metadata: {
-        phase: "LOBBY",
-        ready,
+      payload: {
+        playerId: "system",
+        playerName: "system",
+        message: {
+          sender: playerId,
+          content: ready ? "is ready" : "is not ready",
+          type: "ready",
+        },
       },
+      type: "ready",
     };
 
     await this.saveAndBroadcastMessage(message);

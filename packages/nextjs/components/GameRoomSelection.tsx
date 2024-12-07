@@ -43,7 +43,7 @@ const GameRoomSelection = () => {
       return roomService.joinRoom(roomId, address);
     },
     onSuccess: ({ roomId }) => {
-      router.push(`/game?roomId=${roomId}`);
+      router.push(`/game/${roomId}`);
     },
     onError: error => {
       console.error(error);
