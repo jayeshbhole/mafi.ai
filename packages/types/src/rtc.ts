@@ -4,10 +4,11 @@ export enum MessageType {
   READY = "ready",
   GAME_START = "game_start",
   CHAT = "chat",
-  SYSTEM_CHAT = "system-chat",
-  SYSTEM_ALERT = "system-alert",
-  SYSTEM_SUCCESS = "system-success",
+  SYSTEM_CHAT = "system_chat",
+  SYSTEM_ALERT = "system_alert",
+  SYSTEM_SUCCESS = "system_success",
   VOTE = "vote",
+  VOTE_RESULT = "vote_result",
   DEATH = "death",
   PHASE_CHANGE = "phase_change",
   KILL = "kill",
@@ -22,7 +23,7 @@ interface BaseMessage {
 // Ready message
 interface ReadyMessage extends BaseMessage {
   type: MessageType.READY;
-  playerId: "system";
+  playerId: string;
   payload: {
     message: "ready" | "notReady";
   };
