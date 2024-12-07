@@ -1,0 +1,20 @@
+{
+  "name": "@mafia/game-manager",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "@huddle01/server-sdk": "latest",
+    "hono": "^4.6.13",
+    "nedb": "^1.8.0"
+  },
+  "devDependencies": {
+    "@types/nedb": "^*",
+    "@types/node": "^20.11.17",
+    "tsx": "^4.7.1"
+  }
+}

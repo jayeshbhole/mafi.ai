@@ -33,7 +33,10 @@
     "test": "yarn foundry:test",
     "vercel": "yarn workspace @mafia/nextjs vercel",
     "vercel:yolo": "yarn workspace @mafia/nextjs vercel:yolo",
-    "verify": "yarn workspace @mafia/foundry verify"
+    "verify": "yarn workspace @mafia/foundry verify",
+    "game:dev": "yarn workspace @mafia/game-manager dev",
+    "game:build": "yarn workspace @mafia/game-manager build",
+    "game:start": "yarn workspace @mafia/game-manager start"
   },
   "devDependencies": {
     "husky": "~8.0.3",
