@@ -5,6 +5,12 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./game": "./dist/game.js",
+    "./rtc": "./dist/rtc.js",
+    "./api": "./dist/api.js"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",

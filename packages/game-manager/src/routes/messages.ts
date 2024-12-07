@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { GameManager } from "../game/gameManager.js";
 import { roomsDb } from "../db/index.js";
-
+import type { GameRoom } from "@mafia/types/api";
 const router = new Hono();
 
 // Post a message
@@ -11,7 +11,7 @@ router.post("/:roomId/new-message", async c => {
     const { type, sender, content, target } = await c.req.json();
 
     // Get room and game state
-    const room: Room | null = await new Promise((resolve, reject) => {
+    const room: GameRoom | null = await new Promise((resolve, reject) => {
       roomsDb.findOne({ roomId }, (err, doc) => {
         if (err) reject(err);
         else resolve(doc);
@@ -95,7 +95,7 @@ router.get("/:roomId/get-messages", async c => {
   try {
     const roomId = c.req.param("roomId");
 
-    const room: Room | null = await new Promise((resolve, reject) => {
+    const room: GameRoom | null = await new Promise((resolve, reject) => {
       roomsDb.findOne({ roomId }, (err, doc) => {
         if (err) reject(err);
         else resolve(doc);

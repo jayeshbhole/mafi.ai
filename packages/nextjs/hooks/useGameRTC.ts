@@ -78,12 +78,12 @@ export const useGameRTC = (roomId: string) => {
               voteForPlayer(message.payload.playerId);
             }
             break;
-          case "phase":
+          case "phase_change":
             if (message.payload.message) {
               setPhase(message.payload.message.content as GamePhase);
             }
             break;
-          case "eliminate":
+          case "death":
             if (message.payload.playerId) {
               eliminatePlayer(message.payload.playerId);
             }

@@ -12,7 +12,7 @@ import "@rainbow-me/rainbowkit/styles.css";
 export const metadata = getMetadata({ title: "mafia.ai", description: "mafia.ai | Play Mafia with AI" });
 
 const huddleClient = new HuddleClient({
-  projectId: process.env.NEXT_PUBLIC_HUDDLE01_PROJECT_ID,
+  projectId: process.env.NEXT_PUBLIC_HUDDLE01_PROJECT_ID || "",
   options: {
     activeSpeakers: {
       size: 8,

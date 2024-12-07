@@ -1,4 +1,4 @@
-import type { Message, GamePhase } from "./game";
+import type { Message, MessageType } from "./game";
 
 export interface RTCMessage {
   type: "GAME_MESSAGE";
@@ -7,7 +7,7 @@ export interface RTCMessage {
 }
 
 export interface GameMessage {
-  type: "vote" | "phase" | "eliminate" | "chat";
+  type: MessageType;
   payload: {
     playerId: string;
     playerName: string;

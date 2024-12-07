@@ -1,6 +1,5 @@
 import { API } from "@huddle01/server-sdk/api";
-import type { GameMessage } from "../types/game.js";
-import type { RTCMessage } from "../types/rtc.js";
+import type { GameMessage, RTCMessage } from "@mafia/types/rtc";
 
 const API_KEY = process.env.HUDDLE01_API_KEY;
 if (!API_KEY) throw new Error("HUDDLE01_API_KEY is not set");
