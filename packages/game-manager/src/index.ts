@@ -4,7 +4,7 @@ import { cors } from "hono/cors";
 import { createMiddleware } from "hono/factory";
 import roomsRouter from "./routes/rooms.js";
 import rtcRouter from "./routes/rtc.js";
-import { Server } from 'socket.io';
+import { Server } from "socket.io";
 import { handle } from "hono/cloudflare-pages";
 import { handleIoServer } from "./socket/index.js";
 
@@ -12,11 +12,9 @@ import { handleIoServer } from "./socket/index.js";
 const port = 9999;
 
 const app = new Hono();
-const server = serve(
-  { fetch: app.fetch, port },
-  (info) => {
-    console.log(`Server is running on http://localhost:${info.port}`);
-  });
+const server = serve({ fetch: app.fetch, port }, info => {
+  console.log(`Server is running on http://localhost:${info.port}`);
+});
 
 const io = new Server(server, {
   cors: {
@@ -25,7 +23,7 @@ const io = new Server(server, {
   },
 });
 
-handleIoServer(io);
+handleIoServer(io, "123");
 
 const varMiddleware = createMiddleware<{
   Variables: {
@@ -33,7 +31,7 @@ const varMiddleware = createMiddleware<{
   };
 }>(async (c, next) => {
   if (!c.var.io && io) {
-    c.set('io', io);
+    c.set("io", io);
   }
   await next();
 });

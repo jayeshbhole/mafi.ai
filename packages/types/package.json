@@ -7,11 +7,10 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": "./dist/index.js",
-    "./game": "./dist/game.js",
-    "./rtc": "./dist/rtc.js",
     "./api": "./dist/api.js",
-    "./message": "./dist/message.js",
-    "./player": "./dist/player.js"
+    "./game": "./dist/game.js",
+    "./player": "./dist/player.js",
+    "./rtc": "./dist/rtc.js"
   },
   "scripts": {
     "build": "tsc",

@@ -1,4 +1,4 @@
-import { roomsDb } from "../db/index.js";
+import { gameDb } from "../db/index.js";
 import { GameManager } from "../game/gameManager.js";
 import type { GameMessage, MessageType } from "@mafia/types/rtc";
 import type { GameRoom } from "@mafia/types/api";
@@ -30,7 +30,7 @@ export async function handleRTCMessage(message: GameMessage, roomId: string): Pr
 
     // Get room and create game manager
     const room = (await new Promise((resolve, reject) => {
-      roomsDb.findOne({ roomId }, (err, doc) => {
+      gameDb.findOne({ roomId }, (err, doc) => {
         if (err) reject(err);
         else resolve(doc);
       });
@@ -49,7 +49,7 @@ export async function handleRTCMessage(message: GameMessage, roomId: string): Pr
 
     // Update database with the new message
     await new Promise<void>((resolve, reject) => {
-      roomsDb.update({ roomId }, { $push: { messages: message } }, {}, err => {
+      gameDb.update({ roomId }, { $push: { messages: message } }, {}, err => {
         if (err) reject(err);
         else resolve();
       });
