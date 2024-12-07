@@ -1,19 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Header } from "@/components/Header";
-import { BlockieAvatar } from "@/components/scaffold-eth";
 import { useInitializeNativeCurrencyPrice } from "@/hooks/scaffold-eth";
-import { useWagmiConfig } from "@/hooks/useWagmiConfig";
+import { wagmiConfig } from "@/services/web3/wagmiConfig";
 import { OnchainKitProvider } from "@coinbase/onchainkit";
 import "@coinbase/onchainkit/styles.css";
-import { RainbowKitProvider, darkTheme, lightTheme } from "@rainbow-me/rainbowkit";
+import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppProgressBar as ProgressBar } from "next-nprogress-bar";
-import { useTheme } from "next-themes";
 import { Toaster } from "react-hot-toast";
 import { base } from "viem/chains";
-import { State, WagmiProvider } from "wagmi";
+import { WagmiProvider } from "wagmi";
 
 export const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
   useInitializeNativeCurrencyPrice();
@@ -37,46 +34,29 @@ export const queryClient = new QueryClient({
   },
 });
 
-export const ScaffoldEthAppWithProviders = ({
-  children,
-  initialState,
-}: {
-  children: React.ReactNode;
-  initialState: State | undefined;
-}) => {
-  const { resolvedTheme } = useTheme();
-  const isDarkMode = resolvedTheme === "dark";
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-  const wagmiConfig = useWagmiConfig();
-
+export const ScaffoldEthAppWithProviders = ({ children }: { children: React.ReactNode }) => {
   return (
     <QueryClientProvider client={queryClient}>
-      <WagmiProvider config={wagmiConfig} initialState={initialState}>
-        <RainbowKitProvider
-          avatar={BlockieAvatar}
-          theme={mounted ? (isDarkMode ? darkTheme() : lightTheme()) : lightTheme()}
+      <WagmiProvider config={wagmiConfig}>
+        <OnchainKitProvider
+          apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
+          chain={base}
+          projectId={process.env.NEXT_PUBLIC_CDP_PROJECT_ID}
+          config={{
+            appearance: {
+              name: "mafia.ai",
+              logo: "https://onchainkit.xyz/favicon/48x48.png?v4-19-24",
+              mode: "auto",
+              theme: "dark",
+            },
+          }}
         >
-          <OnchainKitProvider
-            apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
-            chain={base}
-            config={{
-              appearance: {
-                name: "mafia.ai",
-                logo: "https://onchainkit.xyz/favicon/48x48.png?v4-19-24",
-                mode: "auto",
-                theme: "dark",
-              },
-            }}
-          >
+          <RainbowKitProvider>
             <ProgressBar height="3px" color="#2299dd" />
 
             {children}
-          </OnchainKitProvider>
-        </RainbowKitProvider>
+          </RainbowKitProvider>
+        </OnchainKitProvider>
       </WagmiProvider>
     </QueryClientProvider>
   );
