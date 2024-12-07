@@ -1,96 +1,108 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { roomService } from "../services/roomService";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useAccount } from "wagmi";
 
-interface Room {
-  id: number;
-  name: string;
-  players: number;
-}
+const RoomSkeleton = () => (
+  <Card className="p-4">
+    <Skeleton className="h-6 w-3/4 mb-4" />
+    <Skeleton className="h-4 w-1/2 mb-2" />
+    <Skeleton className="h-4 w-1/3 mb-4" />
+    <Skeleton className="h-10 w-full" />
+  </Card>
+);
 
-export default function GameRoomSelection() {
+export const GameRoomSelection = () => {
   const router = useRouter();
-  const [newRoomName, setNewRoomName] = useState("");
+  const { address } = useAccount();
 
-  const { data: rooms = [], refetch } = useQuery<Room[]>({
+  // Query active rooms
+  const { data: rooms, isLoading } = useQuery({
     queryKey: ["rooms"],
-    queryFn: async () => {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      return [
-        { id: 1, name: "Town Square", players: 5 },
-        { id: 2, name: "Midnight Alley", players: 7 },
-        { id: 3, name: "Suspicious Cafe", players: 3 },
-      ];
-    },
+    queryFn: roomService.getActiveRooms,
   });
 
+  // Create room mutation
   const createRoomMutation = useMutation({
-    mutationFn: async (name: string) => {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      return { id: rooms.length + 1, name, players: 1 };
-    },
-    onSuccess: () => {
-      refetch();
-      setNewRoomName("");
+    mutationFn: roomService.createRoom,
+    onSuccess: room => {
+      joinRoom(room.roomId);
     },
   });
 
+  // Join room mutation
   const joinRoomMutation = useMutation({
-    mutationFn: async (roomId: number) => {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      return roomId;
+    mutationFn: async (roomId?: string) => {
+      if (!address) throw new Error("Not connected");
+      if (!roomId) {
+        // Create and join a new room if no roomId provided
+        const room = await roomService.createRoom();
+        return roomService.joinRoom(room.roomId, address);
+      }
+      return roomService.joinRoom(roomId, address);
     },
-    onSuccess: roomId => {
-      router.push(`/game/${roomId}`);
+    onSuccess: ({ roomId }) => {
+      router.push(`/game?roomId=${roomId}`);
     },
   });
 
-  const handleCreateRoom = () => {
-    if (newRoomName.trim()) {
-      createRoomMutation.mutate(newRoomName);
-    }
-  };
+  const joinRoom = useCallback(
+    (roomId?: string) => {
+      if (!address) return;
+      joinRoomMutation.mutate(roomId);
+    },
+    [address, joinRoomMutation],
+  );
+
+  const createRoom = useCallback(() => {
+    if (!address) return;
+    createRoomMutation.mutate();
+  }, [address, createRoomMutation]);
 
   return (
-    <Card className="w-[350px]">
-      <CardHeader>
-        <CardTitle>Game Rooms</CardTitle>
-        <CardDescription>Join a game or create a new one</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {rooms.map(room => (
-            <Button
-              key={room.id}
-              variant="outline"
-              className="w-full justify-between"
-              onClick={() => joinRoomMutation.mutate(room.id)}
-              disabled={joinRoomMutation.isPending}
-            >
-              <span>{room.name}</span>
-              <span className="text-sm text-muted-foreground">{room.players} players</span>
+    <div className="grid gap-4 p-4">
+      <Button onClick={createRoom} disabled={createRoomMutation.isPending}>
+        {createRoomMutation.isPending ? "Creating..." : "Create New Room"}
+      </Button>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {isLoading ? (
+          // Show skeletons while loading
+          Array.from({ length: 6 }).map((_, i) => <RoomSkeleton key={i} />)
+        ) : !rooms?.length ? (
+          // Show message and auto-join if no rooms
+          <Card className="p-4 col-span-full text-center">
+            <h3 className="text-lg font-bold mb-4">No Active Rooms</h3>
+            <Button onClick={() => joinRoom()} disabled={joinRoomMutation.isPending}>
+              {joinRoomMutation.isPending ? "Creating Room..." : "Create & Join Room"}
             </Button>
-          ))}
-        </div>
-      </CardContent>
-      <CardFooter className="flex flex-col space-y-4">
-        <Input placeholder="New room name" value={newRoomName} onChange={e => setNewRoomName(e.target.value)} />
-        <Button
-          className="w-full"
-          onClick={handleCreateRoom}
-          disabled={createRoomMutation.isPending || !newRoomName.trim()}
-        >
-          {createRoomMutation.isPending ? "Creating..." : "Create New Room"}
-        </Button>
-      </CardFooter>
-    </Card>
+          </Card>
+        ) : (
+          // Show available rooms
+          rooms.map(room => (
+            <Card key={room.roomId} className="p-4">
+              <h3 className="text-lg font-bold">Room {room.roomId}</h3>
+              <p className="text-sm text-muted-foreground">
+                Players: {room.players.length}/{room.settings.maxPlayers}
+              </p>
+              <p className="text-sm text-muted-foreground">Phase: {room.gameState.phase}</p>
+              <Button
+                className="mt-4 w-full"
+                onClick={() => joinRoom(room.roomId)}
+                disabled={joinRoomMutation.isPending || room.players.length >= room.settings.maxPlayers}
+              >
+                {joinRoomMutation.isPending ? "Joining..." : "Join Room"}
+              </Button>
+            </Card>
+          ))
+        )}
+      </div>
+    </div>
   );
-}
+};

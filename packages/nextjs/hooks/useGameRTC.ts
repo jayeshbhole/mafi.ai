@@ -1,9 +1,11 @@
 import { useCallback, useEffect } from "react";
+import { roomService } from "../services/roomService";
 import { useGameStore } from "../stores/gameStore";
 import { useRTCStore } from "../stores/rtcStore";
 import { useDataMessage, useRoom } from "@huddle01/react/hooks";
 import type { GameMessage, GamePhase, RTCPayload } from "@mafia/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useAccount } from "wagmi";
 
 export const useGameRTC = (roomId: string) => {
   const { joinRoom, room } = useRoom();
@@ -20,12 +22,13 @@ export const useGameRTC = (roomId: string) => {
   const eliminatePlayer = useGameStore(state => state.eliminatePlayer);
   const addMessage = useGameStore(state => state.addMessage);
 
+  const { address } = useAccount();
+
   // Room connection mutation
   const joinRoomMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch(`localhost:9999/api/rtc/join-room/${roomId}`);
-      if (!response.ok) throw new Error("Failed to join room");
-      return response.json();
+      if (!address) throw new Error("Not connected");
+      return roomService.joinRoom(roomId, address);
     },
     onSuccess: async ({ token }) => {
       await joinRoom({ roomId, token });
@@ -42,12 +45,8 @@ export const useGameRTC = (roomId: string) => {
   // Room state query
   const { data: roomData } = useQuery({
     queryKey: ["room", roomId],
-    queryFn: async () => {
-      const response = await fetch(`/api/rtc/room/${roomId}`);
-      if (!response.ok) throw new Error("Failed to fetch room");
-      return response.json();
-    },
-    enabled: !!roomId && room !== null,
+    queryFn: () => roomService.getActiveRooms().then(rooms => rooms.find(r => r.roomId === roomId)),
+    enabled: !!roomId,
   });
 
   // Update room state when it changes
