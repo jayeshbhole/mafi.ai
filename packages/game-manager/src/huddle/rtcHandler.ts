@@ -47,7 +47,7 @@ export async function handleRTCMessage(signature: string, body: string) {
 
     // Get room and create game manager
     const room = (await new Promise((resolve, reject) => {
-      db.findOne({ roomId }, (err, doc) => {
+      roomsDb.findOne({ roomId }, (err, doc) => {
         if (err) reject(err);
         else resolve(doc);
       });
@@ -66,7 +66,7 @@ export async function handleRTCMessage(signature: string, body: string) {
 
     // Update database with the new message
     await new Promise<void>((resolve, reject) => {
-      db.update({ roomId }, { $push: { messages: data.data } }, {}, err => {
+      roomsDb.update({ roomId }, { $push: { messages: data.data } }, {}, err => {
         if (err) reject(err);
         else resolve();
       });

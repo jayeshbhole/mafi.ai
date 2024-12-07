@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import db from "../db/index.js";
 import type { GameMessage, Room } from "../types/game.js";
 import { GameManager } from "../game/gameManager.js";
+import roomsDb from "../db/index.js";
 
 const router = new Hono();
 
@@ -13,7 +14,7 @@ router.post("/:roomId/new-message", async c => {
 
     // Get room and game state
     const room: Room | null = await new Promise((resolve, reject) => {
-      db.findOne({ roomId }, (err, doc) => {
+      roomsDb.findOne({ roomId }, (err, doc) => {
         if (err) reject(err);
         else resolve(doc);
       });
@@ -97,7 +98,7 @@ router.get("/:roomId/get-messages", async c => {
     const roomId = c.req.param("roomId");
 
     const room: Room | null = await new Promise((resolve, reject) => {
-      db.findOne({ roomId }, (err, doc) => {
+      roomsDb.findOne({ roomId }, (err, doc) => {
         if (err) reject(err);
         else resolve(doc);
       });

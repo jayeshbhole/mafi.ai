@@ -1,19 +1,29 @@
 import Datastore from "nedb";
 import path from "path";
 import { fileURLToPath } from "url";
-import type { Room } from "../types/game.js";
+import type { Room, GameMessage, GameState } from "../types/game.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const db = new Datastore<Room>({
+const roomsDb = new Datastore<Room>({
+  filename: path.join(__dirname, "../../data/rooms.db"),
+  autoload: true,
+});
+
+const messagesDb = new Datastore<GameMessage>({
+  filename: path.join(__dirname, "../../data/messages.db"),
+  autoload: true,
+});
+
+const gamesDb = new Datastore<GameState>({
   filename: path.join(__dirname, "../../data/games.db"),
   autoload: true,
 });
 
 // export const cleanupOldRooms = () => {
 //   const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-//   db.remove({ createdAt: { $lt: oneDayAgo } }, { multi: true });
+//   roomsDb.remove({ createdAt: { $lt: oneDayAgo } }, { multi: true });
 // };
 
-export default db;
+export default roomsDb;

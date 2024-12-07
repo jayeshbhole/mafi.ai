@@ -2,6 +2,7 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import roomsRouter from "./routes/rooms.js";
 import rtcRouter from "./routes/rtc.js";
+import "ws";
 // import { cleanupOldRooms } from "./db/index.js";
 
 const app = new Hono();

@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { API } from "@huddle01/server-sdk/api";
 import { AccessToken, Role } from "@huddle01/server-sdk/auth";
 
-import db from "../db/index.js";
+import roomsDb from "../db/index.js";
 import dotenv from "dotenv";
 import type { Room } from "../types/game.js";
 
@@ -20,9 +20,9 @@ router.post("/create-room", async c => {
     });
 
     const huddle01Room = await api.createRoom({
-      roomLocked: true,
+      roomLocked: false,
       metadata: JSON.stringify({
-        title: "Huddle01 Meeting",
+        title: "Mafia Game",
       }),
     });
     const room: Room = {
@@ -54,7 +54,7 @@ router.post("/create-room", async c => {
     };
 
     await new Promise<void>((resolve, reject) => {
-      db.insert(room, err => {
+      roomsDb.insert(room, err => {
         if (err) reject(err);
         else resolve();
       });
@@ -83,7 +83,7 @@ router.post("/join-room/:roomId", async c => {
     const { playerId } = await c.req.json();
 
     const room: Room | null = await new Promise((resolve, reject) => {
-      db.findOne({ roomId }, (err, doc) => {
+      roomsDb.findOne({ roomId }, (err, doc) => {
         if (err) reject(err);
         else resolve(doc);
       });
@@ -102,9 +102,9 @@ router.post("/join-room/:roomId", async c => {
     const accessToken = new AccessToken({
       apiKey: API_KEY,
       roomId: roomId,
-      role: Role.HOST,
+      role: Role.GUEST,
       permissions: {
-        admin: false,
+        admin: true,
         canConsume: true,
         canProduce: true,
         canProduceSources: {
@@ -121,10 +121,10 @@ router.post("/join-room/:roomId", async c => {
       },
     });
 
-    const token = accessToken.toJwt();
+    const token = await accessToken.toJwt();
 
     await new Promise<void>((resolve, reject) => {
-      db.update({ roomId }, { $push: { players: playerId } }, {}, err => {
+      roomsDb.update({ roomId }, { $push: { players: playerId } }, {}, err => {
         if (err) reject(err);
         else resolve();
       });
@@ -153,7 +153,7 @@ router.get("/:roomId", async c => {
     const roomId = c.req.param("roomId");
 
     const room: Room | null = await new Promise((resolve, reject) => {
-      db.findOne({ roomId }, (err, doc) => {
+      roomsDb.findOne({ roomId }, (err, doc) => {
         if (err) reject(err);
         else resolve(doc);
       });
@@ -188,7 +188,7 @@ router.get("/:roomId", async c => {
 router.get("/", async c => {
   try {
     const rooms: Room[] = await new Promise((resolve, reject) => {
-      db.find({}, (err: Error | null, docs: Room[]) => {
+      roomsDb.find({}, (err: Error | null, docs: Room[]) => {
         if (err) reject(err);
         else resolve(docs);
       });

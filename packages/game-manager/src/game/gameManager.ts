@@ -2,6 +2,7 @@ import { API } from "@huddle01/server-sdk/api";
 import type { GameState, GameMessage, PlayerRole, Room } from "../types/game.js";
 import db from "../db/index.js";
 import { broadcastMessageToRoom } from "../huddle/rtcMessages.js";
+import roomsDb from "../db/index.js";
 
 const API_KEY = process.env.HUDDLE01_API_KEY;
 if (!API_KEY) throw new Error("HUDDLE01_API_KEY is not set");
@@ -37,7 +38,7 @@ export class GameManager {
   private async saveAndBroadcastMessage(message: GameMessage) {
     // Save to database
     await new Promise<void>((resolve, reject) => {
-      db.update({ roomId: this.roomId }, { $push: { messages: message } }, {}, err => {
+      roomsDb.update({ roomId: this.roomId }, { $push: { messages: message } }, {}, err => {
         if (err) reject(err);
         else resolve();
       });
