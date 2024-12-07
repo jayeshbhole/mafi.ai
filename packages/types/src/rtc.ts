@@ -1,4 +1,4 @@
-import type { Message, MessageType } from "./game";
+import type { Message, MessageType } from "./message";
 
 export interface RTCMessage {
   type: "GAME_MESSAGE";

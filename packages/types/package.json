@@ -9,7 +9,9 @@
     ".": "./dist/index.js",
     "./game": "./dist/game.js",
     "./rtc": "./dist/rtc.js",
-    "./api": "./dist/api.js"
+    "./api": "./dist/api.js",
+    "./message": "./dist/message.js",
+    "./player": "./dist/player.js"
   },
   "scripts": {
     "build": "tsc",
