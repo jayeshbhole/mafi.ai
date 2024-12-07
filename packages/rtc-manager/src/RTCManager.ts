@@ -1,4 +1,4 @@
-import { HuddleClient } from '@huddle01/server-sdk'
+import { HuddleClient } from "@huddle01/server-sdk";
 
 export class RTCManager {
   private client: HuddleClient;
