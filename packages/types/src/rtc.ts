@@ -29,6 +29,12 @@ interface ReadyMessage extends BaseMessage {
   };
 }
 
+export interface RTCPayload {
+  to: string[] | "*";
+  payload: string;
+  label?: string;
+}
+
 // Game start message
 interface GameStartMessage extends BaseMessage {
   type: MessageType.GAME_START;
