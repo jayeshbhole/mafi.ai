@@ -12,27 +12,23 @@ const TimerProgress = memo(({ timeLeft, duration, variant = "horizontal", classN
 
   if (variant === "vertical") {
     return (
-      <div className="absolute right-0 top-0 h-full w-2">
-        <div
-          className={`w-full transition-all duration-1000 ease-linear ${className}`}
-          style={{
-            height: `${percentage}%`,
-            transform: "scaleY(-1)", // Start from top
-          }}
-        />
-      </div>
+      <div
+        className={`w-full absolute right-0 bottom-0 h-full transition-all duration-1000 ease-linear ${className}`}
+        style={{
+          height: `${percentage}%`,
+          transform: "scaleY(-1)", // Start from top
+        }}
+      />
     );
   }
 
   return (
-    <div className="absolute inset-0 overflow-hidden rounded-t-lg">
-      <div
-        className={`h-full transition-all duration-1000 ease-linear ${className}`}
-        style={{
-          width: `${percentage}%`,
-        }}
-      />
-    </div>
+    <div
+      className={`h-full transition-all duration-1000 absolute inset-0 overflow-hidden rounded-r-lg ease-linear ${className}`}
+      style={{
+        width: `${percentage}%`,
+      }}
+    />
   );
 });
 

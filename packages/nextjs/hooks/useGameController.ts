@@ -1,14 +1,12 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { gameService } from "../services/gameService";
 import { NIGHT_MESSAGES, PHASE_DURATION, useGameStore } from "../stores/gameStore";
-import { useTimer } from "./useTimer";
 import { useMutation } from "@tanstack/react-query";
 
 export const useGameController = (gameId: string) => {
   // Game state from store
   const phase = useGameStore(state => state.phase);
   const players = useGameStore(state => state.players);
-  const messages = useGameStore(state => state.messages);
   const overlayCard = useGameStore(state => state.overlayCard);
   const nightMessage = useGameStore(state => state.nightMessage);
   const addMessage = useGameStore(state => state.addMessage);
@@ -18,9 +16,8 @@ export const useGameController = (gameId: string) => {
   const setPhase = useGameStore(state => state.setPhase);
   const setOverlayCard = useGameStore(state => state.setOverlayCard);
   const setNightMessage = useGameStore(state => state.setNightMessage);
-
-  // Timer controls
-  const { timeLeft, startTimer, stopTimer, resetTimer } = useTimer();
+  const setTimeLeft = useGameStore(state => state.setTimeLeft);
+  const timerRef = useRef<NodeJS.Timeout>();
 
   // Mutations
   const voteMutation = useMutation({
@@ -47,72 +44,59 @@ export const useGameController = (gameId: string) => {
     },
   });
 
-  const aiResponseMutation = useMutation({
-    mutationFn: () =>
-      gameService.getAIResponse(phase, {
-        players,
-        recentMessages: messages.slice(-5),
-      }),
-    onSuccess: message => {
-      addMessage(message);
-    },
-  });
+  // const aiResponseMutation = useMutation({
+  //   mutationFn: () =>
+  //     gameService.getAIResponse(phase, {
+  //       players,
+  //       recentMessages: messages.slice(-5),
+  //     }),
+  //   onSuccess: message => {
+  //     addMessage(message);
+  //   },
+  // });
 
   // Phase transition handlers
   const transitionToVoting = useCallback(() => {
     setPhase("voting");
     setOverlayCard("voting");
-    addMessage({
-      sender: "System",
-      content: "🗳️ Time to vote! Choose wisely...",
-      type: "system",
-    });
-    resetTimer("voting");
-    startTimer();
-  }, [setPhase, setOverlayCard, addMessage, resetTimer, startTimer]);
+    // addMessage({
+    //   sender: "System",
+    //   content: "🗳️ Time to vote! Choose wisely...",
+    //   type: "system",
+    // });
+  }, [setPhase, setOverlayCard]);
 
   const transitionToNight = useCallback(() => {
-    const voteResults = players
-      .filter(p => p.votes && p.votes > 0)
-      .map(p => `${p.name}: ${p.votes} votes`)
-      .join("\n");
+    // const voteResults = players
+    //   .filter(p => p.votes && p.votes > 0)
+    //   .map(p => `${p.name}: ${p.votes} votes`)
+    //   .join("\n");
 
-    addMessage({
-      sender: "System",
-      content: `📊 Vote Results:\n${voteResults}`,
-      type: "system-alert",
-    });
+    // addMessage({
+    //   sender: "System",
+    //   content: `📊 Vote Results:\n${voteResults}`,
+    //   type: "system-alert",
+    // });
 
     setOverlayCard("night");
     setPhase("night");
-    resetTimer("night");
     setNightMessage(NIGHT_MESSAGES[Math.floor(Math.random() * NIGHT_MESSAGES.length)]);
-    startTimer();
     resetVotes();
 
     // Trigger mafia kill
-    mafiaKillMutation.mutate();
-  }, [
-    players,
-    setPhase,
-    setOverlayCard,
-    setNightMessage,
-    addMessage,
-    resetVotes,
-    mafiaKillMutation,
-    resetTimer,
-    startTimer,
-  ]);
+    // mafiaKillMutation.mutate();
+  }, [setPhase, setOverlayCard, setNightMessage, resetVotes]);
 
   const transitionToDay = useCallback(() => {
     setOverlayCard(null);
     setPhase("day");
-    resetTimer("day");
-    startTimer();
+  }, [setPhase, setOverlayCard]);
 
-    // Trigger AI responses
-    aiResponseMutation.mutate();
-  }, [setPhase, setOverlayCard, resetTimer, startTimer, aiResponseMutation]);
+  const stopTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+  }, []);
 
   // Phase end handler
   const handlePhaseEnd = useCallback(() => {
@@ -139,17 +123,29 @@ export const useGameController = (gameId: string) => {
     [voteMutation],
   );
 
-  // Message handler
-  const handleMessage = useCallback(
-    (content: string) => {
-      addMessage({
-        sender: "You",
-        content,
-        type: "chat",
-      });
-    },
-    [addMessage],
-  );
+  // Timer control functions
+  const startTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+
+    timerRef.current = setInterval(() => {
+      const timeLeft = useGameStore.getState().timeLeft;
+      if (timeLeft <= 0) {
+        handlePhaseEnd();
+      } else {
+        setTimeLeft(timeLeft - 1);
+      }
+    }, 1000);
+  }, [handlePhaseEnd, setTimeLeft]);
+
+  // Start timer when phase changes
+  useEffect(() => {
+    setTimeLeft(PHASE_DURATION[phase]);
+    startTimer();
+
+    return () => stopTimer();
+  }, [phase, setTimeLeft, startTimer, stopTimer]);
 
   // Check game end conditions
   const checkGameEnd = useCallback(() => {
@@ -181,24 +177,17 @@ export const useGameController = (gameId: string) => {
   return {
     // Game state
     phase,
-    timeLeft,
     players,
-    messages,
     overlayCard,
     nightMessage,
 
     // Game actions
-    handlePhaseEnd,
     handleVote,
-    handleMessage,
     checkGameEnd,
 
     // Phase info
     isNightPhase: phase === "night",
     isVotingPhase: phase === "voting",
     isDayPhase: phase === "day",
-
-    // Phase durations
-    phaseDuration: PHASE_DURATION[phase],
   };
 };

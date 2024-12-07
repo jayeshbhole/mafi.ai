@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { GamePhase, Player } from "../../stores/gameStore";
+import { GamePhase, PHASE_DURATION, Player, useGameStore } from "../../stores/gameStore";
 import PlayerList from "./PlayerList";
 import TimerProgress from "./TimerProgress";
 import { CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,10 +7,6 @@ import { Moon, Skull, Sun, Users } from "lucide-react";
 
 interface GameHeaderProps {
   gameId: string;
-  phase: GamePhase;
-  timeLeft: number;
-  duration: number;
-  players: Player[];
 }
 
 interface PhaseStyle {
@@ -53,8 +49,14 @@ const getPhaseStyles = (phase: GamePhase): PhaseStyle => {
   }
 };
 
-const GameHeader = memo(({ gameId, phase, timeLeft, duration, players }: GameHeaderProps) => {
+const GameHeader = memo(({ gameId }: GameHeaderProps) => {
+  const phase = useGameStore(state => state.phase);
   const phaseStyles = getPhaseStyles(phase);
+
+  const players = useGameStore(state => state.players);
+  const duration = PHASE_DURATION[phase];
+
+  const timeLeft = useGameStore(state => state.timeLeft);
 
   return (
     <div className="relative">
