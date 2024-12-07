@@ -19,6 +19,7 @@
   "devDependencies": {
     "@types/nedb": "^*",
     "@types/node": "^20.11.17",
+    "@types/ws": "^8.5.13",
     "node-fetch": "^3.3.2",
     "tsx": "^4.7.1",
     "vitest": "^2.1.8"

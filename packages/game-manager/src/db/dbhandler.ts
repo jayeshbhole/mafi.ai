@@ -9,14 +9,13 @@ export const createGame = async () => {
     day: 0,
     night: 0,
     chat: [],
-  }
+  };
   await gameDb.insert(game);
-
-}
+};
 
 export const addToRoom = async (socket: Socket) => {
-  const res = await roomsDb.find({}).toArray();
+  const res = await gameDb.find({});
   for (const room of res) {
     // Your code here
   }
-}
+};

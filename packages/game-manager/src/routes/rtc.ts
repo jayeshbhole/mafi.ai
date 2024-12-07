@@ -1,6 +1,5 @@
 import { Hono } from "hono";
 import { WebSocket, WebSocketServer } from "ws";
-import { handleRTCMessage } from "../huddle/rtcHandler.js";
 import type { GameMessage } from "@mafia/types/rtc";
 
 const router = new Hono();
@@ -26,7 +25,8 @@ export function setupWebSocketHandlers(wss: WebSocketServer) {
     ws.on("message", async data => {
       try {
         const message = JSON.parse(data.toString()) as GameMessage;
-        const success = await handleRTCMessage(message, roomId);
+
+        let success = false;
 
         if (success) {
           // Broadcast message to all clients in the room except sender

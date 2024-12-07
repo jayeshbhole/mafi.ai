@@ -5,9 +5,6 @@ import { MessageType, type GameMessage } from "@mafia/types/rtc";
 import { randomUUID } from "crypto";
 import { broadcastMessageToRoom } from "../routes/rtc.js";
 
-const API_KEY = process.env.HUDDLE01_API_KEY;
-if (!API_KEY) throw new Error("HUDDLE01_API_KEY is not set");
-
 export class GameManager {
   private roomId: string;
   private gameState: GameState;
