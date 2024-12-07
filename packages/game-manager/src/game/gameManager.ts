@@ -1,347 +1,256 @@
-import type { GameRoom } from "@mafia/types/api";
-import type { GameState } from "@mafia/types/game";
-import type { PlayerRole } from "@mafia/types/player";
+import type { GameState, GameSettings, GamePhase } from "@mafia/types/game";
 import { MessageType, type GameMessage } from "@mafia/types/rtc";
+import { gameDb } from "../db/index.js";
 import { randomUUID } from "crypto";
-import { broadcastMessageToRoom } from "../routes/rtc.js";
 
 export class GameManager {
   private roomId: string;
   private gameState: GameState;
-  private settings: GameRoom["settings"];
+  private settings: GameSettings;
 
-  constructor(roomId: string, gameState: GameState, settings: GameRoom["settings"]) {
+  constructor(roomId: string, gameState: GameState, settings: GameSettings) {
     this.roomId = roomId;
     this.gameState = gameState;
     this.settings = settings;
+
+    // Initialize game state if needed
+    if (!this.gameState.votes) {
+      this.gameState.votes = {};
+    }
+    if (!this.gameState.roles) {
+      this.gameState.roles = {};
+    }
   }
 
-  private async broadcastSystemMessage(content: string, metadata = {}) {
+  // Player Management
+  async handlePlayerReady(playerId: string): Promise<boolean> {
+    const playerIndex = this.gameState.players.findIndex(p => p.id === playerId);
+    if (playerIndex === -1) return false;
+
+    this.gameState.players[playerIndex].isReady = true;
+
     const message: GameMessage = {
-      playerId: "system",
       id: randomUUID(),
       timestamp: Date.now(),
-      payload: {
-        message: content,
-      },
-      type: MessageType.SYSTEM_CHAT,
-    };
-
-    await this.saveAndBroadcastMessage(message);
-  }
-
-  private async saveAndBroadcastMessage(message: GameMessage) {
-    // Save to database
-    await new Promise<void>((resolve, reject) => {
-      roomsDb.update({ roomId: this.roomId }, { $push: { messages: message } }, {}, err => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
-
-    // Broadcast via RTC
-    await broadcastMessageToRoom(this.roomId, message);
-  }
-
-  async handlePlayerMessage(playerId: string, content: string): Promise<boolean> {
-    // Check if player is alive
-    if (this.gameState.players.find(p => p.id === playerId && !p.isAlive)) {
-      return false;
-    }
-
-    // Check if it's day phase
-    if (this.gameState.phase !== "DAY") {
-      return false;
-    }
-
-    const message: GameMessage = {
+      type: MessageType.READY,
       playerId,
-      // playerName: playerId,
       payload: {
-        message: content,
+        message: "ready",
       },
-      type: MessageType.SYSTEM_CHAT,
     };
 
-    await this.saveAndBroadcastMessage(message);
+    await this.saveMessage(message);
+    await this.saveGameState();
     return true;
   }
 
-  async handleVote(voterId: string, targetId: string): Promise<boolean> {
-    // Validate vote
-    if (
-      this.gameState.phase !== "VOTING" ||
-      this.gameState.players.find(p => p.id === voterId && !p.isAlive) ||
-      this.gameState.players.find(p => p.id === targetId && !p.isAlive)
-    ) {
+  canStartGame(): boolean {
+    const readyPlayers = this.gameState.players.filter(p => p.isReady);
+    return readyPlayers.length >= this.settings.minPlayers;
+  }
+
+  async startGame(): Promise<void> {
+    this.gameState.phase = "STARTING";
+    this.gameState.round = 1;
+
+    const message: GameMessage = {
+      id: randomUUID(),
+      timestamp: Date.now(),
+      type: MessageType.GAME_START,
+      playerId: "system",
+      payload: {
+        timestamp: Date.now(),
+      },
+    };
+
+    await this.saveMessage(message);
+    await this.saveGameState();
+    await this.startDay();
+  }
+
+  // Phase Management
+  private async startDay(): Promise<void> {
+    this.gameState.phase = "DAY";
+
+    const message: GameMessage = {
+      id: randomUUID(),
+      timestamp: Date.now(),
+      type: MessageType.PHASE_CHANGE,
+      playerId: "system",
+      payload: {
+        message: "DAY",
+      },
+    };
+
+    await this.saveMessage(message);
+    await this.saveGameState();
+
+    // Start voting phase after day duration
+    setTimeout(async () => {
+      await this.startVoting();
+    }, this.settings.dayDuration * 1000);
+  }
+
+  private async startNight(): Promise<void> {
+    this.gameState.phase = "NIGHT";
+
+    const message: GameMessage = {
+      id: randomUUID(),
+      timestamp: Date.now(),
+      type: MessageType.PHASE_CHANGE,
+      playerId: "system",
+      payload: {
+        message: "NIGHT",
+      },
+    };
+
+    await this.saveMessage(message);
+    await this.saveGameState();
+
+    // Start day phase after night duration
+    setTimeout(async () => {
+      this.gameState.round++;
+      await this.startDay();
+    }, this.settings.nightDuration * 1000);
+  }
+
+  private async startVoting(): Promise<void> {
+    this.gameState.phase = "VOTING";
+    // Initialize votes for current round
+    this.gameState.votes[this.gameState.round] = {};
+
+    const message: GameMessage = {
+      id: randomUUID(),
+      timestamp: Date.now(),
+      type: MessageType.PHASE_CHANGE,
+      playerId: "system",
+      payload: {
+        message: "VOTING",
+      },
+    };
+
+    await this.saveMessage(message);
+    await this.saveGameState();
+
+    // Process votes after voting duration
+    setTimeout(async () => {
+      await this.processVotingResults();
+    }, this.settings.votingDuration * 1000);
+  }
+
+  // Message Handling
+  async handlePlayerMessage(playerId: string, content: string): Promise<boolean> {
+    // Only allow messages from alive players during day phase
+    const player = this.gameState.players.find(p => p.id === playerId);
+    if (!player || !player.isAlive || this.gameState.phase !== "DAY") {
       return false;
     }
 
-    // Record vote
-    // this.gameState.votes[voterId] = targetId;
-
     const message: GameMessage = {
-      playerId: voterId,
       id: randomUUID(),
       timestamp: Date.now(),
+      type: MessageType.CHAT,
+      playerId,
+      payload: {
+        message: content,
+      },
+    };
+
+    await this.saveMessage(message);
+    return true;
+  }
+
+  // Voting Management
+  async handleVote(voterId: string, targetId: string): Promise<boolean> {
+    if (this.gameState.phase !== "VOTING") return false;
+
+    // Check if players are valid and alive
+    const voter = this.gameState.players.find(p => p.id === voterId);
+    const target = this.gameState.players.find(p => p.id === targetId);
+    if (!voter || !target || !voter.isAlive || !target.isAlive) {
+      return false;
+    }
+
+    // Record vote for current round
+    this.gameState.votes[this.gameState.round][voterId] = targetId;
+
+    const message: GameMessage = {
+      id: randomUUID(),
+      timestamp: Date.now(),
+      type: MessageType.VOTE,
+      playerId: voterId,
       payload: {
         vote: targetId,
       },
-      type: MessageType.VOTE,
     };
 
-    await this.saveAndBroadcastMessage(message);
-
-    // Check if we have majority
-    await this.checkVotingResults();
+    await this.saveMessage(message);
+    await this.saveGameState();
     return true;
   }
 
-  private async checkVotingResults() {
-    const votes = this.gameState.votes;
-    const voteCount: Record<string, number> = {};
+  shouldEndVoting(): boolean {
+    const currentRoundVotes = this.gameState.votes[this.gameState.round];
+    const alivePlayers = this.gameState.players.filter(p => p.isAlive);
+    const totalVotes = Object.keys(currentRoundVotes).length;
+    return totalVotes >= alivePlayers.length;
+  }
 
-    // Count votes
-    Object.values(votes).forEach(targetId => {
+  async processVotingResults(): Promise<string | null> {
+    const currentRoundVotes = this.gameState.votes[this.gameState.round];
+    if (!currentRoundVotes) return null;
+
+    const voteCount: Record<string, number> = {};
+    Object.values(currentRoundVotes).forEach(targetId => {
       voteCount[targetId] = (voteCount[targetId] || 0) + 1;
     });
 
-    // Check for majority
-    const aliveCount = this.gameState.alivePlayers.length;
-    const majorityNeeded = Math.floor(aliveCount / 2) + 1;
+    let maxVotes = 0;
+    let eliminatedPlayer: string | null = null;
 
-    for (const [targetId, count] of Object.entries(voteCount)) {
-      if (count >= majorityNeeded) {
-        await this.eliminatePlayer(targetId, "voting");
-        await this.startNightPhase();
-        break;
+    for (const [playerId, votes] of Object.entries(voteCount)) {
+      if (votes > maxVotes) {
+        maxVotes = votes;
+        eliminatedPlayer = playerId;
       }
     }
+
+    if (eliminatedPlayer) {
+      await this.eliminatePlayer(eliminatedPlayer);
+    }
+
+    // Start night phase after voting
+    await this.startNight();
+    return eliminatedPlayer;
   }
 
-  async eliminatePlayer(playerId: string, reason: "voting" | "mafia") {
-    // Update game state
-    this.gameState.deadPlayers.push(playerId);
-    this.gameState.alivePlayers = this.gameState.alivePlayers.filter(p => p !== playerId);
+  // Player Elimination
+  private async eliminatePlayer(playerId: string): Promise<void> {
+    const playerIndex = this.gameState.players.findIndex(p => p.id === playerId);
+    if (playerIndex !== -1) {
+      this.gameState.players[playerIndex].isAlive = false;
+    }
 
     const message: GameMessage = {
+      id: randomUUID(),
+      timestamp: Date.now(),
+      type: MessageType.DEATH,
       playerId: "system",
-      // playerName: "system",
       payload: {
-        message: `${playerId} has been eliminated by ${reason}`,
+        playerId,
       },
-      type: "death",
     };
 
-    await this.saveAndBroadcastMessage(message);
-    await this.checkGameEnd();
+    await this.saveMessage(message);
+    await this.saveGameState();
   }
 
-  private async checkGameEnd() {
-    const aiMafiaCount = this.gameState.aiPlayers.filter(p => !this.gameState.deadPlayers.includes(p)).length;
-    const villagerCount = this.gameState.alivePlayers.filter(p => !this.gameState.aiPlayers.includes(p)).length;
-
-    if (aiMafiaCount >= villagerCount) {
-      await this.broadcastSystemMessage("Game Over - AI Mafia wins!");
-    } else if (aiMafiaCount === 0) {
-      await this.broadcastSystemMessage("Game Over - Villagers win!");
-    }
+  // Database Operations
+  private async saveGameState(): Promise<void> {
+    await gameDb.update({ roomId: this.roomId }, { $set: { gameState: this.gameState } });
   }
 
-  async startDayPhase() {
-    this.gameState.phase = "DAY";
-    this.gameState.votes = {};
-
-    await this.broadcastSystemMessage("Day has begun. Players have 2 minutes to discuss.", {
-      phase: "DAY",
-      round: this.gameState.round,
-    });
-
-    // Schedule voting phase
-    setTimeout(() => this.startVotingPhase(), 2 * 60 * 1000);
-  }
-
-  private async startVotingPhase() {
-    this.gameState.phase = "VOTING";
-    await this.broadcastSystemMessage("Voting has begun. Cast your votes!", {
-      phase: "VOTING",
-      round: this.gameState.round,
-    });
-  }
-
-  private async startNightPhase() {
-    this.gameState.phase = "NIGHT";
-    this.gameState.round++;
-
-    await this.broadcastSystemMessage("Night has fallen. The Mafia is choosing their target.", {
-      phase: "NIGHT",
-      round: this.gameState.round,
-    });
-
-    // Trigger AI Mafia actions
-    await this.handleAIMafiaActions();
-  }
-
-  private async handleAIMafiaActions() {
-    // Get AI Mafia players
-    const aiMafiaPlayers = this.gameState.aiPlayers.filter(
-      p => this.gameState.roles[p] === "AI_MAFIA" && !this.gameState.deadPlayers.includes(p),
-    );
-
-    if (aiMafiaPlayers.length === 0) return;
-
-    // Simple AI: randomly choose a target
-    const possibleTargets = this.gameState.alivePlayers.filter(p => !this.gameState.aiPlayers.includes(p));
-    const target = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
-
-    const message: GameMessage = {
-      playerId: aiMafiaPlayers[0], // Use first AI as sender
-      // playerName: aiMafiaPlayers[0],
-      payload: {
-        message: `eliminated ${target}`,
-      },
-      type: "death",
-    };
-
-    await this.saveAndBroadcastMessage(message);
-    await this.eliminatePlayer(target, "mafia");
-    await this.startDayPhase();
-  }
-
-  private async assignRoles() {
-    const humanPlayers = this.gameState.alivePlayers.filter(p => !this.gameState.aiPlayers.includes(p));
-    const totalPlayers = humanPlayers.length + this.settings.aiCount;
-    const roles: Record<string, PlayerRole> = {};
-
-    // Create AI players if they don't exist
-    for (let i = 0; i < this.settings.aiCount; i++) {
-      const aiId = `ai_mafia_${i + 1}`;
-      this.gameState.aiPlayers.push(aiId);
-      roles[aiId] = "AI_MAFIA";
-    }
-
-    // All human players are villagers
-    for (const playerId of humanPlayers) {
-      roles[playerId] = "VILLAGER";
-    }
-
-    this.gameState.roles = roles;
-
-    // Notify human players of their roles
-    for (const playerId of humanPlayers) {
-      const message: GameMessage = {
-        playerId: "system",
-        playerName: "system",
-        payload: {
-          message: `You are a VILLAGER`,
-        },
-        type: "system",
-      };
-
-      await this.saveAndBroadcastMessage(message);
-    }
-
-    // Announce AI players
-    await this.broadcastSystemMessage(`${this.settings.aiCount} AI Mafia players have joined the game.`, {
-      phase: "STARTING",
-    });
-  }
-
-  // Update the chat handler to use the new message type
-  async handleChatMessage(playerId: string, content: string): Promise<boolean> {
-    // Don't allow AI players to chat
-    if (
-      this.gameState.aiPlayers.includes(playerId) ||
-      (this.gameState.phase !== "LOBBY" &&
-        (this.gameState.phase !== "DAY" || this.gameState.deadPlayers.includes(playerId)))
-    ) {
-      return false;
-    }
-
-    const message: GameMessage = {
-      playerId: "system",
-      // playerName: "system",
-      payload: {
-        message: content,
-      },
-      type: "chat",
-    };
-
-    await this.saveAndBroadcastMessage(message);
-    return true;
-  }
-
-  // Add validation methods
-  async validateChatMessage(playerId: string): Promise<boolean> {
-    return (
-      !this.gameState.aiPlayers.includes(playerId) &&
-      (this.gameState.phase === "LOBBY" ||
-        (this.gameState.phase === "DAY" && !this.gameState.deadPlayers.includes(playerId)))
-    );
-  }
-
-  async validateVote(voterId: string, targetId: string): Promise<boolean> {
-    return (
-      this.gameState.phase === "VOTING" &&
-      !this.gameState.deadPlayers.includes(voterId) &&
-      !this.gameState.deadPlayers.includes(targetId) &&
-      !this.gameState.aiPlayers.includes(voterId)
-    );
-  }
-
-  async validateReadyStatus(playerId: string): Promise<boolean> {
-    return this.gameState.phase === "LOBBY" && !this.gameState.aiPlayers.includes(playerId);
-  }
-
-  async handleReadyStatus(playerId: string, ready: boolean): Promise<boolean> {
-    // Validate ready status
-    if (this.gameState.phase !== "LOBBY" || this.gameState.aiPlayers.includes(playerId)) {
-      return false;
-    }
-
-    // Update ready status
-    if (ready) {
-      this.gameState.readyPlayers.add(playerId);
-    } else {
-      this.gameState.readyPlayers.delete(playerId);
-    }
-
-    // Create ready status message
-    const message: GameMessage = {
-      playerId: "system",
-      playerName: "system",
-      payload: {
-        message: ready ? "isReady" : "notReady",
-      },
-      type: "ready",
-    };
-
-    await this.saveAndBroadcastMessage(message);
-
-    // Check if we can start the game
-    const readyCount = this.gameState.readyPlayers.size;
-    const totalHumanPlayers = this.gameState.alivePlayers.filter(p => !this.gameState.aiPlayers.includes(p)).length;
-
-    if (
-      readyCount >= this.settings.minPlayers - this.settings.aiCount && // Account for AI players
-      readyCount === totalHumanPlayers &&
-      totalHumanPlayers + this.settings.aiCount <= this.settings.maxPlayers
-    ) {
-      await this.startGame();
-    }
-
-    return true;
-  }
-
-  private async startGame() {
-    this.gameState.phase = "STARTING";
-
-    await this.broadcastSystemMessage("Game is starting! Assigning roles...", { phase: "STARTING" });
-
-    // Assign roles
-    await this.assignRoles();
-
-    // Start first night phase after a short delay
-    setTimeout(() => this.startNightPhase(), 5000);
+  private async saveMessage(message: GameMessage): Promise<void> {
+    await gameDb.update({ roomId: this.roomId }, { $push: { messages: message } });
   }
 }

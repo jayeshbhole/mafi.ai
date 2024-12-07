@@ -1,14 +1,10 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import { cors } from "hono/cors";
 import { createMiddleware } from "hono/factory";
-import roomsRouter from "./routes/rooms.js";
-import rtcRouter from "./routes/rtc.js";
 import { Server } from "socket.io";
-import { handle } from "hono/cloudflare-pages";
+import roomsRouter from "./routes/rooms.js";
 import { handleIoServer } from "./socket/index.js";
 
-// import { cleanupOldRooms } from "./db/index.js";
 const port = 9999;
 
 const app = new Hono();
@@ -23,7 +19,7 @@ const io = new Server(server, {
   },
 });
 
-handleIoServer(io, "123");
+handleIoServer(io);
 
 const varMiddleware = createMiddleware<{
   Variables: {
@@ -38,17 +34,7 @@ const varMiddleware = createMiddleware<{
 
 app.use(varMiddleware);
 
-// Add CORS middleware
-// app.use(
-//   "/*",
-//   cors({
-//     origin: ["http://localhost:3000"],
-//     credentials: true,
-//     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-//     maxAge: 600,
-//   }),
-// );
-
 // Mount routers
 app.route("/rooms", roomsRouter);
-app.route("/rtc", rtcRouter);
+
+export default app;
