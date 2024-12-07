@@ -30,7 +30,7 @@ interface GameState {
   messages: Message[];
   overlayCard: GamePhase | null;
   nightMessage: string;
-  killedPlayer: string | null;
+  killedPlayer: Player | null;
 
   // Actions
   setPhase: (phase: GamePhase) => void;
@@ -45,7 +45,7 @@ interface GameState {
   voteForPlayer: (id: string) => void;
   resetVotes: () => void;
   eliminatePlayer: (id: string) => void;
-  setKilledPlayer: (id: string | null) => void;
+  setKilledPlayer: (killedPlayer: Player | null) => void;
 }
 
 const INITIAL_PLAYERS: Player[] = [

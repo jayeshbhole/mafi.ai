@@ -30,7 +30,7 @@ const OverlayCard = memo(({ onVote }: OverlayCardProps) => {
             <CardTitle className="text-4xl mb-6 text-center font-serif text-red-500">A Body Was Found</CardTitle>
             <p className="text-2xl text-center px-6 text-red-200 font-serif max-w-lg leading-relaxed">
               As dawn breaks, the villagers discover the lifeless body of{" "}
-              <span className="text-red-400 font-semibold">{killedPlayer}</span>
+              <span className="text-red-400 font-semibold">{killedPlayer?.name}</span>
             </p>
           </div>
 

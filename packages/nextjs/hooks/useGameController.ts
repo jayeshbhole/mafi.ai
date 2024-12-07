@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
-import { gameService } from "../services/gameService";
 import { NIGHT_MESSAGES, PHASE_DURATION, useGameStore } from "../stores/gameStore";
-import { useMutation } from "@tanstack/react-query";
+import { Player } from "@mafia/types";
 
 export const useGameController = (gameId: string) => {
   // Game state from store
@@ -20,32 +19,6 @@ export const useGameController = (gameId: string) => {
   const setKilledPlayer = useGameStore(state => state.setKilledPlayer);
   const timerRef = useRef<NodeJS.Timeout>();
 
-  // Mutations
-  const voteMutation = useMutation({
-    mutationFn: (playerName: string) => gameService.submitVote(playerName, gameId),
-    onSuccess: (_, playerName) => {
-      voteForPlayer(playerName);
-      addMessage({
-        sender: "System",
-        content: `You voted for ${playerName}`,
-        type: "system-success",
-      });
-    },
-  });
-
-  const mafiaKillMutation = useMutation({
-    mutationFn: () => gameService.getMafiaKill(players),
-    onSuccess: killedPlayer => {
-      eliminatePlayer(killedPlayer);
-      addMessage({
-        sender: "System",
-        content: `🌅 Dawn breaks...\n\n💀 ${killedPlayer} was found dead this morning!`,
-        type: "system-alert",
-      });
-    },
-  });
-
-  // Phase transition handlers
   const transitionToVoting = useCallback(() => {
     setPhase("VOTING");
     setOverlayCard("VOTING");
@@ -69,23 +42,26 @@ export const useGameController = (gameId: string) => {
     resetVotes();
   }, [players, setPhase, setOverlayCard, setNightMessage, eliminatePlayer, resetVotes]);
 
-  const transitionToDay = useCallback(() => {
-    if (mafiaKillMutation.data) {
-      // Show death overlay first
-      setOverlayCard("DEATH");
-      setKilledPlayer(mafiaKillMutation.data);
+  const transitionToDay = useCallback(
+    (killedPlayer: Player | undefined) => {
+      if (killedPlayer) {
+        // Show death overlay first
+        setOverlayCard("DEATH");
+        setKilledPlayer(killedPlayer);
 
-      // After 5 seconds, transition to day phase
-      setTimeout(() => {
+        // After 5 seconds, transition to day phase
+        setTimeout(() => {
+          setOverlayCard(null);
+          setPhase("DAY");
+          setKilledPlayer(null);
+        }, 5000);
+      } else {
         setOverlayCard(null);
         setPhase("DAY");
-        setKilledPlayer(null);
-      }, 5000);
-    } else {
-      setOverlayCard(null);
-      setPhase("DAY");
-    }
-  }, [setPhase, setOverlayCard, setKilledPlayer, mafiaKillMutation.data]);
+      }
+    },
+    [setPhase, setOverlayCard, setKilledPlayer],
+  );
 
   const stopTimer = useCallback(() => {
     if (timerRef.current) {
@@ -94,31 +70,34 @@ export const useGameController = (gameId: string) => {
   }, []);
 
   // Phase end handler
-  const handlePhaseEnd = useCallback(() => {
-    stopTimer();
+  const handlePhaseEnd = useCallback(
+    ({ data }: { data: { killedPlayer?: Player } }) => {
+      stopTimer();
 
-    switch (phase) {
-      case "DAY":
-        transitionToVoting();
-        break;
-      case "VOTING":
-        transitionToResult();
-        break;
-      case "RESULT":
-        transitionToNight();
-        break;
-      case "NIGHT":
-        transitionToDay();
-        break;
-    }
-  }, [phase, transitionToVoting, transitionToResult, transitionToNight, transitionToDay, stopTimer]);
+      switch (phase) {
+        case "DAY":
+          transitionToVoting();
+          break;
+        case "VOTING":
+          transitionToResult();
+          break;
+        case "RESULT":
+          transitionToNight();
+          break;
+        case "NIGHT":
+          transitionToDay(data.killedPlayer);
+          break;
+      }
+    },
+    [phase, transitionToVoting, transitionToResult, transitionToNight, transitionToDay, stopTimer],
+  );
 
   // Vote handler
   const handleVote = useCallback(
     (playerName: string) => {
-      voteMutation.mutate(playerName);
+      voteForPlayer(playerName);
     },
-    [voteMutation],
+    [voteForPlayer],
   );
 
   // Timer control functions
@@ -130,7 +109,9 @@ export const useGameController = (gameId: string) => {
     timerRef.current = setInterval(() => {
       const timeLeft = useGameStore.getState().timeLeft;
       if (timeLeft <= 0) {
-        handlePhaseEnd();
+        handlePhaseEnd({
+          data: {},
+        });
       } else {
         setTimeLeft(timeLeft - 1);
       }
