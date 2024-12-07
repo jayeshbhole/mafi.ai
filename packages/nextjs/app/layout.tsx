@@ -13,11 +13,11 @@ export const metadata = getMetadata({ title: "mafia.ai", description: "mafia.ai 
 const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
   return (
     <html suppressHydrationWarning>
-      <head>
+      {/* <head>
         <script src="https://unpkg.com/react-scan/dist/auto.global.js" async />
-      </head>
-      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-        <body>
+      </head> */}
+      <body>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <ScaffoldEthAppWithProviders>
             <header className="flex fixed top-0 left-0 right-0 justify-between items-center px-4 pt-4">
               <Link href="/" className="h-6 w-6">
@@ -30,8 +30,8 @@ const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
 
             {children}
           </ScaffoldEthAppWithProviders>
-        </body>
-      </ThemeProvider>
+        </ThemeProvider>
+      </body>
     </html>
   );
 };
