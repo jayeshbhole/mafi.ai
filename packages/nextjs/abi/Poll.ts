@@ -1,4 +1,4 @@
-export const storeAbi = [
+export default [
   {
     inputs: [
       {
@@ -800,5 +800,3 @@ export const storeAbi = [
     type: "function",
   },
 ] as const;
-
-export const storeContractAddress = "0x17fc976E2d23d8956B54D3aaf84b3f9a99395D87";
