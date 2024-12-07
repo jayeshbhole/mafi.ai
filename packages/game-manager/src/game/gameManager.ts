@@ -8,10 +8,6 @@ import type { GameMessage } from "@mafia/types/rtc";
 const API_KEY = process.env.HUDDLE01_API_KEY;
 if (!API_KEY) throw new Error("HUDDLE01_API_KEY is not set");
 
-const huddle01Api = new API({
-  apiKey: API_KEY,
-});
-
 export class GameManager {
   private roomId: string;
   private gameState: GameState;

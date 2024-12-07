@@ -4,7 +4,7 @@ import type { GameMessage, RTCMessage } from "@mafia/types/rtc";
 const API_KEY = process.env.HUDDLE01_API_KEY;
 if (!API_KEY) throw new Error("HUDDLE01_API_KEY is not set");
 
-const api = new API({
+export const huddle01Api = new API({
   apiKey: API_KEY,
 });
 
@@ -16,7 +16,7 @@ export async function broadcastMessageToRoom(roomId: string, message: GameMessag
       roomId,
     };
 
-    await api.sendData({
+    await huddle01Api.sendData({
       roomId,
       payload: rtcMessage,
     });
