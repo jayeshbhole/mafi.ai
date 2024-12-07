@@ -58,22 +58,30 @@ export default class GameResponseGenerator {
 `;
 
     this.initialRoundPrompt =
-      "Generate 2 lines of the relevant topic being discussed if everyone is doing introductions or if no one has written anything yet then pls do the same for yourself and if you have introduced yourself once then dont do it again, speaking from a first-person perspective without explicitly mentioning AI.";
+      "Generate 2 lines of the relevant topic being discussed if everyone is doing introductions then pls do the same for yourself and if you have introduced yourself once then dont do it again, speaking from a first-person perspective without explicitly mentioning AI.";
   }
 
   public startSocketClient(serverUrl: string): void {
     this.socket = io(serverUrl);
 
-    this.socket.on("connect", () => {
+    this.socket.on("connect", async () => {
       console.log("Connected to socket server");
       this.login();
-      this.socket!.emit("start", { message: "Game started" });
-    });
+      console.log("Creating or joining room", serverUrl + "/rooms/create-or-join-room");
+      const response = await fetch(serverUrl + "/rooms/create-or-join-room", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          //roomId: "1234",
+          player: 7,
+        }),
+      });
 
-    this.socket.on("ready", (data: any) => {
-      console.log("Ready event received:", data);
-      // Handle ready event same way we handle chat
-      this.handleSocketRequest(data, "CHAT");
+      const responseData = await response.json();
+      console.log("Response:", responseData);
+      this.socket!.emit("ready", { message: "Game started" });
     });
 
     // Add listeners for the specified event types
@@ -110,7 +118,6 @@ export default class GameResponseGenerator {
 
     this.socket.on("error", (error: any) => {
       console.error("Socket error:", error);
-      this.socket?.disconnect();
     });
   }
 
@@ -179,15 +186,12 @@ export default class GameResponseGenerator {
   }
 
   private async handleTextGeneration(
-    socketRequestDto: SocketRequestDto,
-    requestActionType: string
+    socketRequestDto: SocketRequestDto
   ): Promise<string> {
-    if (requestActionType === "CHAT") {
-        const { id, text } = socketRequestDto;
-        const formattedText = `${id}: ${text}`;
-        this.textHistory.push(formattedText);
-        console.log("Updated text history:", this.textHistory);
-    }
+    const { id, text } = socketRequestDto;
+    const formattedText = `${id}: ${text}`;
+    this.textHistory.push(formattedText);
+    console.log("Updated text history:", this.textHistory);
 
     const aiResponse = await this.generateGameResponse(this.textHistory);
     if (aiResponse) {
@@ -244,15 +248,8 @@ export default class GameResponseGenerator {
     }
   }
 
-  private async generateProofOfVote(voteId: number): Promise<string> {
-    // TODO: Implement this
-    return "0x1234";
-  }
-
   private async handleVote(): Promise<number> {
-    const voteId = await this.generateVote(this.textHistory, this.activeIds);
-    const proof = await this.generateProofOfVote(voteId);
-    return voteId;
+    return await this.generateVote(this.textHistory, this.activeIds);
   }
 
   private handleVoteResult(socketRequestDto: SocketRequestDto): void {
@@ -260,22 +257,19 @@ export default class GameResponseGenerator {
     const aiVoteFraction = aiVotes / this.activeIds.length; // Calculate fraction based on active IDs
     this.textHistory.push(`AI Vote Fraction: ${aiVoteFraction}`);
     console.log("Updated text history with vote results:", this.textHistory);
-    return;
   }
 
-  private handleRemoveMember(socketRequestDto: SocketRequestDto): number | undefined {
+  private handleRemoveMember(socketRequestDto: SocketRequestDto): void {
     const removedId = socketRequestDto.removedId;
     this.removedMembers.add(removedId!);
     this.activeIds = this.activeIds.filter((id) => id !== removedId);
     console.log("Updated removed members:", this.removedMembers);
     console.log("Updated active IDs:", this.activeIds);
-    return removedId;
   }
 
-  private async handleKill(): Promise<number> {
-    // TODO: Implement this
-    const killId = await this.generateVote(this.textHistory, this.activeIds);
-    return killId;
+  private handleVoteSubmission(socketRequestDto: SocketRequestDto): void {
+    // have to use lit in this function
+    console.log("Vote submission received:", socketRequestDto);
   }
 
   async handleSocketRequest(
@@ -283,21 +277,20 @@ export default class GameResponseGenerator {
     requestActionType: string
   ): Promise<any> {
     switch (requestActionType) {
-      case "CHAT":
-        return await this.handleTextGeneration(socketRequestDto, requestActionType);
-      case "READY":
-        return await this.handleTextGeneration(socketRequestDto, requestActionType);
+      case "TEXT_UPDATE":
+        return await this.handleTextGeneration(socketRequestDto);
+        break;
       case "VOTE":
         return await this.handleVote();
+        break;
       case "VOTE_RESULT":
         return this.handleVoteResult(socketRequestDto);
+        break;
       case "REMOVE_MEMBER":
         return this.handleRemoveMember(socketRequestDto);
-      case "KILL":
-        return this.handleKill();
+        break;
       default:
         console.warn("Unknown request action type:", requestActionType);
-        return null;
     }
   }
 }
@@ -306,7 +299,9 @@ async function runExample() {
   const gameResponseGenerator = new GameResponseGenerator();
 
   // Start the socket client with the server URL
-  gameResponseGenerator.startSocketClient("http://your-socket-server-url");
+  gameResponseGenerator.startSocketClient("http://localhost:9999");
+
+  // ... existing example code ...
 }
 
 // Run the example

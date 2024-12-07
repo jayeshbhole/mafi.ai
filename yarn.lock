@@ -9956,6 +9956,12 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mafia-agent@workspace:packages/mafia-agent":
+  version: 0.0.0-use.local
+  resolution: "mafia-agent@workspace:packages/mafia-agent"
+  languageName: unknown
+  linkType: soft
+
 "mafia@workspace:.":
   version: 0.0.0-use.local
   resolution: "mafia@workspace:."
