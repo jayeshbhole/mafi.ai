@@ -68,25 +68,20 @@ export const useGameController = (gameId: string) => {
   }, [setPhase, setOverlayCard]);
 
   const transitionToNight = useCallback(() => {
-    // const voteResults = players
-    //   .filter(p => p.votes && p.votes > 0)
-    //   .map(p => `${p.name}: ${p.votes} votes`)
-    //   .join("\n");
+    const votedOutPlayer = players.reduce(
+      (prev, current) => (!prev || (current.votes || 0) > (prev.votes || 0) ? current : prev),
+      players[0],
+    );
 
-    // addMessage({
-    //   sender: "System",
-    //   content: `📊 Vote Results:\n${voteResults}`,
-    //   type: "system-alert",
-    // });
-
-    setOverlayCard("night");
-    setPhase("night");
-    setNightMessage(NIGHT_MESSAGES[Math.floor(Math.random() * NIGHT_MESSAGES.length)]);
-    resetVotes();
-
-    // Trigger mafia kill
-    // mafiaKillMutation.mutate();
-  }, [setPhase, setOverlayCard, setNightMessage, resetVotes]);
+    // Show voting results for 5 seconds
+    setTimeout(() => {
+      setOverlayCard("night");
+      setPhase("night");
+      setNightMessage(NIGHT_MESSAGES[Math.floor(Math.random() * NIGHT_MESSAGES.length)]);
+      eliminatePlayer(votedOutPlayer.name);
+      resetVotes();
+    }, 5000);
+  }, [players, setPhase, setOverlayCard, setNightMessage, eliminatePlayer, resetVotes]);
 
   const transitionToDay = useCallback(() => {
     if (mafiaKillMutation.data) {

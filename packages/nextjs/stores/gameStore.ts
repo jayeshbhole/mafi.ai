@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type GamePhase = "day" | "night" | "voting" | "death";
+export type GamePhase = "day" | "night" | "voting" | "result" | "death";
 export type Player = {
   name: string;
   role: "mafia" | "villager";
@@ -18,9 +18,10 @@ export type Message = {
 };
 
 export const PHASE_DURATION = {
-  day: 20,
+  day: 10,
   night: 5,
-  voting: 15,
+  voting: 20,
+  result: 10,
   death: 10,
 } as const;
 

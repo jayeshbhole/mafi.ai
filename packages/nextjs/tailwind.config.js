@@ -65,6 +65,7 @@ module.exports = {
         "pulse-fast": "pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        shake: "shake 1s cubic-bezier(.36,.07,.19,.97) infinite",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -129,6 +130,11 @@ module.exports = {
           to: {
             height: "0",
           },
+        },
+        shake: {
+          "0%, 100%": { transform: "translate(0, 0)" },
+          "10%, 30%, 50%, 70%, 90%": { transform: "translate(-4px, -4px)" },
+          "20%, 40%, 60%, 80%": { transform: "translate(4px, 4px)" },
         },
       },
     },
