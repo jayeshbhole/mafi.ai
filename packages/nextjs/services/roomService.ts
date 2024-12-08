@@ -15,7 +15,7 @@ export const roomService = {
 
   // Create a new room
   createRoom: async ({ playerId }: { playerId: string }): Promise<GameState> => {
-    const response = await fetch(`${API_URL}/rooms/create-room`, {
+    const response = await fetch(`${API_URL}/rooms/create-or-join-room`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ playerId }),
@@ -28,7 +28,7 @@ export const roomService = {
 
   // Join a room
   joinRoom: async (roomId: string, playerId: string): Promise<JoinRoomResponse> => {
-    const response = await fetch(`${API_URL}/rooms/join-room/${roomId}`, {
+    const response = await fetch(`${API_URL}/rooms/create-or-join-room/${roomId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ playerId }),

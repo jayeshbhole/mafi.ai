@@ -67,14 +67,15 @@ export default class GameResponseGenerator {
     this.socket.on("connect", async () => {
       console.log("Connected to socket server");
       this.login();
-      console.log("Creating or joining room", serverUrl + "/rooms/join-room/room1");
-      const response = await fetch(serverUrl + "/rooms/join-room/room1", {
+      console.log("Creating or joining room", serverUrl + "/rooms/create-or-join-room/room1");
+      const response = await fetch(serverUrl + "/rooms/create-or-join-room/room1", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           playerId: `first_ai`,
+          role: "AI_MAFIA",
         }),
       });
 

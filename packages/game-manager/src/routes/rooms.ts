@@ -11,7 +11,7 @@ dotenv.config();
 const router = new Hono();
 
 const DEFAULT_SETTINGS: GameSettings = {
-  minPlayers: 5,
+  minPlayers: 3,
   maxPlayers: 10,
   aiCount: 1,
   dayDuration: 10,
@@ -20,13 +20,38 @@ const DEFAULT_SETTINGS: GameSettings = {
 };
 
 // Create a room
-router.post("/create-room/:roomId?", async c => {
+router.post("/create-or-join-room/:roomId?", async c => {
   try {
     const data = await c.req.json<{
-      playerId?: string;
+      playerId: string;
     }>();
 
-    const roomId = c.req.param("roomId");
+    // const roomId = c.req.param("roomId");
+    // const newRoomId = "room1";
+    const roomId = "room1";
+
+    const room = await gameCollection.findOne({ roomId });
+
+    if (roomId) {
+      if (room) {
+        const newPlayer: Player = {
+          id: data.playerId,
+          address: data.playerId,
+          maciData: {},
+          name: "",
+          isAlive: true,
+          isReady: false,
+          role: data.playerId === "first_ai" ? "AI_MAFIA" : "VILLAGER",
+        };
+
+        await gameCollection.updateOne({ roomId }, { $push: { players: newPlayer } });
+
+        return c.json<APIResponse>({
+          success: true,
+          data: { roomId, message: "Successfully joined room" },
+        });
+      }
+    }
 
     const { playerId } = data || {};
 
@@ -38,7 +63,6 @@ router.post("/create-room/:roomId?", async c => {
     }
 
     // Create new room if roomId wasn't provided or room wasn't found
-    const newRoomId = "room1";
     const newPlayer: Player = {
       id: playerId,
       address: playerId,
@@ -50,7 +74,7 @@ router.post("/create-room/:roomId?", async c => {
     };
 
     const gameState: GameState = {
-      roomId: newRoomId,
+      roomId: roomId,
       createdAt: Date.now(),
       updatedAt: Date.now(),
       phase: "LOBBY",
@@ -82,52 +106,6 @@ router.post("/create-room/:roomId?", async c => {
     );
   }
 });
-
-router.post("/join-room/:roomId", async c => {
-  const roomId = c.req.param("roomId");
-  const data = await c.req.json<{
-    playerId: string;
-    role?: string;
-  }>();
-
-  const { playerId, role } = data;
-
-  if (!playerId) {
-    return c.json<APIResponse>({
-      success: false,
-      error: "Player ID is required",
-    });
-  }
-
-  const room = await gameCollection.findOne({ roomId });
-  if (!room) {
-    return c.json<APIResponse>({
-      success: false,
-      error: "Room not found",
-    });
-  }
-  const newPlayer: Player = {
-    id: playerId,
-    address: playerId,
-    maciData: {},
-    name: "",
-    isAlive: true,
-    isReady: false,
-    role: (role || "VILLAGER") as PlayerRole,
-  };
-
-  await gameCollection.updateOne({ roomId }, { $push: { players: newPlayer } });
-
-  return c.json<APIResponse>({
-    success: true,
-    data: {
-      roomId: room.roomId,
-      message: "Successfully joined room",
-    },
-  });
-});
-
-// Get all rooms
 router.get("/all", async c => {
   const rooms = await gameCollection.find({}).toArray();
   return c.json<APIResponse>({
