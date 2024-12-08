@@ -1,0 +1,1209 @@
+{
+  "address": "0xE92a59B39EF6b039b436FaEc33539694Fda16341",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "contract IPollFactory",
+          "name": "_pollFactory",
+          "type": "address"
+        },
+        {
+          "internalType": "contract IMessageProcessorFactory",
+          "name": "_messageProcessorFactory",
+          "type": "address"
+        },
+        {
+          "internalType": "contract ITallyFactory",
+          "name": "_tallyFactory",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256[5]",
+          "name": "_emptyBallotRoots",
+          "type": "uint256[5]"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "DepthTooLarge",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidMessage",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidPubKey",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnableInvalidOwner",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "OwnableUnauthorizedAccount",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PoseidonHashLibrariesNotLinked",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "TooManySignups",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "_gameId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "_pollId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum DomainObjs.Mode",
+          "name": "_mode",
+          "type": "uint8"
+        }
+      ],
+      "name": "DeployPoll",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "MESSAGE_DATA_LENGTH",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "coordinatorPubKey",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "x",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "y",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_duration",
+          "type": "uint256"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "addr",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "x",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "y",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct Mafia.Player[]",
+          "name": "_players",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "createGame",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_gameId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_duration",
+          "type": "uint256"
+        }
+      ],
+      "name": "createPoll",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "emptyBallotRoots",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[2]",
+          "name": "array",
+          "type": "uint256[2]"
+        }
+      ],
+      "name": "hash2",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "result",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[3]",
+          "name": "array",
+          "type": "uint256[3]"
+        }
+      ],
+      "name": "hash3",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "result",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[4]",
+          "name": "array",
+          "type": "uint256[4]"
+        }
+      ],
+      "name": "hash4",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "result",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[5]",
+          "name": "array",
+          "type": "uint256[5]"
+        }
+      ],
+      "name": "hash5",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "result",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "left",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "right",
+          "type": "uint256"
+        }
+      ],
+      "name": "hashLeftRight",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "result",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256[10]",
+              "name": "data",
+              "type": "uint256[10]"
+            }
+          ],
+          "internalType": "struct DomainObjs.Message",
+          "name": "_message",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "x",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "y",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct DomainObjs.PubKey",
+          "name": "_encPubKey",
+          "type": "tuple"
+        }
+      ],
+      "name": "hashMessageAndEncPubKey",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "msgHash",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "x",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "y",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct DomainObjs.PubKey",
+              "name": "pubKey",
+              "type": "tuple"
+            },
+            {
+              "internalType": "uint256",
+              "name": "voiceCreditBalance",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "timestamp",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct DomainObjs.StateLeaf",
+          "name": "_stateLeaf",
+          "type": "tuple"
+        }
+      ],
+      "name": "hashStateLeaf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "ciphertext",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "messageProcessorFactory",
+      "outputs": [
+        {
+          "internalType": "contract IMessageProcessorFactory",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[2]",
+          "name": "dataToPad",
+          "type": "uint256[2]"
+        }
+      ],
+      "name": "padAndHashMessage",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256[10]",
+              "name": "data",
+              "type": "uint256[10]"
+            }
+          ],
+          "internalType": "struct DomainObjs.Message",
+          "name": "message",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "x",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "y",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct DomainObjs.PubKey",
+          "name": "padKey",
+          "type": "tuple"
+        },
+        {
+          "internalType": "uint256",
+          "name": "msgHash",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "pollFactory",
+      "outputs": [
+        {
+          "internalType": "contract IPollFactory",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint8",
+              "name": "intStateTreeDepth",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "messageTreeSubDepth",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "messageTreeDepth",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "voteOptionTreeDepth",
+              "type": "uint8"
+            }
+          ],
+          "internalType": "struct Params.TreeDepths",
+          "name": "_treeDepths",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "x",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "y",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct DomainObjs.PubKey",
+          "name": "_coordinatorPubKey",
+          "type": "tuple"
+        },
+        {
+          "internalType": "address",
+          "name": "_verifier",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_vkRegistry",
+          "type": "address"
+        }
+      ],
+      "name": "setConfig",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "array",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "sha256Hash",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "result",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "tallyFactory",
+      "outputs": [
+        {
+          "internalType": "contract ITallyFactory",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "treeDepths",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "intStateTreeDepth",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint8",
+          "name": "messageTreeSubDepth",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint8",
+          "name": "messageTreeDepth",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint8",
+          "name": "voteOptionTreeDepth",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_gameId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "removedPlayer",
+          "type": "address"
+        }
+      ],
+      "name": "updatePlayers",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "verifier",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "vkRegistry",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x44ee5dbb857aaa5cc784b3f9b4e334d19eb55b019b1ee473ccc796cfb56f8284",
+  "receipt": {
+    "to": null,
+    "from": "0xa92fFb82932542B78f138D2d8acE1Baf11Bf2d46",
+    "contractAddress": "0xE92a59B39EF6b039b436FaEc33539694Fda16341",
+    "transactionIndex": 4,
+    "gasUsed": "1685421",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000800000000000000000000000000000000000010000000000000000000000000000000000004000000000000000000000000000000000000001000000000000000000000000000000000000020000000000000000000800000000000000000000000000000000400000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000001000000000000000000008000000000000000000000000000000000000000000000000000020000000000000400000000000000000000000000000000000000000000000000000",
+    "blockHash": "0xe7501f70e4a264c117c93bd632cbf2a1dee7b295f1600d4bd191c24c9d05669a",
+    "transactionHash": "0x44ee5dbb857aaa5cc784b3f9b4e334d19eb55b019b1ee473ccc796cfb56f8284",
+    "logs": [
+      {
+        "transactionIndex": 4,
+        "blockNumber": 18921034,
+        "transactionHash": "0x44ee5dbb857aaa5cc784b3f9b4e334d19eb55b019b1ee473ccc796cfb56f8284",
+        "address": "0xE92a59B39EF6b039b436FaEc33539694Fda16341",
+        "topics": [
+          "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0",
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x000000000000000000000000a92ffb82932542b78f138d2d8ace1baf11bf2d46"
+        ],
+        "data": "0x",
+        "logIndex": 5,
+        "blockHash": "0xe7501f70e4a264c117c93bd632cbf2a1dee7b295f1600d4bd191c24c9d05669a"
+      }
+    ],
+    "blockNumber": 18921034,
+    "cumulativeGasUsed": "1946138",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0xB5edCDA0A565b6d79Ef2d3DA49B715fC75D8744E",
+    "0x8a6D964F1d8aC3E1783106cBA1ba2a4abc6E6C5B",
+    "0x2bE50060A00c6F082222B1A71cd06A7cBE1BAab8",
+    [
+      "16015576667038038422103932363190100635991292382181099511410843174865570503661",
+      "166510078825589460025300915201657086611944528317298994959376081297530246971",
+      "10057734083972610459557695472359628128485394923403014377687504571662791937025",
+      "4904828619307091008204672239231377290495002626534171783829482835985709082773",
+      "18694062287284245784028624966421731916526814537891066525886866373016385890569"
+    ]
+  ],
+  "numDeployments": 1,
+  "solcInputHash": "5da1ac7657407e67ddc9076546f332e7",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.20+commit.a1b79de6\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"contract IPollFactory\",\"name\":\"_pollFactory\",\"type\":\"address\"},{\"internalType\":\"contract IMessageProcessorFactory\",\"name\":\"_messageProcessorFactory\",\"type\":\"address\"},{\"internalType\":\"contract ITallyFactory\",\"name\":\"_tallyFactory\",\"type\":\"address\"},{\"internalType\":\"uint256[5]\",\"name\":\"_emptyBallotRoots\",\"type\":\"uint256[5]\"}],\"stateMutability\":\"payable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"DepthTooLarge\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidMessage\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidPubKey\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"OwnableInvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"OwnableUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"PoseidonHashLibrariesNotLinked\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"TooManySignups\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"_gameId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"_pollId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"enum DomainObjs.Mode\",\"name\":\"_mode\",\"type\":\"uint8\"}],\"name\":\"DeployPoll\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"MESSAGE_DATA_LENGTH\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"coordinatorPubKey\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"x\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"y\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_duration\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"x\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"y\",\"type\":\"uint256\"}],\"internalType\":\"struct Mafia.Player[]\",\"name\":\"_players\",\"type\":\"tuple[]\"}],\"name\":\"createGame\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_gameId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_duration\",\"type\":\"uint256\"}],\"name\":\"createPoll\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"emptyBallotRoots\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[2]\",\"name\":\"array\",\"type\":\"uint256[2]\"}],\"name\":\"hash2\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"result\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[3]\",\"name\":\"array\",\"type\":\"uint256[3]\"}],\"name\":\"hash3\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"result\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[4]\",\"name\":\"array\",\"type\":\"uint256[4]\"}],\"name\":\"hash4\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"result\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[5]\",\"name\":\"array\",\"type\":\"uint256[5]\"}],\"name\":\"hash5\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"result\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"left\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"right\",\"type\":\"uint256\"}],\"name\":\"hashLeftRight\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"result\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint256[10]\",\"name\":\"data\",\"type\":\"uint256[10]\"}],\"internalType\":\"struct DomainObjs.Message\",\"name\":\"_message\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"x\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"y\",\"type\":\"uint256\"}],\"internalType\":\"struct DomainObjs.PubKey\",\"name\":\"_encPubKey\",\"type\":\"tuple\"}],\"name\":\"hashMessageAndEncPubKey\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"msgHash\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"x\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"y\",\"type\":\"uint256\"}],\"internalType\":\"struct DomainObjs.PubKey\",\"name\":\"pubKey\",\"type\":\"tuple\"},{\"internalType\":\"uint256\",\"name\":\"voiceCreditBalance\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"internalType\":\"struct DomainObjs.StateLeaf\",\"name\":\"_stateLeaf\",\"type\":\"tuple\"}],\"name\":\"hashStateLeaf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"ciphertext\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"messageProcessorFactory\",\"outputs\":[{\"internalType\":\"contract IMessageProcessorFactory\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[2]\",\"name\":\"dataToPad\",\"type\":\"uint256[2]\"}],\"name\":\"padAndHashMessage\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256[10]\",\"name\":\"data\",\"type\":\"uint256[10]\"}],\"internalType\":\"struct DomainObjs.Message\",\"name\":\"message\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"x\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"y\",\"type\":\"uint256\"}],\"internalType\":\"struct DomainObjs.PubKey\",\"name\":\"padKey\",\"type\":\"tuple\"},{\"internalType\":\"uint256\",\"name\":\"msgHash\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pollFactory\",\"outputs\":[{\"internalType\":\"contract IPollFactory\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"uint8\",\"name\":\"intStateTreeDepth\",\"type\":\"uint8\"},{\"internalType\":\"uint8\",\"name\":\"messageTreeSubDepth\",\"type\":\"uint8\"},{\"internalType\":\"uint8\",\"name\":\"messageTreeDepth\",\"type\":\"uint8\"},{\"internalType\":\"uint8\",\"name\":\"voteOptionTreeDepth\",\"type\":\"uint8\"}],\"internalType\":\"struct Params.TreeDepths\",\"name\":\"_treeDepths\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"x\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"y\",\"type\":\"uint256\"}],\"internalType\":\"struct DomainObjs.PubKey\",\"name\":\"_coordinatorPubKey\",\"type\":\"tuple\"},{\"internalType\":\"address\",\"name\":\"_verifier\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_vkRegistry\",\"type\":\"address\"}],\"name\":\"setConfig\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"array\",\"type\":\"uint256[]\"}],\"name\":\"sha256Hash\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"result\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"tallyFactory\",\"outputs\":[{\"internalType\":\"contract ITallyFactory\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"treeDepths\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"intStateTreeDepth\",\"type\":\"uint8\"},{\"internalType\":\"uint8\",\"name\":\"messageTreeSubDepth\",\"type\":\"uint8\"},{\"internalType\":\"uint8\",\"name\":\"messageTreeDepth\",\"type\":\"uint8\"},{\"internalType\":\"uint8\",\"name\":\"voteOptionTreeDepth\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_gameId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"removedPlayer\",\"type\":\"address\"}],\"name\":\"updatePlayers\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"verifier\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"vkRegistry\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"errors\":{\"OwnableInvalidOwner(address)\":[{\"details\":\"The owner is not a valid owner account. (eg. `address(0)`)\"}],\"OwnableUnauthorizedAccount(address)\":[{\"details\":\"The caller account is not authorized to perform an operation.\"}]},\"kind\":\"dev\",\"methods\":{\"createGame(uint256,(address,uint256,uint256)[])\":{\"params\":{\"_duration\":\"the duration of the game\"}},\"hash2(uint256[2])\":{\"params\":{\"array\":\"An array of two uint256 elements.\"},\"returns\":{\"result\":\"The Poseidon hash of the two elements.\"}},\"hash3(uint256[3])\":{\"params\":{\"array\":\"An array of three uint256 elements.\"},\"returns\":{\"result\":\"The Poseidon hash of the three elements.\"}},\"hash4(uint256[4])\":{\"params\":{\"array\":\"An array of four uint256 elements.\"},\"returns\":{\"result\":\"The Poseidon hash of the four elements.\"}},\"hash5(uint256[5])\":{\"params\":{\"array\":\"An array of five uint256 elements.\"},\"returns\":{\"result\":\"The Poseidon hash of the five elements.\"}},\"hashLeftRight(uint256,uint256)\":{\"params\":{\"left\":\"the first element to hash.\",\"right\":\"the second element to hash.\"},\"returns\":{\"result\":\"The Poseidon hash of the two elements.\"}},\"hashMessageAndEncPubKey((uint256[10]),(uint256,uint256))\":{\"params\":{\"_encPubKey\":\"the encryption public key to be hashed\",\"_message\":\"the message to be hashed\"},\"returns\":{\"msgHash\":\"The hash of the message and the encryption public key\"}},\"hashStateLeaf(((uint256,uint256),uint256,uint256))\":{\"params\":{\"_stateLeaf\":\"the state leaf to be hashed\"},\"returns\":{\"ciphertext\":\"The hash of the state leaf\"}},\"owner()\":{\"details\":\"Returns the address of the current owner.\"},\"padAndHashMessage(uint256[2])\":{\"params\":{\"dataToPad\":\"the data to be padded\"},\"returns\":{\"message\":\"The padded message\",\"msgHash\":\"The hash of the padded message and encryption key\",\"padKey\":\"The padding public key\"}},\"renounceOwnership()\":{\"details\":\"Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner.\"},\"sha256Hash(uint256[])\":{\"params\":{\"array\":\"The array of uint256 elements.\"},\"returns\":{\"result\":\"The SHA256 hash of the array.\"}},\"transferOwnership(address)\":{\"details\":\"Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.\"}},\"version\":1},\"userdoc\":{\"errors\":{\"InvalidMessage()\":[{\"notice\":\"custom errors\"}]},\"kind\":\"user\",\"methods\":{\"MESSAGE_DATA_LENGTH()\":{\"notice\":\"the length of a MACI message\"},\"createGame(uint256,(address,uint256,uint256)[])\":{\"notice\":\"create a new game\"},\"hash2(uint256[2])\":{\"notice\":\"Computes the Poseidon hash of two uint256 elements.\"},\"hash3(uint256[3])\":{\"notice\":\"Computes the Poseidon hash of three uint256 elements.\"},\"hash4(uint256[4])\":{\"notice\":\"Computes the Poseidon hash of four uint256 elements.\"},\"hash5(uint256[5])\":{\"notice\":\"Computes the Poseidon hash of five uint256 elements.\"},\"hashLeftRight(uint256,uint256)\":{\"notice\":\"Computes the Poseidon hash of two uint256 elements.\"},\"hashMessageAndEncPubKey((uint256[10]),(uint256,uint256))\":{\"notice\":\"An utility function used to hash a MACI message and an encryption public key\"},\"hashStateLeaf(((uint256,uint256),uint256,uint256))\":{\"notice\":\"An utility function used to hash a state leaf\"},\"padAndHashMessage(uint256[2])\":{\"notice\":\"An utility function used to pad and hash a MACI message\"},\"sha256Hash(uint256[])\":{\"notice\":\"Computes the SHA256 hash of an array of uint256 elements.\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/maci-contracts/Mafia.sol\":\"Mafia\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[],\"viaIR\":true},\"sources\":{\"@openzeppelin/contracts/access/Ownable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (access/Ownable.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {Context} from \\\"../utils/Context.sol\\\";\\n\\n/**\\n * @dev Contract module which provides a basic access control mechanism, where\\n * there is an account (an owner) that can be granted exclusive access to\\n * specific functions.\\n *\\n * The initial owner is set to the address provided by the deployer. This can\\n * later be changed with {transferOwnership}.\\n *\\n * This module is used through inheritance. It will make available the modifier\\n * `onlyOwner`, which can be applied to your functions to restrict their use to\\n * the owner.\\n */\\nabstract contract Ownable is Context {\\n    address private _owner;\\n\\n    /**\\n     * @dev The caller account is not authorized to perform an operation.\\n     */\\n    error OwnableUnauthorizedAccount(address account);\\n\\n    /**\\n     * @dev The owner is not a valid owner account. (eg. `address(0)`)\\n     */\\n    error OwnableInvalidOwner(address owner);\\n\\n    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);\\n\\n    /**\\n     * @dev Initializes the contract setting the address provided by the deployer as the initial owner.\\n     */\\n    constructor(address initialOwner) {\\n        if (initialOwner == address(0)) {\\n            revert OwnableInvalidOwner(address(0));\\n        }\\n        _transferOwnership(initialOwner);\\n    }\\n\\n    /**\\n     * @dev Throws if called by any account other than the owner.\\n     */\\n    modifier onlyOwner() {\\n        _checkOwner();\\n        _;\\n    }\\n\\n    /**\\n     * @dev Returns the address of the current owner.\\n     */\\n    function owner() public view virtual returns (address) {\\n        return _owner;\\n    }\\n\\n    /**\\n     * @dev Throws if the sender is not the owner.\\n     */\\n    function _checkOwner() internal view virtual {\\n        if (owner() != _msgSender()) {\\n            revert OwnableUnauthorizedAccount(_msgSender());\\n        }\\n    }\\n\\n    /**\\n     * @dev Leaves the contract without owner. It will not be possible to call\\n     * `onlyOwner` functions. Can only be called by the current owner.\\n     *\\n     * NOTE: Renouncing ownership will leave the contract without an owner,\\n     * thereby disabling any functionality that is only available to the owner.\\n     */\\n    function renounceOwnership() public virtual onlyOwner {\\n        _transferOwnership(address(0));\\n    }\\n\\n    /**\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\n     * Can only be called by the current owner.\\n     */\\n    function transferOwnership(address newOwner) public virtual onlyOwner {\\n        if (newOwner == address(0)) {\\n            revert OwnableInvalidOwner(address(0));\\n        }\\n        _transferOwnership(newOwner);\\n    }\\n\\n    /**\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\n     * Internal function without access restriction.\\n     */\\n    function _transferOwnership(address newOwner) internal virtual {\\n        address oldOwner = _owner;\\n        _owner = newOwner;\\n        emit OwnershipTransferred(oldOwner, newOwner);\\n    }\\n}\\n\",\"keccak256\":\"0xff6d0bb2e285473e5311d9d3caacb525ae3538a80758c10649a4d61029b017bb\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/Context.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.1) (utils/Context.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\nabstract contract Context {\\n    function _msgSender() internal view virtual returns (address) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        return msg.data;\\n    }\\n\\n    function _contextSuffixLength() internal view virtual returns (uint256) {\\n        return 0;\\n    }\\n}\\n\",\"keccak256\":\"0x493033a8d1b176a037b2cc6a04dad01a5c157722049bbecf632ca876224dd4b2\",\"license\":\"MIT\"},\"contracts/maci-contracts/Mafia.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.20;\\n\\nimport { Ownable } from \\\"@openzeppelin/contracts/access/Ownable.sol\\\";\\nimport { IMACI } from \\\"maci-contracts/contracts/interfaces/IMACI.sol\\\";\\nimport { IPollFactory } from \\\"maci-contracts/contracts/interfaces/IPollFactory.sol\\\";\\nimport { DomainObjs } from \\\"maci-contracts/contracts/utilities/DomainObjs.sol\\\";\\nimport { Params } from \\\"maci-contracts/contracts/utilities/Params.sol\\\";\\nimport { Utilities } from \\\"maci-contracts/contracts/utilities/Utilities.sol\\\";\\nimport { SignUpGatekeeper } from \\\"maci-contracts/contracts/gatekeepers/SignUpGatekeeper.sol\\\";\\nimport { InitialVoiceCreditProxy } from \\\"maci-contracts/contracts/initialVoiceCreditProxy/InitialVoiceCreditProxy.sol\\\";\\nimport { ITallyFactory } from \\\"maci-contracts/contracts/interfaces/ITallyFactory.sol\\\";\\nimport { IMessageProcessorFactory } from \\\"maci-contracts/contracts/interfaces/IMPFactory.sol\\\";\\nimport { LazyIMTData, InternalLazyIMT } from \\\"maci-contracts/contracts/trees/LazyIMT.sol\\\";\\nimport { CurveBabyJubJub } from \\\"maci-contracts/contracts/crypto/BabyJubJub.sol\\\";\\n\\ncontract Mafia is DomainObjs, Params, Utilities, Ownable(msg.sender) {\\n\\tuint256 internal constant BLANK_STATE_LEAF_HASH =\\n\\t\\tuint256(\\n\\t\\t\\t6769006970205099520508948723718471724660867171122235270773600567925038008762\\n\\t\\t);\\n\\tuint8 internal constant STATE_TREE_DEPTH = 5;\\n\\n\\tIPollFactory public immutable pollFactory;\\n\\tIMessageProcessorFactory public immutable messageProcessorFactory;\\n\\tITallyFactory public immutable tallyFactory;\\n\\n\\tstruct Poll {\\n\\t\\taddress poll;\\n\\t\\taddress messageProcessor;\\n\\t\\taddress tally;\\n\\t}\\n\\n\\tstruct Game {\\n\\t\\tuint256 startTime;\\n\\t\\tuint256 endTime;\\n\\t\\tstring tallyUrl;\\n\\t\\taddress[] players;\\n\\t\\tPoll[] polls;\\n\\t\\tLazyIMTData lazyIMTData;\\n\\t}\\n\\n\\tstruct Player {\\n\\t\\taddress addr;\\n\\t\\tuint256 x;\\n\\t\\tuint256 y;\\n\\t}\\n\\n\\tTreeDepths public treeDepths;\\n\\tPubKey public coordinatorPubKey;\\n\\taddress public verifier;\\n\\taddress public vkRegistry;\\n\\n\\tGame[] private games;\\n\\tmapping(address => uint256) playerHash;\\n\\n\\tuint256[5] public emptyBallotRoots;\\n\\n\\terror PoseidonHashLibrariesNotLinked();\\n\\terror TooManySignups();\\n\\terror InvalidPubKey();\\n\\n\\tevent DeployPoll(\\n\\t\\tuint256 indexed _gameId,\\n\\t\\tuint256 indexed _pollId,\\n\\t\\tMode _mode\\n\\t);\\n\\n\\tconstructor(\\n\\t\\tIPollFactory _pollFactory,\\n\\t\\tIMessageProcessorFactory _messageProcessorFactory,\\n\\t\\tITallyFactory _tallyFactory,\\n\\t\\tuint256[5] memory _emptyBallotRoots\\n\\t) payable {\\n\\t\\tpollFactory = _pollFactory;\\n\\t\\tmessageProcessorFactory = _messageProcessorFactory;\\n\\t\\ttallyFactory = _tallyFactory;\\n\\t\\temptyBallotRoots = _emptyBallotRoots;\\n\\n\\t\\t// Verify linked poseidon libraries\\n\\t\\tif (hash2([uint256(1), uint256(1)]) == 0)\\n\\t\\t\\trevert PoseidonHashLibrariesNotLinked();\\n\\t}\\n\\n\\tfunction setConfig(\\n\\t\\tTreeDepths memory _treeDepths,\\n\\t\\tPubKey memory _coordinatorPubKey,\\n\\t\\taddress _verifier,\\n\\t\\taddress _vkRegistry\\n\\t) public onlyOwner {\\n\\t\\ttreeDepths = _treeDepths;\\n\\t\\tcoordinatorPubKey = _coordinatorPubKey;\\n\\t\\tverifier = _verifier;\\n\\t\\tvkRegistry = _vkRegistry;\\n\\t}\\n\\n\\t/// @notice create a new game\\n\\t/// @param _duration the duration of the game\\n\\tfunction createGame(\\n\\t\\tuint256 _duration,\\n\\t\\tPlayer[] calldata _players\\n\\t) external onlyOwner {\\n\\t\\tgames.push();\\n\\t\\tuint gameId = games.length - 1;\\n\\t\\tGame storage game = games[gameId];\\n\\t\\tgame.startTime = block.timestamp;\\n\\t\\tgame.endTime = block.timestamp + _duration;\\n\\t\\tfor (uint256 i = 0; i < _players.length; i++) {\\n\\t\\t\\tgame.players.push(_players[i].addr);\\n\\t\\t}\\n\\n\\t\\t_addPlayers(gameId, _players);\\n\\t}\\n\\n\\tfunction _addPlayers(uint256 _gameId, Player[] calldata _players) private {\\n\\t\\tGame storage game = games[_gameId];\\n\\t\\tInternalLazyIMT._init(game.lazyIMTData, STATE_TREE_DEPTH);\\n\\t\\tInternalLazyIMT._insert(game.lazyIMTData, BLANK_STATE_LEAF_HASH);\\n\\n\\t\\tuint256 timestamp = block.timestamp;\\n\\n\\t\\tfor (uint256 i = 0; i < _players.length; i++) {\\n\\t\\t\\tPlayer memory player = _players[i];\\n\\t\\t\\tif (!CurveBabyJubJub.isOnCurve(player.x, player.y)) {\\n\\t\\t\\t\\trevert InvalidPubKey();\\n\\t\\t\\t}\\n\\n\\t\\t\\tuint256 stateLeaf = hashStateLeaf(\\n\\t\\t\\t\\tStateLeaf(PubKey(player.x, player.y), 100, timestamp)\\n\\t\\t\\t);\\n\\t\\t\\tplayerHash[player.addr] = stateLeaf;\\n\\t\\t\\tInternalLazyIMT._insert(game.lazyIMTData, stateLeaf);\\n\\t\\t}\\n\\t}\\n\\n\\tfunction updatePlayers(\\n\\t\\tuint256 _gameId,\\n\\t\\taddress removedPlayer\\n\\t) public onlyOwner {\\n\\t\\tGame storage game = games[_gameId];\\n\\n\\t\\tInternalLazyIMT._init(game.lazyIMTData, STATE_TREE_DEPTH);\\n\\t\\tInternalLazyIMT._insert(game.lazyIMTData, BLANK_STATE_LEAF_HASH);\\n\\n\\t\\tfor (uint256 i = 0; i < game.players.length; i++) {\\n\\t\\t\\tif (game.players[i] == removedPlayer) {\\n\\t\\t\\t\\tgame.players[i] = game.players[game.players.length - 1];\\n\\t\\t\\t\\tgame.players.pop();\\n\\t\\t\\t}\\n\\t\\t\\tInternalLazyIMT._insert(\\n\\t\\t\\t\\tgame.lazyIMTData,\\n\\t\\t\\t\\tplayerHash[game.players[i]]\\n\\t\\t\\t);\\n\\t\\t}\\n\\t}\\n\\n\\tfunction createPoll(uint256 _gameId, uint _duration) public onlyOwner {\\n\\t\\tuint256 voteOptionTreeDepth = treeDepths.voteOptionTreeDepth;\\n\\t\\taddress p = pollFactory.deploy(\\n\\t\\t\\t_duration,\\n\\t\\t\\ttreeDepths,\\n\\t\\t\\tcoordinatorPubKey,\\n\\t\\t\\taddress(this),\\n\\t\\t\\temptyBallotRoots[voteOptionTreeDepth - 1]\\n\\t\\t);\\n\\n\\t\\taddress mp = messageProcessorFactory.deploy(\\n\\t\\t\\tverifier,\\n\\t\\t\\tvkRegistry,\\n\\t\\t\\tp,\\n\\t\\t\\tmsg.sender,\\n\\t\\t\\tMode.NON_QV\\n\\t\\t);\\n\\t\\taddress tally = tallyFactory.deploy(\\n\\t\\t\\tverifier,\\n\\t\\t\\tvkRegistry,\\n\\t\\t\\tp,\\n\\t\\t\\tmp,\\n\\t\\t\\tmsg.sender,\\n\\t\\t\\tMode.NON_QV\\n\\t\\t);\\n\\n\\t\\tGame storage game = games[_gameId];\\n\\t\\tgame.polls.push(Poll({ poll: p, messageProcessor: mp, tally: tally }));\\n\\n\\t\\temit DeployPoll(_gameId, game.polls.length - 1, Mode.NON_QV);\\n\\t}\\n}\\n\",\"keccak256\":\"0x0f79e03288cb9982098a53ee181ee12cdff63e1a8b611d283efc9fd81dc078c8\",\"license\":\"MIT\"},\"maci-contracts/contracts/crypto/BabyJubJub.sol\":{\"content\":\"// @note This code was taken from\\n// https://github.com/yondonfu/sol-baby-jubjub/blob/master/contracts/CurveBabyJubJub.sol\\n// Thanks to yondonfu for the code\\n// Implementation cited on baby-jubjub's paper\\n// https://eips.ethereum.org/EIPS/eip-2494#implementation\\n\\n// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.20;\\n\\nlibrary CurveBabyJubJub {\\n  // Curve parameters\\n  // E: 168700x^2 + y^2 = 1 + 168696x^2y^2\\n  // A = 168700\\n  uint256 public constant A = 0x292FC;\\n  // D = 168696\\n  uint256 public constant D = 0x292F8;\\n  // Prime Q = 21888242871839275222246405745257275088548364400416034343698204186575808495617\\n  uint256 public constant Q = 0x30644E72E131A029B85045B68181585D2833E84879B9709143E1F593F0000001;\\n\\n  /**\\n   * @dev Add 2 points on baby jubjub curve\\n   * Formula for adding 2 points on a twisted Edwards curve:\\n   * x3 = (x1y2 + y1x2) / (1 + dx1x2y1y2)\\n   * y3 = (y1y2 - ax1x2) / (1 - dx1x2y1y2)\\n   */\\n  function pointAdd(uint256 _x1, uint256 _y1, uint256 _x2, uint256 _y2) internal view returns (uint256 x3, uint256 y3) {\\n    if (_x1 == 0 && _y1 == 0) {\\n      return (_x2, _y2);\\n    }\\n\\n    if (_x2 == 0 && _y1 == 0) {\\n      return (_x1, _y1);\\n    }\\n\\n    uint256 x1x2 = mulmod(_x1, _x2, Q);\\n    uint256 y1y2 = mulmod(_y1, _y2, Q);\\n    uint256 dx1x2y1y2 = mulmod(D, mulmod(x1x2, y1y2, Q), Q);\\n    uint256 x3Num = addmod(mulmod(_x1, _y2, Q), mulmod(_y1, _x2, Q), Q);\\n    uint256 y3Num = submod(y1y2, mulmod(A, x1x2, Q), Q);\\n\\n    x3 = mulmod(x3Num, inverse(addmod(1, dx1x2y1y2, Q)), Q);\\n    y3 = mulmod(y3Num, inverse(submod(1, dx1x2y1y2, Q)), Q);\\n  }\\n\\n  /**\\n   * @dev Double a point on baby jubjub curve\\n   * Doubling can be performed with the same formula as addition\\n   */\\n  function pointDouble(uint256 _x1, uint256 _y1) internal view returns (uint256 x2, uint256 y2) {\\n    return pointAdd(_x1, _y1, _x1, _y1);\\n  }\\n\\n  /**\\n   * @dev Multiply a point on baby jubjub curve by a scalar\\n   * Use the double and add algorithm\\n   */\\n  function pointMul(uint256 _x1, uint256 _y1, uint256 _d) internal view returns (uint256 x2, uint256 y2) {\\n    uint256 remaining = _d;\\n\\n    uint256 px = _x1;\\n    uint256 py = _y1;\\n    uint256 ax = 0;\\n    uint256 ay = 0;\\n\\n    while (remaining != 0) {\\n      if ((remaining & 1) != 0) {\\n        // Binary digit is 1 so add\\n        (ax, ay) = pointAdd(ax, ay, px, py);\\n      }\\n\\n      (px, py) = pointDouble(px, py);\\n\\n      remaining = remaining / 2;\\n    }\\n\\n    x2 = ax;\\n    y2 = ay;\\n  }\\n\\n  /**\\n   * @dev Check if a given point is on the curve\\n   * (168700x^2 + y^2) - (1 + 168696x^2y^2) == 0\\n   */\\n  function isOnCurve(uint256 _x, uint256 _y) internal pure returns (bool) {\\n    uint256 xSq = mulmod(_x, _x, Q);\\n    uint256 ySq = mulmod(_y, _y, Q);\\n    uint256 lhs = addmod(mulmod(A, xSq, Q), ySq, Q);\\n    uint256 rhs = addmod(1, mulmod(mulmod(D, xSq, Q), ySq, Q), Q);\\n    return submod(lhs, rhs, Q) == 0;\\n  }\\n\\n  /**\\n   * @dev Perform modular subtraction\\n   */\\n  function submod(uint256 _a, uint256 _b, uint256 _mod) internal pure returns (uint256) {\\n    uint256 aNN = _a;\\n\\n    if (_a <= _b) {\\n      aNN += _mod;\\n    }\\n\\n    return addmod(aNN - _b, 0, _mod);\\n  }\\n\\n  /**\\n   * @dev Compute modular inverse of a number\\n   */\\n  function inverse(uint256 _a) internal view returns (uint256) {\\n    // We can use Euler's theorem instead of the extended Euclidean algorithm\\n    // Since m = Q and Q is prime we have: a^-1 = a^(m - 2) (mod m)\\n    return expmod(_a, Q - 2, Q);\\n  }\\n\\n  /**\\n   * @dev Helper function to call the bigModExp precompile\\n   */\\n  function expmod(uint256 _b, uint256 _e, uint256 _m) internal view returns (uint256 o) {\\n    assembly {\\n      let memPtr := mload(0x40)\\n      mstore(memPtr, 0x20) // Length of base _b\\n      mstore(add(memPtr, 0x20), 0x20) // Length of exponent _e\\n      mstore(add(memPtr, 0x40), 0x20) // Length of modulus _m\\n      mstore(add(memPtr, 0x60), _b) // Base _b\\n      mstore(add(memPtr, 0x80), _e) // Exponent _e\\n      mstore(add(memPtr, 0xa0), _m) // Modulus _m\\n\\n      // The bigModExp precompile is at 0x05\\n      let success := staticcall(gas(), 0x05, memPtr, 0xc0, memPtr, 0x20)\\n      switch success\\n      case 0 {\\n        revert(0x0, 0x0)\\n      }\\n      default {\\n        o := mload(memPtr)\\n      }\\n    }\\n  }\\n}\\n\",\"keccak256\":\"0xf28f6c9c4534cecd69276c7f902a33ed94a08901400f570979085701d796cea8\",\"license\":\"MIT\"},\"maci-contracts/contracts/crypto/Hasher.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.20;\\n\\nimport { SnarkConstants } from \\\"./SnarkConstants.sol\\\";\\nimport { PoseidonT3 } from \\\"./PoseidonT3.sol\\\";\\nimport { PoseidonT4 } from \\\"./PoseidonT4.sol\\\";\\nimport { PoseidonT5 } from \\\"./PoseidonT5.sol\\\";\\nimport { PoseidonT6 } from \\\"./PoseidonT6.sol\\\";\\n\\n/// @notice A SHA256 hash function for any number of input elements, and Poseidon hash\\n/// functions for 2, 3, 4, 5, and 12 input elements.\\ncontract Hasher is SnarkConstants {\\n  /// @notice Computes the SHA256 hash of an array of uint256 elements.\\n  /// @param array The array of uint256 elements.\\n  /// @return result The SHA256 hash of the array.\\n  function sha256Hash(uint256[] memory array) public pure returns (uint256 result) {\\n    result = uint256(sha256(abi.encodePacked(array))) % SNARK_SCALAR_FIELD;\\n  }\\n\\n  /// @notice Computes the Poseidon hash of two uint256 elements.\\n  /// @param array An array of two uint256 elements.\\n  /// @return result The Poseidon hash of the two elements.\\n  function hash2(uint256[2] memory array) public pure returns (uint256 result) {\\n    result = PoseidonT3.poseidon(array);\\n  }\\n\\n  /// @notice Computes the Poseidon hash of three uint256 elements.\\n  /// @param array An array of three uint256 elements.\\n  /// @return result The Poseidon hash of the three elements.\\n  function hash3(uint256[3] memory array) public pure returns (uint256 result) {\\n    result = PoseidonT4.poseidon(array);\\n  }\\n\\n  /// @notice Computes the Poseidon hash of four uint256 elements.\\n  /// @param array An array of four uint256 elements.\\n  /// @return result The Poseidon hash of the four elements.\\n  function hash4(uint256[4] memory array) public pure returns (uint256 result) {\\n    result = PoseidonT5.poseidon(array);\\n  }\\n\\n  /// @notice Computes the Poseidon hash of five uint256 elements.\\n  /// @param array An array of five uint256 elements.\\n  /// @return result The Poseidon hash of the five elements.\\n  function hash5(uint256[5] memory array) public pure returns (uint256 result) {\\n    result = PoseidonT6.poseidon(array);\\n  }\\n\\n  /// @notice Computes the Poseidon hash of two uint256 elements.\\n  /// @param left the first element to hash.\\n  /// @param right the second element to hash.\\n  /// @return result The Poseidon hash of the two elements.\\n  function hashLeftRight(uint256 left, uint256 right) public pure returns (uint256 result) {\\n    uint256[2] memory input;\\n    input[0] = left;\\n    input[1] = right;\\n    result = hash2(input);\\n  }\\n}\\n\",\"keccak256\":\"0x5bd9dc3c43c862d8fd566e8ae2d3a52e1271f2aa3b042c71f97fe2dc449b1d5f\",\"license\":\"MIT\"},\"maci-contracts/contracts/crypto/PoseidonT3.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.20;\\n\\n/// @notice A library which provides functions for computing Pedersen hashes.\\nlibrary PoseidonT3 {\\n  // solhint-disable-next-line no-empty-blocks\\n  function poseidon(uint256[2] memory input) public pure returns (uint256) {}\\n}\\n\",\"keccak256\":\"0x27b66b331502146590287b856ab767b2a2fb66a16da114961e3cef9e160d7263\",\"license\":\"MIT\"},\"maci-contracts/contracts/crypto/PoseidonT4.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.20;\\n\\n/// @notice A library which provides functions for computing Pedersen hashes.\\nlibrary PoseidonT4 {\\n  // solhint-disable-next-line no-empty-blocks\\n  function poseidon(uint256[3] memory input) public pure returns (uint256) {}\\n}\\n\",\"keccak256\":\"0xd38b24182625dab43ccd72c623df1263f2fec8ef828852189bf8ac17e59ae12b\",\"license\":\"MIT\"},\"maci-contracts/contracts/crypto/PoseidonT5.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.20;\\n\\n/// @notice A library which provides functions for computing Pedersen hashes.\\nlibrary PoseidonT5 {\\n  // solhint-disable-next-line no-empty-blocks\\n  function poseidon(uint256[4] memory input) public pure returns (uint256) {}\\n}\\n\",\"keccak256\":\"0x93228facf0feb920e3b92e536040ba3c6fd5ffcdd5ae415373f153e05cec78b9\",\"license\":\"MIT\"},\"maci-contracts/contracts/crypto/PoseidonT6.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.20;\\n\\n/// @notice A library which provides functions for computing Pedersen hashes.\\nlibrary PoseidonT6 {\\n  // solhint-disable-next-line no-empty-blocks\\n  function poseidon(uint256[5] memory input) public pure returns (uint256) {}\\n}\\n\",\"keccak256\":\"0x792080273729327555e4bed7ba86e51a22e63769732308ac0a59dce88e451505\",\"license\":\"MIT\"},\"maci-contracts/contracts/crypto/SnarkConstants.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.20;\\n\\n/// @title SnarkConstants\\n/// @notice This contract contains constants related to the SNARK\\n/// components of MACI.\\ncontract SnarkConstants {\\n  /// @notice The scalar field\\n  uint256 internal constant SNARK_SCALAR_FIELD =\\n    21888242871839275222246405745257275088548364400416034343698204186575808495617;\\n\\n  /// @notice The public key here is the first Pedersen base\\n  /// point from iden3's circomlib implementation of the Pedersen hash.\\n  /// Since it is generated using a hash-to-curve function, we are\\n  /// confident that no-one knows the private key associated with this\\n  /// public key. See:\\n  /// https://github.com/iden3/circomlib/blob/d5ed1c3ce4ca137a6b3ca48bec4ac12c1b38957a/src/pedersen_printbases.js\\n  /// Its hash should equal\\n  /// 6769006970205099520508948723718471724660867171122235270773600567925038008762.\\n  uint256 internal constant PAD_PUBKEY_X =\\n    10457101036533406547632367118273992217979173478358440826365724437999023779287;\\n  uint256 internal constant PAD_PUBKEY_Y =\\n    19824078218392094440610104313265183977899662750282163392862422243483260492317;\\n\\n  /// @notice The Keccack256 hash of 'Maci'\\n  uint256 internal constant NOTHING_UP_MY_SLEEVE =\\n    8370432830353022751713833565135785980866757267633941821328460903436894336785;\\n}\\n\",\"keccak256\":\"0xef88737ff3d47333964f4fd6b939a12fe6e2ca64b069b26600a10c6a8f52fc7b\",\"license\":\"MIT\"},\"maci-contracts/contracts/gatekeepers/SignUpGatekeeper.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.20;\\n\\n/// @title SignUpGatekeeper\\n/// @notice A gatekeeper contract which allows users to sign up for a poll.\\nabstract contract SignUpGatekeeper {\\n  /// @notice Allows to set the MACI contract\\n  // solhint-disable-next-line no-empty-blocks\\n  function setMaciInstance(address _maci) public virtual {}\\n\\n  /// @notice Registers the user\\n  /// @param _user The address of the user\\n  /// @param _data additional data\\n  // solhint-disable-next-line no-empty-blocks\\n  function register(address _user, bytes memory _data) public virtual {}\\n\\n  /// @notice Get the trait of the gatekeeper\\n  /// @return The type of the gatekeeper\\n  function getTrait() public pure virtual returns (string memory);\\n}\\n\",\"keccak256\":\"0x81eee8829ae3deeae2c4870c4ba6776e7512a08cfe52d7bb26a84fea6c193881\",\"license\":\"MIT\"},\"maci-contracts/contracts/initialVoiceCreditProxy/InitialVoiceCreditProxy.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.20;\\n\\n/// @title InitialVoiceCreditProxy\\n/// @notice This contract is the base contract for\\n/// InitialVoiceCreditProxy contracts. It allows to set a custom initial voice\\n/// credit balance for MACI's voters.\\nabstract contract InitialVoiceCreditProxy {\\n  /// @notice Returns the initial voice credit balance for a new MACI's voter\\n  /// @param _user the address of the voter\\n  /// @param _data additional data\\n  /// @return the balance\\n  // solhint-disable-next-line no-empty-blocks\\n  function getVoiceCredits(address _user, bytes memory _data) public view virtual returns (uint256) {}\\n}\\n\",\"keccak256\":\"0xa25c307be878c23d3e2f02200eb5cb1ad7c26efc3356cfdc5e72b1e2008f1249\",\"license\":\"MIT\"},\"maci-contracts/contracts/interfaces/IMACI.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.20;\\n\\n/// @title IMACI\\n/// @notice MACI interface\\ninterface IMACI {\\n  /// @notice Get the depth of the state tree\\n  /// @return The depth of the state tree\\n  function stateTreeDepth() external view returns (uint8);\\n\\n  /// @notice Return the main root of the StateAq contract\\n  /// @return The Merkle root\\n  function getStateTreeRoot() external view returns (uint256);\\n\\n  /// @notice Get the number of signups\\n  /// @return numsignUps The number of signups\\n  function numSignUps() external view returns (uint256);\\n}\\n\",\"keccak256\":\"0x3ab057b23782dae9e0b399bdb262adbe32be85fa8db17f0a0fbfca56352603c1\",\"license\":\"MIT\"},\"maci-contracts/contracts/interfaces/IMPFactory.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.10;\\n\\nimport { DomainObjs } from \\\"../utilities/DomainObjs.sol\\\";\\n\\n/// @title IMessageProcessorFactory\\n/// @notice MessageProcessorFactory interface\\ninterface IMessageProcessorFactory {\\n  /// @notice Deploy a new MessageProcessor contract and return the address.\\n  /// @param _verifier Verifier contract\\n  /// @param _vkRegistry VkRegistry contract\\n  /// @param _poll Poll contract\\n  /// @param _owner Owner of the MessageProcessor contract\\n  /// @param _mode Voting mode\\n  /// @return The deployed MessageProcessor contract\\n  function deploy(\\n    address _verifier,\\n    address _vkRegistry,\\n    address _poll,\\n    address _owner,\\n    DomainObjs.Mode _mode\\n  ) external returns (address);\\n}\\n\",\"keccak256\":\"0xe26a5a2bc189117c9d7e7a60f248c3fcec64b81144bd164633ab971248cf43ce\",\"license\":\"MIT\"},\"maci-contracts/contracts/interfaces/IPollFactory.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.10;\\n\\nimport { Params } from \\\"../utilities/Params.sol\\\";\\nimport { DomainObjs } from \\\"../utilities/DomainObjs.sol\\\";\\n\\n/// @title IPollFactory\\n/// @notice PollFactory interface\\ninterface IPollFactory {\\n  /// @notice Deploy a new Poll contract and AccQueue contract for messages.\\n  /// @param _duration The duration of the poll\\n  /// @param _treeDepths The depths of the merkle trees\\n  /// @param _coordinatorPubKey The coordinator's public key\\n  /// @param _maci The MACI contract interface reference\\n  /// @param _emptyBallotRoot The root of the empty ballot tree\\n  /// @return The deployed Poll contract\\n  function deploy(\\n    uint256 _duration,\\n    Params.TreeDepths memory _treeDepths,\\n    DomainObjs.PubKey memory _coordinatorPubKey,\\n    address _maci,\\n    uint256 _emptyBallotRoot\\n  ) external returns (address);\\n}\\n\",\"keccak256\":\"0x0ab03b1a9368f6d9c69dc89ece9c5f4763238c18d3b87f82a2d4043bb8aecc53\",\"license\":\"MIT\"},\"maci-contracts/contracts/interfaces/ITallyFactory.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.10;\\n\\nimport { DomainObjs } from \\\"../utilities/DomainObjs.sol\\\";\\n\\n/// @title ITallyFactory\\n/// @notice TallyFactory interface\\ninterface ITallyFactory {\\n  /// @notice Deploy a new Tally contract and return the address.\\n  /// @param _verifier Verifier contract\\n  /// @param _vkRegistry VkRegistry contract\\n  /// @param _poll Poll contract\\n  /// @param _messageProcessor MessageProcessor contract\\n  /// @param _owner Owner of the contract\\n  /// @param _mode Voting mode\\n  /// @return The deployed contract\\n  function deploy(\\n    address _verifier,\\n    address _vkRegistry,\\n    address _poll,\\n    address _messageProcessor,\\n    address _owner,\\n    DomainObjs.Mode _mode\\n  ) external returns (address);\\n}\\n\",\"keccak256\":\"0x941442404bf8dc477bb99516c25ac2b46f27a8d32707d4a72fc3bb77e39f7362\",\"license\":\"MIT\"},\"maci-contracts/contracts/trees/AccQueue.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.20;\\n\\nimport { Ownable } from \\\"@openzeppelin/contracts/access/Ownable.sol\\\";\\nimport { Hasher } from \\\"../crypto/Hasher.sol\\\";\\n\\n/// @title AccQueue\\n/// @notice This contract defines a Merkle tree where each leaf insertion only updates a\\n/// subtree. To obtain the main tree root, the contract owner must merge the\\n/// subtrees together. Merging subtrees requires at least 2 operations:\\n/// mergeSubRoots(), and merge(). To get around the gas limit,\\n/// the mergeSubRoots() can be performed in multiple transactions.\\nabstract contract AccQueue is Ownable(msg.sender), Hasher {\\n  // The maximum tree depth\\n  uint256 public constant MAX_DEPTH = 32;\\n\\n  /// @notice A Queue is a 2D array of Merkle roots and indices which represents nodes\\n  /// in a Merkle tree while it is progressively updated.\\n  struct Queue {\\n    /// @notice IMPORTANT: the following declares an array of b elements of type T: T[b]\\n    /// And the following declares an array of b elements of type T[a]: T[a][b]\\n    /// As such, the following declares an array of MAX_DEPTH+1 arrays of\\n    /// uint256[4] arrays, **not the other way round**:\\n    uint256[4][MAX_DEPTH + 1] levels;\\n    uint256[MAX_DEPTH + 1] indices;\\n  }\\n\\n  // The depth of each subtree\\n  uint256 internal immutable subDepth;\\n\\n  // The number of elements per hash operation. Should be either 2 (for\\n  // binary trees) or 5 (quinary trees). The limit is 5 because that is the\\n  // maximum supported number of inputs for the EVM implementation of the\\n  // Poseidon hash function\\n  uint256 internal immutable hashLength;\\n\\n  // hashLength ** subDepth\\n  uint256 internal immutable subTreeCapacity;\\n\\n  // True hashLength == 2, false if hashLength == 5\\n  bool internal immutable isBinary;\\n\\n  // The index of the current subtree. e.g. the first subtree has index 0, the\\n  // second has 1, and so on\\n  uint256 internal currentSubtreeIndex;\\n\\n  // Tracks the current subtree.\\n  Queue internal leafQueue;\\n\\n  // Tracks the smallest tree of subroots\\n  Queue internal subRootQueue;\\n\\n  // Subtree roots\\n  mapping(uint256 => uint256) internal subRoots;\\n\\n  // Merged roots\\n  uint256[MAX_DEPTH + 1] internal mainRoots;\\n\\n  // Whether the subtrees have been merged\\n  bool public subTreesMerged;\\n\\n  // Whether entire merkle tree has been merged\\n  bool public treeMerged;\\n\\n  // The root of the shortest possible tree which fits all current subtree\\n  // roots\\n  uint256 internal smallSRTroot;\\n\\n  // Tracks the next subroot to queue\\n  uint256 internal nextSubRootIndex;\\n\\n  // The number of leaves inserted across all subtrees so far\\n  uint256 public numLeaves;\\n\\n  /// @notice custom errors\\n  error SubDepthCannotBeZero();\\n  error SubdepthTooLarge(uint256 _subDepth, uint256 max);\\n  error InvalidHashLength();\\n  error DepthCannotBeZero();\\n  error SubTreesAlreadyMerged();\\n  error NothingToMerge();\\n  error SubTreesNotMerged();\\n  error DepthTooLarge(uint256 _depth, uint256 max);\\n  error DepthTooSmall(uint256 _depth, uint256 min);\\n  error InvalidIndex(uint256 _index);\\n  error InvalidLevel();\\n\\n  /// @notice Create a new AccQueue\\n  /// @param _subDepth The depth of each subtree.\\n  /// @param _hashLength The number of leaves per node (2 or 5).\\n  constructor(uint256 _subDepth, uint256 _hashLength) payable {\\n    /// validation\\n    if (_subDepth == 0) revert SubDepthCannotBeZero();\\n    if (_subDepth > MAX_DEPTH) revert SubdepthTooLarge(_subDepth, MAX_DEPTH);\\n    if (_hashLength != 2 && _hashLength != 5) revert InvalidHashLength();\\n\\n    isBinary = _hashLength == 2;\\n    subDepth = _subDepth;\\n    hashLength = _hashLength;\\n    subTreeCapacity = _hashLength ** _subDepth;\\n  }\\n\\n  /// @notice Hash the contents of the specified level and the specified leaf.\\n  /// This is a virtual function as the hash function which the overriding\\n  /// contract uses will be either hashLeftRight or hash5, which require\\n  /// different input array lengths.\\n  /// @param _level The level to hash.\\n  /// @param _leaf The leaf include with the level.\\n  /// @return _hash The hash of the level and leaf.\\n  // solhint-disable-next-line no-empty-blocks\\n  function hashLevel(uint256 _level, uint256 _leaf) internal virtual returns (uint256 _hash) {}\\n\\n  /// @notice Hash the contents of the specified level and the specified leaf.\\n  /// This is a virtual function as the hash function which the overriding\\n  /// contract uses will be either hashLeftRight or hash5, which require\\n  /// different input array lengths.\\n  /// @param _level The level to hash.\\n  /// @param _leaf The leaf include with the level.\\n  /// @return _hash The hash of the level and leaf.\\n  // solhint-disable-next-line no-empty-blocks\\n  function hashLevelLeaf(uint256 _level, uint256 _leaf) public view virtual returns (uint256 _hash) {}\\n\\n  /// @notice Returns the zero leaf at a specified level.\\n  /// This is a virtual function as the hash function which the overriding\\n  /// contract uses will be either hashLeftRight or hash5, which will produce\\n  /// different zero values (e.g. hashLeftRight(0, 0) vs\\n  /// hash5([0, 0, 0, 0, 0]). Moreover, the zero value may be a\\n  /// nothing-up-my-sleeve value.\\n  /// @param _level The level at which to return the zero leaf.\\n  /// @return zero The zero leaf at the specified level.\\n  // solhint-disable-next-line no-empty-blocks\\n  function getZero(uint256 _level) internal virtual returns (uint256 zero) {}\\n\\n  /// @notice Add a leaf to the queue for the current subtree.\\n  /// @param _leaf The leaf to add.\\n  /// @return leafIndex The index of the leaf in the queue.\\n  function enqueue(uint256 _leaf) public onlyOwner returns (uint256 leafIndex) {\\n    leafIndex = numLeaves;\\n    // Recursively queue the leaf\\n    _enqueue(_leaf, 0);\\n\\n    // Update the leaf counter\\n    numLeaves = leafIndex + 1;\\n\\n    // Now that a new leaf has been added, mainRoots and smallSRTroot are\\n    // obsolete\\n    delete mainRoots;\\n    delete smallSRTroot;\\n    subTreesMerged = false;\\n\\n    // If a subtree is full\\n    if (numLeaves % subTreeCapacity == 0) {\\n      // Store the subroot\\n      subRoots[currentSubtreeIndex] = leafQueue.levels[subDepth][0];\\n\\n      // Increment the index\\n      currentSubtreeIndex++;\\n\\n      // Delete ancillary data\\n      delete leafQueue.levels[subDepth][0];\\n      delete leafQueue.indices;\\n    }\\n  }\\n\\n  /// @notice Updates the queue at a given level and hashes any subroots\\n  /// that need to be hashed.\\n  /// @param _leaf The leaf to add.\\n  /// @param _level The level at which to queue the leaf.\\n  function _enqueue(uint256 _leaf, uint256 _level) internal {\\n    if (_level > subDepth) {\\n      revert InvalidLevel();\\n    }\\n\\n    while (true) {\\n      uint256 n = leafQueue.indices[_level];\\n\\n      if (n != hashLength - 1) {\\n        // Just store the leaf\\n        leafQueue.levels[_level][n] = _leaf;\\n\\n        if (_level != subDepth) {\\n          // Update the index\\n          leafQueue.indices[_level]++;\\n        }\\n\\n        return;\\n      }\\n\\n      // Hash the leaves to next level\\n      _leaf = hashLevel(_level, _leaf);\\n\\n      // Reset the index for this level\\n      delete leafQueue.indices[_level];\\n\\n      // Queue the hash of the leaves into to the next level\\n      _level++;\\n    }\\n  }\\n\\n  /// @notice Fill any empty leaves of the current subtree with zeros and store the\\n  /// resulting subroot.\\n  function fill() public onlyOwner {\\n    if (numLeaves % subTreeCapacity == 0) {\\n      // If the subtree is completely empty, then the subroot is a\\n      // precalculated zero value\\n      subRoots[currentSubtreeIndex] = getZero(subDepth);\\n    } else {\\n      // Otherwise, fill the rest of the subtree with zeros\\n      _fill(0);\\n\\n      // Store the subroot\\n      subRoots[currentSubtreeIndex] = leafQueue.levels[subDepth][0];\\n\\n      // Reset the subtree data\\n      delete leafQueue.levels;\\n\\n      // Reset the merged roots\\n      delete mainRoots;\\n    }\\n\\n    // Increment the subtree index\\n    uint256 curr = currentSubtreeIndex + 1;\\n    currentSubtreeIndex = curr;\\n\\n    // Update the number of leaves\\n    numLeaves = curr * subTreeCapacity;\\n\\n    // Reset the subroot tree root now that it is obsolete\\n    delete smallSRTroot;\\n\\n    subTreesMerged = false;\\n  }\\n\\n  /// @notice A function that queues zeros to the specified level, hashes,\\n  /// the level, and enqueues the hash to the next level.\\n  /// @param _level The level at which to queue zeros.\\n  // solhint-disable-next-line no-empty-blocks\\n  function _fill(uint256 _level) internal virtual {}\\n\\n  /// Insert a subtree. Used for batch enqueues.\\n  function insertSubTree(uint256 _subRoot) public onlyOwner {\\n    subRoots[currentSubtreeIndex] = _subRoot;\\n\\n    // Increment the subtree index\\n    currentSubtreeIndex++;\\n\\n    // Update the number of leaves\\n    numLeaves += subTreeCapacity;\\n\\n    // Reset the subroot tree root now that it is obsolete\\n    delete smallSRTroot;\\n\\n    subTreesMerged = false;\\n  }\\n\\n  /// @notice Calculate the lowest possible height of a tree with\\n  /// all the subroots merged together.\\n  /// @return depth The lowest possible height of a tree with all the\\n  function calcMinHeight() public view returns (uint256 depth) {\\n    depth = 1;\\n    while (true) {\\n      if (hashLength ** depth >= currentSubtreeIndex) {\\n        break;\\n      }\\n      depth++;\\n    }\\n  }\\n\\n  /// @notice Merge all subtrees to form the shortest possible tree.\\n  /// This function can be called either once to merge all subtrees in a\\n  /// single transaction, or multiple times to do the same in multiple\\n  /// transactions.\\n  /// @param _numSrQueueOps The number of times this function will call\\n  ///                       queueSubRoot(), up to the maximum number of times\\n  ///                       necessary. If it is set to 0, it will call\\n  ///                       queueSubRoot() as many times as is necessary. Set\\n  ///                       this to a low number and call this function\\n  ///                       multiple times if there are many subroots to\\n  ///                       merge, or a single transaction could run out of\\n  ///                       gas.\\n  function mergeSubRoots(uint256 _numSrQueueOps) public onlyOwner {\\n    // This function can only be called once unless a new subtree is created\\n    if (subTreesMerged) revert SubTreesAlreadyMerged();\\n\\n    // There must be subtrees to merge\\n    if (numLeaves == 0) revert NothingToMerge();\\n\\n    // Fill any empty leaves in the current subtree with zeros only if the\\n    // current subtree is not full\\n    if (numLeaves % subTreeCapacity != 0) {\\n      fill();\\n    }\\n\\n    // If there is only 1 subtree, use its root\\n    if (currentSubtreeIndex == 1) {\\n      smallSRTroot = getSubRoot(0);\\n      subTreesMerged = true;\\n      return;\\n    }\\n\\n    uint256 depth = calcMinHeight();\\n\\n    uint256 queueOpsPerformed = 0;\\n    for (uint256 i = nextSubRootIndex; i < currentSubtreeIndex; i++) {\\n      if (_numSrQueueOps != 0 && queueOpsPerformed == _numSrQueueOps) {\\n        // If the limit is not 0, stop if the limit has been reached\\n        return;\\n      }\\n\\n      // Queue the next subroot\\n      queueSubRoot(getSubRoot(nextSubRootIndex), 0, depth);\\n\\n      // Increment the next subroot counter\\n      nextSubRootIndex++;\\n\\n      // Increment the ops counter\\n      queueOpsPerformed++;\\n    }\\n\\n    // The height of the tree of subroots\\n    uint256 m = hashLength ** depth;\\n\\n    // Queue zeroes to fill out the SRT\\n    if (nextSubRootIndex == currentSubtreeIndex) {\\n      uint256 z = getZero(subDepth);\\n      for (uint256 i = currentSubtreeIndex; i < m; i++) {\\n        queueSubRoot(z, 0, depth);\\n      }\\n    }\\n\\n    // Store the smallest main root\\n    smallSRTroot = subRootQueue.levels[depth][0];\\n    subTreesMerged = true;\\n  }\\n\\n  /// @notice Queues a subroot into the subroot tree.\\n  /// @param _leaf The value to queue.\\n  /// @param _level The level at which to queue _leaf.\\n  /// @param _maxDepth The depth of the tree.\\n  function queueSubRoot(uint256 _leaf, uint256 _level, uint256 _maxDepth) internal {\\n    if (_level > _maxDepth) {\\n      return;\\n    }\\n\\n    uint256 n = subRootQueue.indices[_level];\\n\\n    if (n != hashLength - 1) {\\n      // Just store the leaf\\n      subRootQueue.levels[_level][n] = _leaf;\\n      subRootQueue.indices[_level]++;\\n    } else {\\n      // Hash the elements in this level and queue it in the next level\\n      uint256 hashed;\\n      if (isBinary) {\\n        uint256[2] memory inputs;\\n        inputs[0] = subRootQueue.levels[_level][0];\\n        inputs[1] = _leaf;\\n        hashed = hash2(inputs);\\n      } else {\\n        uint256[5] memory inputs;\\n        for (uint8 i = 0; i < n; i++) {\\n          inputs[i] = subRootQueue.levels[_level][i];\\n        }\\n        inputs[n] = _leaf;\\n        hashed = hash5(inputs);\\n      }\\n\\n      // TODO: change recursion to a while loop\\n      // Recurse\\n      delete subRootQueue.indices[_level];\\n      queueSubRoot(hashed, _level + 1, _maxDepth);\\n    }\\n  }\\n\\n  /// @notice Merge all subtrees to form a main tree with a desired depth.\\n  /// @param _depth The depth of the main tree. It must fit all the leaves or\\n  ///               this function will revert.\\n  /// @return root The root of the main tree.\\n  function merge(uint256 _depth) public onlyOwner returns (uint256 root) {\\n    // The tree depth must be more than 0\\n    if (_depth == 0) revert DepthCannotBeZero();\\n\\n    // Ensure that the subtrees have been merged\\n    if (!subTreesMerged) revert SubTreesNotMerged();\\n\\n    // Check the depth\\n    if (_depth > MAX_DEPTH) revert DepthTooLarge(_depth, MAX_DEPTH);\\n\\n    // Calculate the SRT depth\\n    uint256 srtDepth = subDepth;\\n    while (true) {\\n      if (hashLength ** srtDepth >= numLeaves) {\\n        break;\\n      }\\n      srtDepth++;\\n    }\\n\\n    if (_depth < srtDepth) revert DepthTooSmall(_depth, srtDepth);\\n\\n    // If the depth is the same as the SRT depth, just use the SRT root\\n    if (_depth == srtDepth) {\\n      mainRoots[_depth] = smallSRTroot;\\n      treeMerged = true;\\n      return smallSRTroot;\\n    } else {\\n      root = smallSRTroot;\\n\\n      // Calculate the main root\\n\\n      for (uint256 i = srtDepth; i < _depth; i++) {\\n        uint256 z = getZero(i);\\n\\n        if (isBinary) {\\n          uint256[2] memory inputs;\\n          inputs[0] = root;\\n          inputs[1] = z;\\n          root = hash2(inputs);\\n        } else {\\n          uint256[5] memory inputs;\\n          inputs[0] = root;\\n          inputs[1] = z;\\n          inputs[2] = z;\\n          inputs[3] = z;\\n          inputs[4] = z;\\n          root = hash5(inputs);\\n        }\\n      }\\n\\n      mainRoots[_depth] = root;\\n      treeMerged = true;\\n    }\\n  }\\n\\n  /// @notice Returns the subroot at the specified index. Reverts if the index refers\\n  /// to a subtree which has not been filled yet.\\n  /// @param _index The subroot index.\\n  /// @return subRoot The subroot at the specified index.\\n  function getSubRoot(uint256 _index) public view returns (uint256 subRoot) {\\n    if (currentSubtreeIndex <= _index) revert InvalidIndex(_index);\\n    subRoot = subRoots[_index];\\n  }\\n\\n  /// @notice Returns the subroot tree (SRT) root. Its value must first be computed\\n  /// using mergeSubRoots.\\n  /// @return smallSubTreeRoot The SRT root.\\n  function getSmallSRTroot() public view returns (uint256 smallSubTreeRoot) {\\n    if (!subTreesMerged) revert SubTreesNotMerged();\\n    smallSubTreeRoot = smallSRTroot;\\n  }\\n\\n  /// @notice Return the merged Merkle root of all the leaves at a desired depth.\\n  /// @dev merge() or merged(_depth) must be called first.\\n  /// @param _depth The depth of the main tree. It must first be computed\\n  ///               using mergeSubRoots() and merge().\\n  /// @return mainRoot The root of the main tree.\\n  function getMainRoot(uint256 _depth) public view returns (uint256 mainRoot) {\\n    if (hashLength ** _depth < numLeaves) revert DepthTooSmall(_depth, numLeaves);\\n\\n    mainRoot = mainRoots[_depth];\\n  }\\n\\n  /// @notice Get the next subroot index and the current subtree index.\\n  function getSrIndices() public view returns (uint256 next, uint256 current) {\\n    next = nextSubRootIndex;\\n    current = currentSubtreeIndex;\\n  }\\n}\\n\",\"keccak256\":\"0x990817db62e9e808ddc0df10be11031aea8e8c9788cc434df396fc3b115def28\",\"license\":\"MIT\"},\"maci-contracts/contracts/trees/LazyIMT.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.20;\\n\\nimport { PoseidonT3 } from \\\"../crypto/PoseidonT3.sol\\\";\\n\\n/// @notice A struct that holds a LazyIMT data\\nstruct LazyIMTData {\\n  uint40 maxIndex;\\n  uint40 numberOfLeaves;\\n  mapping(uint256 => uint256) elements;\\n}\\n\\n/// @notice Custom errors\\nerror DefaultZeroBadIndex();\\nerror DepthTooLarge();\\nerror DepthCannotBeZero();\\nerror NumberOfLeavesCannotBeZero();\\nerror AmbiguousDepth();\\n\\n/// @title InternalLazyIMT\\n/// @dev A LazyIMT with Zeroes value set to the hash of\\n/// a MACI Blank State Leaf\\n/// @notice This implementation is taken from zk-kit\\n/// https://github.com/privacy-scaling-explorations/zk-kit/blob/main/packages/imt.sol/contracts/internal/InternalLazyIMT.sol\\n/// and modified to work with MACI.\\nlibrary InternalLazyIMT {\\n  uint256 internal constant MAX_DEPTH = 32;\\n\\n  uint40 internal constant MAX_INDEX = (1 << 32) - 1;\\n\\n  uint256 internal constant Z_0 = 6769006970205099520508948723718471724660867171122235270773600567925038008762;\\n  uint256 internal constant Z_1 = 2972820301952105722688860985556183033855705951263221082702981787813754939537;\\n  uint256 internal constant Z_2 = 19009473369953096352828532459942637819279786575057870804186038131433538383332;\\n  uint256 internal constant Z_3 = 1877001762518233819645599208989578372605193385355680834239714249281096297174;\\n  uint256 internal constant Z_4 = 4022598852800694816938652741439614774645858989706174527409714109784047480520;\\n  uint256 internal constant Z_5 = 8078617093048295855521451309865989496051030103472138252021705658681696298712;\\n  uint256 internal constant Z_6 = 21861637049723057871988413507302821095913894718242489848472531680353400271584;\\n  uint256 internal constant Z_7 = 2969626195902860050407584814596940245443093107470116547781577350415736914038;\\n  uint256 internal constant Z_8 = 13863086449569754493134198846069090996475357615094865751949144794620598051673;\\n  uint256 internal constant Z_9 = 13774233155966252113965527228795435224641075024674384267997743867571011718458;\\n  uint256 internal constant Z_10 = 7674682532432601125535053858292577379388329393276537570517515727197672122157;\\n  uint256 internal constant Z_11 = 2657471847139856346360223652201172662911313292042510535836997980857168085414;\\n  uint256 internal constant Z_12 = 14112562742724116016492623819773686970029672095023612838615540190985426106768;\\n  uint256 internal constant Z_13 = 16966520284141749853106006448832965932249937855809150844697400390499975107456;\\n  uint256 internal constant Z_14 = 21146121663662200258116396149536742745305242191891337170899444969488030502620;\\n  uint256 internal constant Z_15 = 8395571901509192935479743034608666551563743095742598750914087478677907730358;\\n  uint256 internal constant Z_16 = 11584898446168752024843587018551921614604785083342073076015560385003528300499;\\n  uint256 internal constant Z_17 = 19681365563800708744156562671961079617734353445922751560400662591064339349816;\\n  uint256 internal constant Z_18 = 11060693795061987995391612467169498625108376769265861980249917517984263067473;\\n  uint256 internal constant Z_19 = 20136055137568042031318427040358591430196153124171666293804511634641041409480;\\n  uint256 internal constant Z_20 = 10438448879123510479428288344427042332522761183009746406441238260861529360499;\\n  uint256 internal constant Z_21 = 20302411580043873005239406811066876697276902025885155920151067303221158887923;\\n  uint256 internal constant Z_22 = 16905699456770804689394621400052823445587122726651394178036372609288266146575;\\n  uint256 internal constant Z_23 = 13317924909658910751179983108234689413063120680580702936091220805509299490708;\\n  uint256 internal constant Z_24 = 11624463897690689883938167321830091369950933831231839575225419984927228390345;\\n  uint256 internal constant Z_25 = 12388077003631746290497429926117583834311703848735670874049584990731919769551;\\n  uint256 internal constant Z_26 = 16641943593086083573943184041147806885253724243247212515325749241831788827569;\\n  uint256 internal constant Z_27 = 8675770901378242337954792996483564563211065498082968464791979179678744114204;\\n  uint256 internal constant Z_28 = 3741944068643598116715410464277276913339851849923986024648161859457213369743;\\n  uint256 internal constant Z_29 = 9365051374992868354747065577256691008852056444829383197903446097138255771103;\\n  uint256 internal constant Z_30 = 19608043542461863702809013760105552654336523908709289008189330402608282498922;\\n  uint256 internal constant Z_31 = 15116478429455923389320892447700153271977917184085737305957533984219061034768;\\n  uint256 internal constant Z_32 = 13372161856163346716845871420623647679532631520878788090782842562075678687737;\\n\\n  /// @notice Returns the default zero value for a given index\\n  /// @param index The index of the zero value\\n  /// @return The zero value\\n  function _defaultZero(uint8 index) internal pure returns (uint256) {\\n    if (index == 0) return Z_0;\\n    if (index == 1) return Z_1;\\n    if (index == 2) return Z_2;\\n    if (index == 3) return Z_3;\\n    if (index == 4) return Z_4;\\n    if (index == 5) return Z_5;\\n    if (index == 6) return Z_6;\\n    if (index == 7) return Z_7;\\n    if (index == 8) return Z_8;\\n    if (index == 9) return Z_9;\\n    if (index == 10) return Z_10;\\n    if (index == 11) return Z_11;\\n    if (index == 12) return Z_12;\\n    if (index == 13) return Z_13;\\n    if (index == 14) return Z_14;\\n    if (index == 15) return Z_15;\\n    if (index == 16) return Z_16;\\n    if (index == 17) return Z_17;\\n    if (index == 18) return Z_18;\\n    if (index == 19) return Z_19;\\n    if (index == 20) return Z_20;\\n    if (index == 21) return Z_21;\\n    if (index == 22) return Z_22;\\n    if (index == 23) return Z_23;\\n    if (index == 24) return Z_24;\\n    if (index == 25) return Z_25;\\n    if (index == 26) return Z_26;\\n    if (index == 27) return Z_27;\\n    if (index == 28) return Z_28;\\n    if (index == 29) return Z_29;\\n    if (index == 30) return Z_30;\\n    if (index == 31) return Z_31;\\n    if (index == 32) return Z_32;\\n    revert DefaultZeroBadIndex();\\n  }\\n\\n  /// @notice Initializes the LazyIMT\\n  /// @param self The LazyIMTData\\n  /// @param depth The depth of the tree\\n  function _init(LazyIMTData storage self, uint8 depth) internal {\\n    if (depth > MAX_DEPTH) {\\n      revert DepthTooLarge();\\n    }\\n    self.maxIndex = uint40((1 << depth) - 1);\\n    self.numberOfLeaves = 0;\\n  }\\n\\n  /// @notice Returns the index for a given level and index\\n  /// @param level The level\\n  /// @param index The index\\n  /// @return The index for the element\\n  function _indexForElement(uint8 level, uint40 index) internal pure returns (uint40) {\\n    // store the elements sparsely\\n    return (uint40(level) << 32) - level + index;\\n  }\\n\\n  /// @notice Inserts a leaf into the LazyIMT\\n  /// @param self The LazyIMTData\\n  /// @param leaf The leaf to insert\\n  function _insert(LazyIMTData storage self, uint256 leaf) internal {\\n    uint40 index = self.numberOfLeaves;\\n\\n    self.numberOfLeaves = index + 1;\\n\\n    uint256 hash = leaf;\\n\\n    for (uint8 i = 0; ; ) {\\n      self.elements[_indexForElement(i, index)] = hash;\\n      // it's a left element so we don't hash until there's a right element\\n      if (index & 1 == 0) break;\\n      uint40 elementIndex = _indexForElement(i, index - 1);\\n      hash = PoseidonT3.poseidon([self.elements[elementIndex], hash]);\\n      unchecked {\\n        index >>= 1;\\n        i++;\\n      }\\n    }\\n  }\\n\\n  /// @notice Returns the root of the LazyIMT\\n  /// @param self The LazyIMTData\\n  /// @return The root of the LazyIMT\\n  function _root(LazyIMTData storage self) internal view returns (uint256) {\\n    // this will always short circuit if self.numberOfLeaves == 0\\n    uint40 numberOfLeaves = self.numberOfLeaves;\\n    // dynamically determine a depth\\n    uint8 depth = 1;\\n    while (uint40(1 << depth) < numberOfLeaves) {\\n      depth++;\\n    }\\n    return _root(self, numberOfLeaves, depth);\\n  }\\n\\n  /// @notice Returns the root of the LazyIMT\\n  /// @dev Here it's assumed that the depth value is valid.\\n  /// If it is either 0 or > 2^8-1 this function will panic.\\n  /// @param self The LazyIMTData\\n  /// @param numberOfLeaves The number of leaves\\n  /// @param depth The depth of the tree\\n  /// @return The root of the LazyIMT\\n  function _root(LazyIMTData storage self, uint40 numberOfLeaves, uint8 depth) internal view returns (uint256) {\\n    if (depth > MAX_DEPTH) {\\n      revert DepthTooLarge();\\n    }\\n    // this should always short circuit if self.numberOfLeaves == 0\\n    if (numberOfLeaves == 0) return _defaultZero(depth);\\n    uint256[] memory levels = new uint256[](depth + 1);\\n    _levels(self, numberOfLeaves, depth, levels);\\n    return levels[depth];\\n  }\\n\\n  /// @notice Updates the levels of the LazyIMT\\n  /// @param self The LazyIMTData\\n  /// @param numberOfLeaves The number of leaves\\n  /// @param depth The depth of the tree\\n  /// @param levels The levels of the tree\\n  function _levels(\\n    LazyIMTData storage self,\\n    uint40 numberOfLeaves,\\n    uint8 depth,\\n    uint256[] memory levels\\n  ) internal view {\\n    if (depth > MAX_DEPTH) {\\n      revert DepthTooLarge();\\n    }\\n    if (numberOfLeaves == 0) {\\n      revert NumberOfLeavesCannotBeZero();\\n    }\\n\\n    // this should always short circuit if self.numberOfLeaves == 0\\n    uint40 index = numberOfLeaves - 1;\\n\\n    if (index & 1 == 0) {\\n      levels[0] = self.elements[_indexForElement(0, index)];\\n    } else {\\n      levels[0] = _defaultZero(0);\\n    }\\n\\n    for (uint8 i = 0; i < depth; ) {\\n      if (index & 1 == 0) {\\n        levels[i + 1] = PoseidonT3.poseidon([levels[i], _defaultZero(i)]);\\n      } else {\\n        uint256 levelCount = (numberOfLeaves) >> (i + 1);\\n        if (levelCount > index >> 1) {\\n          uint256 parent = self.elements[_indexForElement(i + 1, index >> 1)];\\n          levels[i + 1] = parent;\\n        } else {\\n          uint256 sibling = self.elements[_indexForElement(i, index - 1)];\\n          levels[i + 1] = PoseidonT3.poseidon([sibling, levels[i]]);\\n        }\\n      }\\n      unchecked {\\n        index >>= 1;\\n        i++;\\n      }\\n    }\\n  }\\n}\\n\",\"keccak256\":\"0x5f4ff617c1c038ae15cc0357c092d5656ee025e4063dd78884a8ceb924cbfc86\",\"license\":\"MIT\"},\"maci-contracts/contracts/utilities/DomainObjs.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.20;\\n\\n/// @title DomainObjs\\n/// @notice An utility contract that holds\\n/// a number of domain objects and functions\\ncontract DomainObjs {\\n  /// @notice the length of a MACI message\\n  uint8 public constant MESSAGE_DATA_LENGTH = 10;\\n\\n  /// @notice voting modes\\n  enum Mode {\\n    QV,\\n    NON_QV\\n  }\\n\\n  /// @title Message\\n  /// @notice this struct represents a MACI message\\n  /// @dev msgType: 1 for vote message\\n  struct Message {\\n    uint256[MESSAGE_DATA_LENGTH] data;\\n  }\\n\\n  /// @title PubKey\\n  /// @notice A MACI public key\\n  struct PubKey {\\n    uint256 x;\\n    uint256 y;\\n  }\\n\\n  /// @title StateLeaf\\n  /// @notice A MACI state leaf\\n  /// @dev used to represent a user's state\\n  /// in the state Merkle tree\\n  struct StateLeaf {\\n    PubKey pubKey;\\n    uint256 voiceCreditBalance;\\n    uint256 timestamp;\\n  }\\n}\\n\",\"keccak256\":\"0xf2d6000c85f03c81cc4226150c1c1fbd88c9e18c1cc32b7311976ab43552768f\",\"license\":\"MIT\"},\"maci-contracts/contracts/utilities/Params.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.20;\\n\\nimport { IMACI } from \\\"../interfaces/IMACI.sol\\\";\\nimport { AccQueue } from \\\"../trees/AccQueue.sol\\\";\\n\\n/// @title Params\\n/// @notice This contracts contains a number of structures\\n/// which are to be passed as parameters to Poll contracts.\\n/// This way we can reduce the number of parameters\\n/// and avoid a stack too deep error during compilation.\\ncontract Params {\\n  /// @notice A struct holding the depths of the merkle trees\\n  struct TreeDepths {\\n    uint8 intStateTreeDepth;\\n    uint8 messageTreeSubDepth;\\n    uint8 messageTreeDepth;\\n    uint8 voteOptionTreeDepth;\\n  }\\n\\n  /// @notice A struct holding the external contracts\\n  /// that are to be passed to a Poll contract on\\n  /// deployment\\n  struct ExtContracts {\\n    IMACI maci;\\n    AccQueue messageAq;\\n  }\\n}\\n\",\"keccak256\":\"0x8a3efa6cc303351f771c3cd9f16a57b9de709a6c696972e6e9837a7b3aa3995d\",\"license\":\"MIT\"},\"maci-contracts/contracts/utilities/Utilities.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.20;\\n\\nimport { DomainObjs } from \\\"./DomainObjs.sol\\\";\\nimport { Hasher } from \\\"../crypto/Hasher.sol\\\";\\nimport { SnarkConstants } from \\\"../crypto/SnarkConstants.sol\\\";\\n\\n/// @title Utilities\\n/// @notice An utility contract that can be used to:\\n/// * hash a state leaf\\n/// * pad and hash a MACI message\\n/// * hash a MACI message and an encryption public key\\ncontract Utilities is SnarkConstants, DomainObjs, Hasher {\\n  /// @notice custom errors\\n  error InvalidMessage();\\n\\n  /// @notice An utility function used to hash a state leaf\\n  /// @param _stateLeaf the state leaf to be hashed\\n  /// @return ciphertext The hash of the state leaf\\n  function hashStateLeaf(StateLeaf memory _stateLeaf) public pure returns (uint256 ciphertext) {\\n    uint256[4] memory plaintext;\\n    plaintext[0] = _stateLeaf.pubKey.x;\\n    plaintext[1] = _stateLeaf.pubKey.y;\\n    plaintext[2] = _stateLeaf.voiceCreditBalance;\\n    plaintext[3] = _stateLeaf.timestamp;\\n\\n    ciphertext = hash4(plaintext);\\n  }\\n\\n  /// @notice An utility function used to pad and hash a MACI message\\n  /// @param dataToPad the data to be padded\\n  /// @return message The padded message\\n  /// @return padKey The padding public key\\n  /// @return msgHash The hash of the padded message and encryption key\\n  function padAndHashMessage(\\n    uint256[2] memory dataToPad\\n  ) public pure returns (Message memory message, PubKey memory padKey, uint256 msgHash) {\\n    // add data and pad it to 10 elements (automatically cause it's the default value)\\n    uint256[10] memory dat;\\n    dat[0] = dataToPad[0];\\n    dat[1] = dataToPad[1];\\n\\n    padKey = PubKey(PAD_PUBKEY_X, PAD_PUBKEY_Y);\\n    message = Message({ data: dat });\\n    msgHash = hashMessageAndEncPubKey(message, padKey);\\n  }\\n\\n  /// @notice An utility function used to hash a MACI message and an encryption public key\\n  /// @param _message the message to be hashed\\n  /// @param _encPubKey the encryption public key to be hashed\\n  /// @return msgHash The hash of the message and the encryption public key\\n  function hashMessageAndEncPubKey(\\n    Message memory _message,\\n    PubKey memory _encPubKey\\n  ) public pure returns (uint256 msgHash) {\\n    if (_message.data.length != 10) {\\n      revert InvalidMessage();\\n    }\\n\\n    uint256[5] memory n;\\n    n[0] = _message.data[0];\\n    n[1] = _message.data[1];\\n    n[2] = _message.data[2];\\n    n[3] = _message.data[3];\\n    n[4] = _message.data[4];\\n\\n    uint256[5] memory m;\\n    m[0] = _message.data[5];\\n    m[1] = _message.data[6];\\n    m[2] = _message.data[7];\\n    m[3] = _message.data[8];\\n    m[4] = _message.data[9];\\n\\n    msgHash = hash4([hash5(n), hash5(m), _encPubKey.x, _encPubKey.y]);\\n  }\\n}\\n\",\"keccak256\":\"0x3b53d8068e07444209114d3c0f9bcf49426921a70cc3e4ae7eeddf6eeb09927a\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x60e060409080825262001cfb80380380916200001c828562000295565b83398101906101009081818403126200027a5780516001600160a01b039290919083831683036200027a576020948583015185811681036200027a57878401519186831683036200027a5780607f860112156200027a5788516001600160401b039590949060a08601878111878210176200027f578b52859181019283116200027a5760608a9101915b8383106200026957505050503315620002515760008054336001600160a01b03198216811783558a51989297929091167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08880a360805260a05260c052825b600581106200023d5750508285019081118382101762000229578452600180835283830181905284516314d2f97b60e11b81529282600485015b86600283106200021657935050505082604481736679BE25dDA6310cafe79E7D3062F7Ad5fc177c35af49283156200020a578193620001d0575b50505015620001c05751611a419081620002ba8239608051818181610498015261117d015260a0518181816105060152611236015260c05181818161057e0152610dec0152f35b51633d7ba68560e21b8152600490fd5b9091809350813d831162000202575b620001eb818362000295565b81010312620001ff57505138808062000179565b80fd5b503d620001df565b508351903d90823e3d90fd5b835182529283019291840191016200013f565b634e487b7160e01b82526041600452602482fd5b815160088201559085019060010162000105565b8751631e4fbdf760e01b815260006004820152602490fd5b82518152918101918a9101620000a6565b600080fd5b634e487b7160e01b600052604160045260246000fd5b601f909101601f19168101906001600160401b038211908210176200027f5760405256fe608060408181526004908136101561001657600080fd5b600092833560e01c908163055575eb146112225750806313fb8932146111f95780632b7ac3f3146111d157806331e766a5146111ac578063343393b5146111685780633dfb88b21461110d57806346a6f4a814610fce57806358bfc37914610e7b5780635bb9399514610e4a57806362a361bb14610e1b57806362b31f1e14610dd757806364e0ece114610cb0578063683f3dc314610c94578063715018a614610c3a5780637511a64f146109445780637d0a81c8146108ea5780638a2a3dfb1461084d5780638da5cb5b146108255780639cfced97146107c3578063ac98e5df14610781578063b87802c814610755578063bad62d20146103ef578063bea140b3146102ee578063edbfe83f146101c75763f2fde38b1461013757600080fd5b346101c35760203660031901126101c3576001600160a01b038235818116939192908490036101bf57610168611399565b83156101a957505082546001600160a01b0319811683178455167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08380a380f35b51631e4fbdf760e01b8152908101849052602490fd5b8480fd5b8280fd5b8382346102ea57806003193601126102ea5736602312156102ea576101eb36611346565b9080516101f7816112cf565b8151610202816112eb565b610140918236833752815190610217826112b3565b848252846020809301528183519461022e866112eb565b82368737805186520151828501528251610247816112b3565b7f171e826ad4a870fd925e0bf0e87884e70e080879c2205ef10114f28a3b6f6dd78152828101927f2bd407d897fbbca9f88adfd2d15252e69de8c1564eb4d3d27162e259172f1a1d845284519561029d876112cf565b86526102a9828761194d565b945195519690865b600a83106102d5575050506101a09550519084015251610160830152610180820152f35b81806001928b518152019901920191976102b1565b5080fd5b50346101c35760603660031901126101c35736602312156101c357805161031481611297565b806064913683116103eb57849194905b8382106103db57505082516304b98e1d60e31b815293849186919083015b600383106103c15750505060209181732Bcfe85c9BBdEc18F48583655b0aFCcc4B084BB75af49182156103b7578392610380575b6020838351908152f35b9091506020813d82116103af575b8161039b60209383611324565b810103126101c35760209250519038610376565b3d915061038e565b81513d85823e3d90fd5b815181528693506001929092019160209182019101610342565b8135815260209182019101610324565b8580fd5b509190346102ea5761040036611383565b610408611399565b600180549560001994601888901c60ff16868101818111610742576005111561072f576007810154908351956370f7b36160e01b87528387015260ff60249a8181168c890152818160081c16604489015260101c166064870152608486015260025460a486015260035460c48601523060e486015261010485015260209360018060a01b03908581610124818c867f0000000000000000000000000000000000000000000000000000000000000000165af1908115610725578991610708575b508180845416918160055416865193633634487360e01b8552868501528c8401521691826044830152336064830152856084830152868260a4818d857f0000000000000000000000000000000000000000000000000000000000000000165af19182156106fe57908a9182936106df575b50878c60c483885416848060055416978b51988995869463431a717560e01b86528d86015284015289604484015216958660648301523360848301528b60a4830152857f0000000000000000000000000000000000000000000000000000000000000000165af19283156106d5578b936106a6575b50846105b98a6113c5565b5001938651906105c882611297565b815288810192835281878201941684528454600160401b811015610694578c898201808855821015610682576002929160038c838a88955220910201915116936bffffffffffffffffffffffff60a01b9485835416178255838a8301915116858254161790550192511690825416179055549586019586116106705750519081527f60a11d5f71919d2a88fed66d85caaf6d1541f5b35e59875eaa9fd431fef071bf9190a380f35b634e487b7160e01b8752601190528686fd5b634e487b7160e01b8152603288528e90fd5b634e487b7160e01b8d52604187528d8dfd5b6106c7919350883d8a116106ce575b6106bf8183611324565b810190611463565b91386105ae565b503d6106b5565b86513d8d823e3d90fd5b6106f7919350883d8a116106ce576106bf8183611324565b9138610539565b85513d8c823e3d90fd5b61071f9150863d88116106ce576106bf8183611324565b386104c8565b84513d8b823e3d90fd5b634e487b7160e01b885260328252602488fd5b634e487b7160e01b895260118352602489fd5b5090346101c35760203660031901126101c3573560058110156101c35760209250600801549051908152f35b8382346102ea57816003193601126102ea5760809060ff6001548251928282168452828260081c166020850152828260101c169084015260181c166060820152f35b5090346101c35760a03660031901126101c35736602312156101c3578151906107eb82611308565b8160a4913683116103eb5760209550905b8282106108165750505061080f9061159d565b9051908152f35b813581529085019085016107fc565b8382346102ea57816003193601126102ea57905490516001600160a01b039091168152602090f35b5082346108d357366003190161018081126102ea57610140136108d357815190610876826112cf565b36602312156108d357825161088a816112eb565b80610144953687116108e657905b8682106108d6575050825282610143193601126108d3575060209261080f918351916108c3836112b3565b358252610164358583015261194d565b80fd5b8135815260209182019101610898565b8380fd5b5090346101c357366003190192608084126108d3578280519461090c86611297565b126108d3575060209261080f91835190610925826112b3565b3581526024358582015281526044358482015260643583820152611911565b50346101c357806003193601126101c35760249081359167ffffffffffffffff918284116103eb57366023850112156103eb57838501359283116103eb5781840193823691606086020101116103eb5761099c611399565b600654600160401b9081811015610c2857600191828201806006556109c0836113c5565b50508211610c16576109d1826113c5565b509042825588354201804211610c04578483015560038a9201915b878110610b8d57505050610a016005916113c5565b5001805469ffffffffffffffffffff1916601f17815593610a2185611661565b875b818110610a2e578880f35b610a3981838961143b565b606081360312610b8957845190610a4f82611297565b6001600160a01b0381358181168103610b8557835260209182810135908884860191838352013591898601928084527f30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001808080858196099380098180828187620292fc090894620292f809098b088181811115610b5c575b508103908111610b48578f9008610b3857928d610b33969593610b1d600794610b2e975190518d5191610af9836112b3565b8252858201528c5190610b0b82611297565b8152606485820152428d820152611911565b94511690525280878d2055886117e6565b611416565b610a23565b88516379fae7af60e01b81528d90fd5b5050634e487b7160e01b8e5260118d52898efd5b909150828101809111610b70579038610ac7565b5050634e487b7160e01b8f525060118d52898efd5b8c80fd5b8980fd5b610b9881898b61143b565b356001600160a01b0381168103610c0057835483811015610bee57610be99291610bca8289610b2e940188558761144b565b90919082549060031b9160018060a01b03809116831b921b1916179055565b6109ec565b634e487b7160e01b8d5260418c52888dfd5b8b80fd5b634e487b7160e01b8b5260118a52868bfd5b634e487b7160e01b8952601188528489fd5b634e487b7160e01b8852604187528388fd5b83346108d357806003193601126108d357610c53611399565b80546001600160a01b03198116825581906001600160a01b03167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08280a380f35b8382346102ea57816003193601126102ea5760209051600a8152f35b50346101c357366003190161010081126108e6576080136101c357805191610cd783611265565b803560ff811681036101bf5783526024359160ff831683036101bf57602084019283526044359260ff841684036103eb578185019384526064359160ff83168303610dd3576060860192835280608319360112610dd3575190610d39826112b3565b6084358252602082019260a435845260c4359560018060a01b0397888816809803610b895760e435988916809903610b895760ff90610d76611399565b511663ff00000062ff000061ff00600154965160081b16935160101b16935160181b169363ffffffff19161717171760015551600255516003556bffffffffffffffffffffffff60a01b9182825416179055600554161760055580f35b8680fd5b8382346102ea57816003193601126102ea57517f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168152602090f35b8382346102ea57806003193601126102ea5736602312156102ea5760209061080f610e4536611346565b6114b0565b8382346102ea5760209061080f610e6036611383565b835191610e6c836112b3565b843684378252848201526114b0565b5082346108d357602092836003193601126102ea57803567ffffffffffffffff918282116108e657366023830112156108e65781810135928311610fbb57508160051b90845192610ece87840185611324565b835285830160248193830101913683116103eb5791859391602489969401905b828210610fa957505086519251858401929150845b818110610f905750505081610f209103601f198101835282611324565b84519080519084845b838110610f7b5750505081908101838152039060025afa15610f70577f30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f00000019051069051908152f35b9051903d90823e3d90fd5b82810182015185820152879550869101610f29565b8251845289968896509384019390920191600101610f03565b81358152879550908601908601610eee565b634e487b7160e01b845260419052602483fd5b50346101c357806003193601126101c3576001600160a01b0360248035828116959291908690036101c35793611002611399565b61100c81356113c5565b5060058101805469ffffffffffffffffffff1916601f1781559690919061103288611661565b600392830191855b835480821015611109578387611050848861144b565b905490891b1c161461108d575b50808661106d611088938761144b565b905490881b1c1688526007602052610b2e898920548c6117e6565b61103a565b600019908082019081116110f757876110a96110ba928861144b565b905490891b1c16610bca848861144b565b845480156110e5576110889291016110d2818761144b565b898254918a1b1b1916905585559061105d565b634e487b7160e01b8952603184528a89fd5b634e487b7160e01b8952601184528a89fd5b8780f35b5090346101c35760803660031901126101c35736602312156101c35781519061113582611265565b816084913683116103eb5760209550905b8282106111595750505061080f90611535565b81358152908501908501611146565b8382346102ea57816003193601126102ea57517f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168152602090f35b5082346108d357806003193601126108d3575060025460035482519182526020820152f35b5090346101c357826003193601126101c3575490516001600160a01b03909116815260209150f35b8382346102ea57816003193601126102ea5760055490516001600160a01b039091168152602090f35b8490346102ea57816003193601126102ea577f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168152602090f35b6080810190811067ffffffffffffffff82111761128157604052565b634e487b7160e01b600052604160045260246000fd5b6060810190811067ffffffffffffffff82111761128157604052565b6040810190811067ffffffffffffffff82111761128157604052565b6020810190811067ffffffffffffffff82111761128157604052565b610140810190811067ffffffffffffffff82111761128157604052565b60a0810190811067ffffffffffffffff82111761128157604052565b90601f8019910116810190811067ffffffffffffffff82111761128157604052565b9060405191611354836112b3565b82604491821161137e576004905b82821061136e57505050565b8135815260209182019101611362565b600080fd5b604090600319011261137e576004359060243590565b6000546001600160a01b031633036113ad57565b60405163118cdaa760e01b8152336004820152602490fd5b600654811015611400576007906006600052027ff652222313e28459528d920b65115c16c04f3efc82aaedc97be59f3f377c0d3f0190600090565b634e487b7160e01b600052603260045260246000fd5b60001981146114255760010190565b634e487b7160e01b600052601160045260246000fd5b9190811015611400576060020190565b80548210156114005760005260206000200190600090565b9081602091031261137e57516001600160a01b038116810361137e5790565b6040810192916000915b6002831061149957505050565b60019082518152602080910192019201919061148c565b60206114d091604051809381926314d2f97b60e11b835260048301611482565b0381736679BE25dDA6310cafe79E7D3062F7Ad5fc177c35af4908115611529576000916114fb575090565b906020823d8211611521575b8161151460209383611324565b810103126108d357505190565b3d9150611507565b6040513d6000823e3d90fd5b60405163248f667760e01b81529060049060008284015b83821061158657505050506020816084817311131bA5CA1507417940BcA73e274112b68185325af4908115611529576000916114fb575090565b60019083518152602080910193019101909161154c565b604051630926f44b60e31b815290600090600483015b600583106115ed5750505060208160a481734E2f5b0B7e0818B21839B4F26096775fd7e5E4285af4908115611529576000916114fb575090565b6001908251815260208091019201920191906115b3565b90600164ffffffffff8093160191821161142557565b91909164ffffffffff8080941691160191821161142557565b64ffffffffff908116600019019190821161142557565b64ffffffffff918216908216039190821161142557565b64ffffffffff80825460281c16926116a161167b85611604565b845469ffffffffff0000000000191660289190911b69ffffffffff000000000016178455565b736679BE25dDA6310cafe79E7D3062F7Ad5fc177c3906000907f0ef71f46e11a513c599eed9dd03576c33439bcfb1cee155316f90541e41649ba5b60ff906001906020888301886117068c6117018a89168b871b64ff000000001661164a565b61161a565b16600052808252604092808460002055848c16156117d85791809161177094936117386117328f611633565b8b6118f2565b918c865193611746856112b3565b16600052835284600020548252828201528351809581926314d2f97b60e11b835260048301611482565b03818b5af49182156117ce575060009161179c575b50647fffffffff915098821c1693011691956116dc565b82813d83116117c7575b6117b08183611324565b810103126108d35750647fffffffff905138611785565b503d6117a6565b513d6000823e3d90fd5b505050505050945050505050565b909164ffffffffff9081835460281c169361182961180386611604565b855469ffffffffff0000000000191660289190911b69ffffffffff000000000016178555565b736679BE25dDA6310cafe79E7D3062F7Ad5fc177c3916000915b60ff906001906020888301886118688c6117018a89168b871b64ff000000001661164a565b16600052808252604092808460002055848c16156117d85791809161189494936117386117328f611633565b03818b5af49182156117ce57506000916118c0575b50647fffffffff915098821c169301169195611843565b82813d83116118eb575b6118d48183611324565b810103126108d35750647fffffffff9051386118a9565b503d6118ca565b9061170161190e9264ff0000000060ff82169160201b1661164a565b90565b61190e90604080519161192383611265565b60803684378051518352602081510151602084015260208101518284015201516060820152611535565b602061190e9260406119f581519461196486611308565b60a03687378051518652848151015185870152828151015183870152606081510151606087015260808151015160808701526101208351916119a583611308565b60a036843760a081510151835260c0815101518784015260e0815101518584015261010081510151606084015251015160808201526119ee8351966119e988611265565b61159d565b865261159d565b838501528151908401520151606082015261153556fea26469706673582212207248e25f06e502fc36d4ffef82654de4c61dd522bf6dbcdbda02ae315836942364736f6c63430008140033",
+  "deployedBytecode": "0x608060408181526004908136101561001657600080fd5b600092833560e01c908163055575eb146112225750806313fb8932146111f95780632b7ac3f3146111d157806331e766a5146111ac578063343393b5146111685780633dfb88b21461110d57806346a6f4a814610fce57806358bfc37914610e7b5780635bb9399514610e4a57806362a361bb14610e1b57806362b31f1e14610dd757806364e0ece114610cb0578063683f3dc314610c94578063715018a614610c3a5780637511a64f146109445780637d0a81c8146108ea5780638a2a3dfb1461084d5780638da5cb5b146108255780639cfced97146107c3578063ac98e5df14610781578063b87802c814610755578063bad62d20146103ef578063bea140b3146102ee578063edbfe83f146101c75763f2fde38b1461013757600080fd5b346101c35760203660031901126101c3576001600160a01b038235818116939192908490036101bf57610168611399565b83156101a957505082546001600160a01b0319811683178455167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08380a380f35b51631e4fbdf760e01b8152908101849052602490fd5b8480fd5b8280fd5b8382346102ea57806003193601126102ea5736602312156102ea576101eb36611346565b9080516101f7816112cf565b8151610202816112eb565b610140918236833752815190610217826112b3565b848252846020809301528183519461022e866112eb565b82368737805186520151828501528251610247816112b3565b7f171e826ad4a870fd925e0bf0e87884e70e080879c2205ef10114f28a3b6f6dd78152828101927f2bd407d897fbbca9f88adfd2d15252e69de8c1564eb4d3d27162e259172f1a1d845284519561029d876112cf565b86526102a9828761194d565b945195519690865b600a83106102d5575050506101a09550519084015251610160830152610180820152f35b81806001928b518152019901920191976102b1565b5080fd5b50346101c35760603660031901126101c35736602312156101c357805161031481611297565b806064913683116103eb57849194905b8382106103db57505082516304b98e1d60e31b815293849186919083015b600383106103c1575050506020918173__$fa059fb1da6d850ca47ea49359bfe89f78$__5af49182156103b7578392610380575b6020838351908152f35b9091506020813d82116103af575b8161039b60209383611324565b810103126101c35760209250519038610376565b3d915061038e565b81513d85823e3d90fd5b815181528693506001929092019160209182019101610342565b8135815260209182019101610324565b8580fd5b509190346102ea5761040036611383565b610408611399565b600180549560001994601888901c60ff16868101818111610742576005111561072f576007810154908351956370f7b36160e01b87528387015260ff60249a8181168c890152818160081c16604489015260101c166064870152608486015260025460a486015260035460c48601523060e486015261010485015260209360018060a01b03908581610124818c867f0000000000000000000000000000000000000000000000000000000000000000165af1908115610725578991610708575b508180845416918160055416865193633634487360e01b8552868501528c8401521691826044830152336064830152856084830152868260a4818d857f0000000000000000000000000000000000000000000000000000000000000000165af19182156106fe57908a9182936106df575b50878c60c483885416848060055416978b51988995869463431a717560e01b86528d86015284015289604484015216958660648301523360848301528b60a4830152857f0000000000000000000000000000000000000000000000000000000000000000165af19283156106d5578b936106a6575b50846105b98a6113c5565b5001938651906105c882611297565b815288810192835281878201941684528454600160401b811015610694578c898201808855821015610682576002929160038c838a88955220910201915116936bffffffffffffffffffffffff60a01b9485835416178255838a8301915116858254161790550192511690825416179055549586019586116106705750519081527f60a11d5f71919d2a88fed66d85caaf6d1541f5b35e59875eaa9fd431fef071bf9190a380f35b634e487b7160e01b8752601190528686fd5b634e487b7160e01b8152603288528e90fd5b634e487b7160e01b8d52604187528d8dfd5b6106c7919350883d8a116106ce575b6106bf8183611324565b810190611463565b91386105ae565b503d6106b5565b86513d8d823e3d90fd5b6106f7919350883d8a116106ce576106bf8183611324565b9138610539565b85513d8c823e3d90fd5b61071f9150863d88116106ce576106bf8183611324565b386104c8565b84513d8b823e3d90fd5b634e487b7160e01b885260328252602488fd5b634e487b7160e01b895260118352602489fd5b5090346101c35760203660031901126101c3573560058110156101c35760209250600801549051908152f35b8382346102ea57816003193601126102ea5760809060ff6001548251928282168452828260081c166020850152828260101c169084015260181c166060820152f35b5090346101c35760a03660031901126101c35736602312156101c3578151906107eb82611308565b8160a4913683116103eb5760209550905b8282106108165750505061080f9061159d565b9051908152f35b813581529085019085016107fc565b8382346102ea57816003193601126102ea57905490516001600160a01b039091168152602090f35b5082346108d357366003190161018081126102ea57610140136108d357815190610876826112cf565b36602312156108d357825161088a816112eb565b80610144953687116108e657905b8682106108d6575050825282610143193601126108d3575060209261080f918351916108c3836112b3565b358252610164358583015261194d565b80fd5b8135815260209182019101610898565b8380fd5b5090346101c357366003190192608084126108d3578280519461090c86611297565b126108d3575060209261080f91835190610925826112b3565b3581526024358582015281526044358482015260643583820152611911565b50346101c357806003193601126101c35760249081359167ffffffffffffffff918284116103eb57366023850112156103eb57838501359283116103eb5781840193823691606086020101116103eb5761099c611399565b600654600160401b9081811015610c2857600191828201806006556109c0836113c5565b50508211610c16576109d1826113c5565b509042825588354201804211610c04578483015560038a9201915b878110610b8d57505050610a016005916113c5565b5001805469ffffffffffffffffffff1916601f17815593610a2185611661565b875b818110610a2e578880f35b610a3981838961143b565b606081360312610b8957845190610a4f82611297565b6001600160a01b0381358181168103610b8557835260209182810135908884860191838352013591898601928084527f30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001808080858196099380098180828187620292fc090894620292f809098b088181811115610b5c575b508103908111610b48578f9008610b3857928d610b33969593610b1d600794610b2e975190518d5191610af9836112b3565b8252858201528c5190610b0b82611297565b8152606485820152428d820152611911565b94511690525280878d2055886117e6565b611416565b610a23565b88516379fae7af60e01b81528d90fd5b5050634e487b7160e01b8e5260118d52898efd5b909150828101809111610b70579038610ac7565b5050634e487b7160e01b8f525060118d52898efd5b8c80fd5b8980fd5b610b9881898b61143b565b356001600160a01b0381168103610c0057835483811015610bee57610be99291610bca8289610b2e940188558761144b565b90919082549060031b9160018060a01b03809116831b921b1916179055565b6109ec565b634e487b7160e01b8d5260418c52888dfd5b8b80fd5b634e487b7160e01b8b5260118a52868bfd5b634e487b7160e01b8952601188528489fd5b634e487b7160e01b8852604187528388fd5b83346108d357806003193601126108d357610c53611399565b80546001600160a01b03198116825581906001600160a01b03167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08280a380f35b8382346102ea57816003193601126102ea5760209051600a8152f35b50346101c357366003190161010081126108e6576080136101c357805191610cd783611265565b803560ff811681036101bf5783526024359160ff831683036101bf57602084019283526044359260ff841684036103eb578185019384526064359160ff83168303610dd3576060860192835280608319360112610dd3575190610d39826112b3565b6084358252602082019260a435845260c4359560018060a01b0397888816809803610b895760e435988916809903610b895760ff90610d76611399565b511663ff00000062ff000061ff00600154965160081b16935160101b16935160181b169363ffffffff19161717171760015551600255516003556bffffffffffffffffffffffff60a01b9182825416179055600554161760055580f35b8680fd5b8382346102ea57816003193601126102ea57517f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168152602090f35b8382346102ea57806003193601126102ea5736602312156102ea5760209061080f610e4536611346565b6114b0565b8382346102ea5760209061080f610e6036611383565b835191610e6c836112b3565b843684378252848201526114b0565b5082346108d357602092836003193601126102ea57803567ffffffffffffffff918282116108e657366023830112156108e65781810135928311610fbb57508160051b90845192610ece87840185611324565b835285830160248193830101913683116103eb5791859391602489969401905b828210610fa957505086519251858401929150845b818110610f905750505081610f209103601f198101835282611324565b84519080519084845b838110610f7b5750505081908101838152039060025afa15610f70577f30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f00000019051069051908152f35b9051903d90823e3d90fd5b82810182015185820152879550869101610f29565b8251845289968896509384019390920191600101610f03565b81358152879550908601908601610eee565b634e487b7160e01b845260419052602483fd5b50346101c357806003193601126101c3576001600160a01b0360248035828116959291908690036101c35793611002611399565b61100c81356113c5565b5060058101805469ffffffffffffffffffff1916601f1781559690919061103288611661565b600392830191855b835480821015611109578387611050848861144b565b905490891b1c161461108d575b50808661106d611088938761144b565b905490881b1c1688526007602052610b2e898920548c6117e6565b61103a565b600019908082019081116110f757876110a96110ba928861144b565b905490891b1c16610bca848861144b565b845480156110e5576110889291016110d2818761144b565b898254918a1b1b1916905585559061105d565b634e487b7160e01b8952603184528a89fd5b634e487b7160e01b8952601184528a89fd5b8780f35b5090346101c35760803660031901126101c35736602312156101c35781519061113582611265565b816084913683116103eb5760209550905b8282106111595750505061080f90611535565b81358152908501908501611146565b8382346102ea57816003193601126102ea57517f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168152602090f35b5082346108d357806003193601126108d3575060025460035482519182526020820152f35b5090346101c357826003193601126101c3575490516001600160a01b03909116815260209150f35b8382346102ea57816003193601126102ea5760055490516001600160a01b039091168152602090f35b8490346102ea57816003193601126102ea577f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168152602090f35b6080810190811067ffffffffffffffff82111761128157604052565b634e487b7160e01b600052604160045260246000fd5b6060810190811067ffffffffffffffff82111761128157604052565b6040810190811067ffffffffffffffff82111761128157604052565b6020810190811067ffffffffffffffff82111761128157604052565b610140810190811067ffffffffffffffff82111761128157604052565b60a0810190811067ffffffffffffffff82111761128157604052565b90601f8019910116810190811067ffffffffffffffff82111761128157604052565b9060405191611354836112b3565b82604491821161137e576004905b82821061136e57505050565b8135815260209182019101611362565b600080fd5b604090600319011261137e576004359060243590565b6000546001600160a01b031633036113ad57565b60405163118cdaa760e01b8152336004820152602490fd5b600654811015611400576007906006600052027ff652222313e28459528d920b65115c16c04f3efc82aaedc97be59f3f377c0d3f0190600090565b634e487b7160e01b600052603260045260246000fd5b60001981146114255760010190565b634e487b7160e01b600052601160045260246000fd5b9190811015611400576060020190565b80548210156114005760005260206000200190600090565b9081602091031261137e57516001600160a01b038116810361137e5790565b6040810192916000915b6002831061149957505050565b60019082518152602080910192019201919061148c565b60206114d091604051809381926314d2f97b60e11b835260048301611482565b038173__$1540826e134b1b69b7091c82576ee3aadd$__5af4908115611529576000916114fb575090565b906020823d8211611521575b8161151460209383611324565b810103126108d357505190565b3d9150611507565b6040513d6000823e3d90fd5b60405163248f667760e01b81529060049060008284015b838210611586575050505060208160848173__$e61c65d9562aef5fa6ab22c0f787cf1e30$__5af4908115611529576000916114fb575090565b60019083518152602080910193019101909161154c565b604051630926f44b60e31b815290600090600483015b600583106115ed5750505060208160a48173__$46fbdf6658faf65265971bdad66851b86c$__5af4908115611529576000916114fb575090565b6001908251815260208091019201920191906115b3565b90600164ffffffffff8093160191821161142557565b91909164ffffffffff8080941691160191821161142557565b64ffffffffff908116600019019190821161142557565b64ffffffffff918216908216039190821161142557565b64ffffffffff80825460281c16926116a161167b85611604565b845469ffffffffff0000000000191660289190911b69ffffffffff000000000016178455565b73__$1540826e134b1b69b7091c82576ee3aadd$__906000907f0ef71f46e11a513c599eed9dd03576c33439bcfb1cee155316f90541e41649ba5b60ff906001906020888301886117068c6117018a89168b871b64ff000000001661164a565b61161a565b16600052808252604092808460002055848c16156117d85791809161177094936117386117328f611633565b8b6118f2565b918c865193611746856112b3565b16600052835284600020548252828201528351809581926314d2f97b60e11b835260048301611482565b03818b5af49182156117ce575060009161179c575b50647fffffffff915098821c1693011691956116dc565b82813d83116117c7575b6117b08183611324565b810103126108d35750647fffffffff905138611785565b503d6117a6565b513d6000823e3d90fd5b505050505050945050505050565b909164ffffffffff9081835460281c169361182961180386611604565b855469ffffffffff0000000000191660289190911b69ffffffffff000000000016178555565b73__$1540826e134b1b69b7091c82576ee3aadd$__916000915b60ff906001906020888301886118688c6117018a89168b871b64ff000000001661164a565b16600052808252604092808460002055848c16156117d85791809161189494936117386117328f611633565b03818b5af49182156117ce57506000916118c0575b50647fffffffff915098821c169301169195611843565b82813d83116118eb575b6118d48183611324565b810103126108d35750647fffffffff9051386118a9565b503d6118ca565b9061170161190e9264ff0000000060ff82169160201b1661164a565b90565b61190e90604080519161192383611265565b60803684378051518352602081510151602084015260208101518284015201516060820152611535565b602061190e9260406119f581519461196486611308565b60a03687378051518652848151015185870152828151015183870152606081510151606087015260808151015160808701526101208351916119a583611308565b60a036843760a081510151835260c0815101518784015260e0815101518584015261010081510151606084015251015160808201526119ee8351966119e988611265565b61159d565b865261159d565b838501528151908401520151606082015261153556fea26469706673582212207248e25f06e502fc36d4ffef82654de4c61dd522bf6dbcdbda02ae315836942364736f6c63430008140033",
+  "libraries": {
+    "PoseidonT3": "0x6679BE25dDA6310cafe79E7D3062F7Ad5fc177c3",
+    "PoseidonT4": "0x2Bcfe85c9BBdEc18F48583655b0aFCcc4B084BB7",
+    "PoseidonT5": "0x11131bA5CA1507417940BcA73e274112b6818532",
+    "PoseidonT6": "0x4E2f5b0B7e0818B21839B4F26096775fd7e5E428"
+  },
+  "devdoc": {
+    "errors": {
+      "OwnableInvalidOwner(address)": [
+        {
+          "details": "The owner is not a valid owner account. (eg. `address(0)`)"
+        }
+      ],
+      "OwnableUnauthorizedAccount(address)": [
+        {
+          "details": "The caller account is not authorized to perform an operation."
+        }
+      ]
+    },
+    "kind": "dev",
+    "methods": {
+      "createGame(uint256,(address,uint256,uint256)[])": {
+        "params": {
+          "_duration": "the duration of the game"
+        }
+      },
+      "hash2(uint256[2])": {
+        "params": {
+          "array": "An array of two uint256 elements."
+        },
+        "returns": {
+          "result": "The Poseidon hash of the two elements."
+        }
+      },
+      "hash3(uint256[3])": {
+        "params": {
+          "array": "An array of three uint256 elements."
+        },
+        "returns": {
+          "result": "The Poseidon hash of the three elements."
+        }
+      },
+      "hash4(uint256[4])": {
+        "params": {
+          "array": "An array of four uint256 elements."
+        },
+        "returns": {
+          "result": "The Poseidon hash of the four elements."
+        }
+      },
+      "hash5(uint256[5])": {
+        "params": {
+          "array": "An array of five uint256 elements."
+        },
+        "returns": {
+          "result": "The Poseidon hash of the five elements."
+        }
+      },
+      "hashLeftRight(uint256,uint256)": {
+        "params": {
+          "left": "the first element to hash.",
+          "right": "the second element to hash."
+        },
+        "returns": {
+          "result": "The Poseidon hash of the two elements."
+        }
+      },
+      "hashMessageAndEncPubKey((uint256[10]),(uint256,uint256))": {
+        "params": {
+          "_encPubKey": "the encryption public key to be hashed",
+          "_message": "the message to be hashed"
+        },
+        "returns": {
+          "msgHash": "The hash of the message and the encryption public key"
+        }
+      },
+      "hashStateLeaf(((uint256,uint256),uint256,uint256))": {
+        "params": {
+          "_stateLeaf": "the state leaf to be hashed"
+        },
+        "returns": {
+          "ciphertext": "The hash of the state leaf"
+        }
+      },
+      "owner()": {
+        "details": "Returns the address of the current owner."
+      },
+      "padAndHashMessage(uint256[2])": {
+        "params": {
+          "dataToPad": "the data to be padded"
+        },
+        "returns": {
+          "message": "The padded message",
+          "msgHash": "The hash of the padded message and encryption key",
+          "padKey": "The padding public key"
+        }
+      },
+      "renounceOwnership()": {
+        "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner."
+      },
+      "sha256Hash(uint256[])": {
+        "params": {
+          "array": "The array of uint256 elements."
+        },
+        "returns": {
+          "result": "The SHA256 hash of the array."
+        }
+      },
+      "transferOwnership(address)": {
+        "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "errors": {
+      "InvalidMessage()": [
+        {
+          "notice": "custom errors"
+        }
+      ]
+    },
+    "kind": "user",
+    "methods": {
+      "MESSAGE_DATA_LENGTH()": {
+        "notice": "the length of a MACI message"
+      },
+      "createGame(uint256,(address,uint256,uint256)[])": {
+        "notice": "create a new game"
+      },
+      "hash2(uint256[2])": {
+        "notice": "Computes the Poseidon hash of two uint256 elements."
+      },
+      "hash3(uint256[3])": {
+        "notice": "Computes the Poseidon hash of three uint256 elements."
+      },
+      "hash4(uint256[4])": {
+        "notice": "Computes the Poseidon hash of four uint256 elements."
+      },
+      "hash5(uint256[5])": {
+        "notice": "Computes the Poseidon hash of five uint256 elements."
+      },
+      "hashLeftRight(uint256,uint256)": {
+        "notice": "Computes the Poseidon hash of two uint256 elements."
+      },
+      "hashMessageAndEncPubKey((uint256[10]),(uint256,uint256))": {
+        "notice": "An utility function used to hash a MACI message and an encryption public key"
+      },
+      "hashStateLeaf(((uint256,uint256),uint256,uint256))": {
+        "notice": "An utility function used to hash a state leaf"
+      },
+      "padAndHashMessage(uint256[2])": {
+        "notice": "An utility function used to pad and hash a MACI message"
+      },
+      "sha256Hash(uint256[])": {
+        "notice": "Computes the SHA256 hash of an array of uint256 elements."
+      }
+    },
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 8,
+        "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+        "label": "_owner",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_address"
+      },
+      {
+        "astId": 266,
+        "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+        "label": "treeDepths",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_struct(TreeDepths)3286_storage"
+      },
+      {
+        "astId": 269,
+        "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+        "label": "coordinatorPubKey",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_struct(PubKey)3259_storage"
+      },
+      {
+        "astId": 271,
+        "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+        "label": "verifier",
+        "offset": 0,
+        "slot": "4",
+        "type": "t_address"
+      },
+      {
+        "astId": 273,
+        "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+        "label": "vkRegistry",
+        "offset": 0,
+        "slot": "5",
+        "type": "t_address"
+      },
+      {
+        "astId": 277,
+        "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+        "label": "games",
+        "offset": 0,
+        "slot": "6",
+        "type": "t_array(t_struct(Game)256_storage)dyn_storage"
+      },
+      {
+        "astId": 281,
+        "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+        "label": "playerHash",
+        "offset": 0,
+        "slot": "7",
+        "type": "t_mapping(t_address,t_uint256)"
+      },
+      {
+        "astId": 285,
+        "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+        "label": "emptyBallotRoots",
+        "offset": 0,
+        "slot": "8",
+        "type": "t_array(t_uint256)5_storage"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_array(t_address)dyn_storage": {
+        "base": "t_address",
+        "encoding": "dynamic_array",
+        "label": "address[]",
+        "numberOfBytes": "32"
+      },
+      "t_array(t_struct(Game)256_storage)dyn_storage": {
+        "base": "t_struct(Game)256_storage",
+        "encoding": "dynamic_array",
+        "label": "struct Mafia.Game[]",
+        "numberOfBytes": "32"
+      },
+      "t_array(t_struct(Poll)239_storage)dyn_storage": {
+        "base": "t_struct(Poll)239_storage",
+        "encoding": "dynamic_array",
+        "label": "struct Mafia.Poll[]",
+        "numberOfBytes": "32"
+      },
+      "t_array(t_uint256)5_storage": {
+        "base": "t_uint256",
+        "encoding": "inplace",
+        "label": "uint256[5]",
+        "numberOfBytes": "160"
+      },
+      "t_mapping(t_address,t_uint256)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => uint256)",
+        "numberOfBytes": "32",
+        "value": "t_uint256"
+      },
+      "t_mapping(t_uint256,t_uint256)": {
+        "encoding": "mapping",
+        "key": "t_uint256",
+        "label": "mapping(uint256 => uint256)",
+        "numberOfBytes": "32",
+        "value": "t_uint256"
+      },
+      "t_string_storage": {
+        "encoding": "bytes",
+        "label": "string",
+        "numberOfBytes": "32"
+      },
+      "t_struct(Game)256_storage": {
+        "encoding": "inplace",
+        "label": "struct Mafia.Game",
+        "members": [
+          {
+            "astId": 241,
+            "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+            "label": "startTime",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 243,
+            "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+            "label": "endTime",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 245,
+            "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+            "label": "tallyUrl",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_string_storage"
+          },
+          {
+            "astId": 248,
+            "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+            "label": "players",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_array(t_address)dyn_storage"
+          },
+          {
+            "astId": 252,
+            "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+            "label": "polls",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_array(t_struct(Poll)239_storage)dyn_storage"
+          },
+          {
+            "astId": 255,
+            "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+            "label": "lazyIMTData",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_struct(LazyIMTData)2496_storage"
+          }
+        ],
+        "numberOfBytes": "224"
+      },
+      "t_struct(LazyIMTData)2496_storage": {
+        "encoding": "inplace",
+        "label": "struct LazyIMTData",
+        "members": [
+          {
+            "astId": 2489,
+            "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+            "label": "maxIndex",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint40"
+          },
+          {
+            "astId": 2491,
+            "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+            "label": "numberOfLeaves",
+            "offset": 5,
+            "slot": "0",
+            "type": "t_uint40"
+          },
+          {
+            "astId": 2495,
+            "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+            "label": "elements",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_mapping(t_uint256,t_uint256)"
+          }
+        ],
+        "numberOfBytes": "64"
+      },
+      "t_struct(Poll)239_storage": {
+        "encoding": "inplace",
+        "label": "struct Mafia.Poll",
+        "members": [
+          {
+            "astId": 234,
+            "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+            "label": "poll",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_address"
+          },
+          {
+            "astId": 236,
+            "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+            "label": "messageProcessor",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_address"
+          },
+          {
+            "astId": 238,
+            "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+            "label": "tally",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_address"
+          }
+        ],
+        "numberOfBytes": "96"
+      },
+      "t_struct(PubKey)3259_storage": {
+        "encoding": "inplace",
+        "label": "struct DomainObjs.PubKey",
+        "members": [
+          {
+            "astId": 3256,
+            "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+            "label": "x",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 3258,
+            "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+            "label": "y",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256"
+          }
+        ],
+        "numberOfBytes": "64"
+      },
+      "t_struct(TreeDepths)3286_storage": {
+        "encoding": "inplace",
+        "label": "struct Params.TreeDepths",
+        "members": [
+          {
+            "astId": 3279,
+            "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+            "label": "intStateTreeDepth",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8"
+          },
+          {
+            "astId": 3281,
+            "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+            "label": "messageTreeSubDepth",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_uint8"
+          },
+          {
+            "astId": 3283,
+            "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+            "label": "messageTreeDepth",
+            "offset": 2,
+            "slot": "0",
+            "type": "t_uint8"
+          },
+          {
+            "astId": 3285,
+            "contract": "contracts/maci-contracts/Mafia.sol:Mafia",
+            "label": "voteOptionTreeDepth",
+            "offset": 3,
+            "slot": "0",
+            "type": "t_uint8"
+          }
+        ],
+        "numberOfBytes": "32"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      },
+      "t_uint40": {
+        "encoding": "inplace",
+        "label": "uint40",
+        "numberOfBytes": "5"
+      },
+      "t_uint8": {
+        "encoding": "inplace",
+        "label": "uint8",
+        "numberOfBytes": "1"
+      }
+    }
+  }
+}

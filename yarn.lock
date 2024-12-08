@@ -12,6 +12,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@adraffy/ens-normalize@npm:1.10.1":
+  version: 1.10.1
+  resolution: "@adraffy/ens-normalize@npm:1.10.1"
+  checksum: 0836f394ea256972ec19a0b5e78cb7f5bcdfd48d8a32c7478afc94dd53ae44c04d1aa2303d7f3077b4f3ac2323b1f557ab9188e8059978748fdcd83e04a80dcc
+  languageName: node
+  linkType: hard
+
 "@adraffy/ens-normalize@npm:^1.10.1":
   version: 1.11.0
   resolution: "@adraffy/ens-normalize@npm:1.11.0"
@@ -1389,6 +1396,7 @@ __metadata:
     eslint-config-prettier: ~8.10.0
     eslint-plugin-prettier: ~5.2.1
     lucide-react: ^0.468.0
+    maci-domainobjs: ^2.5.0
     next: ~14.2.11
     next-nprogress-bar: ~2.3.13
     next-themes: ^0.4.4
@@ -3966,6 +3974,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:22.7.5":
+  version: 22.7.5
+  resolution: "@types/node@npm:22.7.5"
+  dependencies:
+    undici-types: ~6.19.2
+  checksum: 1a8bbb504efaffcef7b8491074a428e5c0b5425b0c0ffb13e7262cb8462c275e8cc5eaf90a38d8fbf52a1eeda7c01ab3b940673c43fc2414140779c973e40ec6
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:^20.11.17":
   version: 20.17.9
   resolution: "@types/node@npm:20.17.9"
@@ -5106,6 +5123,47 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@zk-kit/baby-jubjub@npm:1.0.3, @zk-kit/baby-jubjub@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "@zk-kit/baby-jubjub@npm:1.0.3"
+  dependencies:
+    "@zk-kit/utils": 1.2.1
+  checksum: ff89da4af4878b0df38181ac60147b1a351dd1077e1af52287342c4102b306af6c98c332fc46d383e647214d17ecc0150c3578d488350ec942ea8371c57e6783
+  languageName: node
+  linkType: hard
+
+"@zk-kit/eddsa-poseidon@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@zk-kit/eddsa-poseidon@npm:1.1.0"
+  dependencies:
+    "@zk-kit/baby-jubjub": 1.0.3
+    "@zk-kit/utils": 1.2.1
+    blakejs: ^1.2.1
+    buffer: 6.0.3
+    poseidon-lite: 0.3.0
+  checksum: b71fdee03e84cec28fa8059df0b919356a98d5c6ec1873fff55af2fa8e23d252e004d4c468121347a701ffcf964d01fe600382803a1901f25344f1e4417b1d33
+  languageName: node
+  linkType: hard
+
+"@zk-kit/poseidon-cipher@npm:^0.3.2":
+  version: 0.3.2
+  resolution: "@zk-kit/poseidon-cipher@npm:0.3.2"
+  dependencies:
+    "@zk-kit/baby-jubjub": 1.0.3
+    "@zk-kit/utils": 1.2.1
+  checksum: e7638f93c4d30e85fa7d996f414df2ab721c6eb5bb64f40b49d879362e3c7057f51bb1a8dd6767ecb3461a2ac3d6b0a47d89494eb5a6eb91b7228d41a21a544c
+  languageName: node
+  linkType: hard
+
+"@zk-kit/utils@npm:1.2.1":
+  version: 1.2.1
+  resolution: "@zk-kit/utils@npm:1.2.1"
+  dependencies:
+    buffer: ^6.0.3
+  checksum: ee2c93cbab506c97592db6ecbbc9d869737e4d3ec318d77c6c4123b71098455392a524bdeecd4ef903e41b56211368e8d1b26a3f88b65540d1c571d9f4be553e
+  languageName: node
+  linkType: hard
+
 "abbrev@npm:1":
   version: 1.1.1
   resolution: "abbrev@npm:1.1.1"
@@ -5239,6 +5297,13 @@ __metadata:
   version: 3.0.0
   resolution: "aes-js@npm:3.0.0"
   checksum: 251e26d533cd1a915b44896b17d5ed68c24a02484cfdd2e74ec700a309267db96651ea4eb657bf20aac32a3baa61f6e34edf8e2fec2de440a655da9942d334b8
+  languageName: node
+  linkType: hard
+
+"aes-js@npm:4.0.0-beta.5":
+  version: 4.0.0-beta.5
+  resolution: "aes-js@npm:4.0.0-beta.5"
+  checksum: cc2ea969d77df939c32057f7e361b6530aa6cb93cb10617a17a45cd164e6d761002f031ff6330af3e67e58b1f0a3a8fd0b63a720afd591a653b02f649470e15b
   languageName: node
   linkType: hard
 
@@ -5714,6 +5779,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"blakejs@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "blakejs@npm:1.2.1"
+  checksum: d699ba116cfa21d0b01d12014a03e484dd76d483133e6dc9eb415aa70a119f08beb3bcefb8c71840106a00b542cba77383f8be60cd1f0d4589cb8afb922eefbe
+  languageName: node
+  linkType: hard
+
 "blo@npm:~1.2.0":
   version: 1.2.0
   resolution: "blo@npm:1.2.0"
@@ -5798,7 +5870,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"buffer@npm:^6.0.3":
+"buffer@npm:6.0.3, buffer@npm:^6.0.3":
   version: 6.0.3
   resolution: "buffer@npm:6.0.3"
   dependencies:
@@ -7912,6 +7984,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ethers@npm:^6.13.4":
+  version: 6.13.4
+  resolution: "ethers@npm:6.13.4"
+  dependencies:
+    "@adraffy/ens-normalize": 1.10.1
+    "@noble/curves": 1.2.0
+    "@noble/hashes": 1.3.2
+    "@types/node": 22.7.5
+    aes-js: 4.0.0-beta.5
+    tslib: 2.7.0
+    ws: 8.17.1
+  checksum: a64ad0f05ed7f79bf3092cd54ac11c3ed4a0a3fe8ee00a81053b5b4a34d84728c12fa5aa9bf3e2cc5efabbf1a0a37f62cd3a1852cf780a1ab619421fa03c2713
+  languageName: node
+  linkType: hard
+
 "ethers@npm:~5.7.1":
   version: 5.7.2
   resolution: "ethers@npm:5.7.2"
@@ -9956,6 +10043,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"maci-crypto@npm:^2.5.0":
+  version: 2.5.0
+  resolution: "maci-crypto@npm:2.5.0"
+  dependencies:
+    "@zk-kit/baby-jubjub": ^1.0.3
+    "@zk-kit/eddsa-poseidon": ^1.1.0
+    "@zk-kit/poseidon-cipher": ^0.3.2
+    ethers: ^6.13.4
+  checksum: f3b9a44258b4c185ad9e25b2ef9435de671369b264a01f89899bd448aa7882eb1c153d3babba14586288ea419152a601c797b29d35420c8b1bc912bc285039ba
+  languageName: node
+  linkType: hard
+
+"maci-domainobjs@npm:^2.5.0":
+  version: 2.5.0
+  resolution: "maci-domainobjs@npm:2.5.0"
+  dependencies:
+    maci-crypto: ^2.5.0
+  checksum: 520cea227675e48ec580f71da5df220e694c44abfb606bf89f18d08f0ba299ec701f3c68ba8f24d2a7d022557e0d893210efa535c2c77ae4879a2da5e27df36f
+  languageName: node
+  linkType: hard
+
 "mafia@workspace:.":
   version: 0.0.0-use.local
   resolution: "mafia@workspace:."
@@ -11259,6 +11367,13 @@ __metadata:
   version: 2.1.11
   resolution: "pony-cause@npm:2.1.11"
   checksum: 4aaa9ddab8f8225b5cbb32f7329a71b73679074579fa91f9e9d6853d398f3c2872de979519e1525c0c91d53afc82c32fddb76e379d19157e69ef1f7064523dfa
+  languageName: node
+  linkType: hard
+
+"poseidon-lite@npm:0.3.0":
+  version: 0.3.0
+  resolution: "poseidon-lite@npm:0.3.0"
+  checksum: 49e46dc43d222f12b76bd3758ef4d4a507d9c788d4221a0e29ad9d29a7ddff54d1e0f9fc58dff15aba8bef87b36b0a47925af5cc4663e2724b14243ef6076247
   languageName: node
   linkType: hard
 
@@ -13242,6 +13357,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tslib@npm:2.7.0":
+  version: 2.7.0
+  resolution: "tslib@npm:2.7.0"
+  checksum: 1606d5c89f88d466889def78653f3aab0f88692e80bb2066d090ca6112ae250ec1cfa9dbfaab0d17b60da15a4186e8ec4d893801c67896b277c17374e36e1d28
+  languageName: node
+  linkType: hard
+
 "tslib@npm:^2.0.0, tslib@npm:^2.1.0, tslib@npm:^2.3.1, tslib@npm:^2.4.0, tslib@npm:^2.6.0, tslib@npm:^2.6.2":
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
@@ -14296,6 +14418,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ws@npm:8.17.1, ws@npm:~8.17.1":
+  version: 8.17.1
+  resolution: "ws@npm:8.17.1"
+  peerDependencies:
+    bufferutil: ^4.0.1
+    utf-8-validate: ">=5.0.2"
+  peerDependenciesMeta:
+    bufferutil:
+      optional: true
+    utf-8-validate:
+      optional: true
+  checksum: 442badcce1f1178ec87a0b5372ae2e9771e07c4929a3180321901f226127f252441e8689d765aa5cfba5f50ac60dd830954afc5aeae81609aefa11d3ddf5cecf
+  languageName: node
+  linkType: hard
+
 "ws@npm:8.18.0":
   version: 8.18.0
   resolution: "ws@npm:8.18.0"
@@ -14323,21 +14460,6 @@ __metadata:
     utf-8-validate:
       optional: true
   checksum: f9bb062abf54cc8f02d94ca86dcd349c3945d63851f5d07a3a61c2fcb755b15a88e943a63cf580cbdb5b74436d67ef6b67f745b8f7c0814e411379138e1863cb
-  languageName: node
-  linkType: hard
-
-"ws@npm:~8.17.1":
-  version: 8.17.1
-  resolution: "ws@npm:8.17.1"
-  peerDependencies:
-    bufferutil: ^4.0.1
-    utf-8-validate: ">=5.0.2"
-  peerDependenciesMeta:
-    bufferutil:
-      optional: true
-    utf-8-validate:
-      optional: true
-  checksum: 442badcce1f1178ec87a0b5372ae2e9771e07c4929a3180321901f226127f252441e8689d765aa5cfba5f50ac60dd830954afc5aeae81609aefa11d3ddf5cecf
   languageName: node
   linkType: hard
 
