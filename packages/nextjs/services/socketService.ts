@@ -1,7 +1,6 @@
 import { useGameStore } from "./store/gameStore";
 import { type GameMessage, GameState, MessageType } from "@mafia/types";
 import { type Socket, io } from "socket.io-client";
-import { v4 as uuid } from "uuid";
 import { create } from "zustand";
 
 const URL = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:9999";
@@ -29,7 +28,7 @@ interface SocketStore {
   socket: Socket<ServerToClientEvents, ClientToServerEvents> | null;
   connected: boolean;
   messages: GameMessage[];
-  playerId: string;
+
   connect: (roomId: string) => void;
   disconnect: () => void;
   sendReady: () => void;
@@ -43,19 +42,24 @@ export const useSocketStore = create<SocketStore>((set, get) => ({
   socket: null,
   connected: false,
   messages: [],
-  playerId: "",
-
-  setPlayerId: (id: string) => set({ playerId: id }),
 
   connect: (roomId: string) => {
     console.log("Connecting to socket server", socket);
 
     socket.connect();
+    const playerId = useGameStore.getState().playerId;
+    if (!playerId) {
+      console.error("No player ID available");
+      return;
+    }
+
+    // Set socket auth
+    socket.auth = { playerId };
     socket.emit("join-room", roomId);
 
     socket.on("connect", () => {
       set({ connected: true, socket });
-      console.log("Connected to socket server");
+      console.log("Connected to socket server with playerId:", playerId);
     });
 
     socket.on("game-state", data => {
@@ -78,7 +82,13 @@ export const useSocketStore = create<SocketStore>((set, get) => ({
 
   sendReady: () => {
     if (socket) {
-      socket.emit(MessageType.READY, { ready: true });
+      socket.emit(MessageType.READY, {
+        type: MessageType.READY,
+        playerId: useGameStore.getState().playerId,
+        payload: {
+          message: "ready",
+        },
+      });
     }
   },
 }));

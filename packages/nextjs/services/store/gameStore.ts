@@ -80,7 +80,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   setPlayerId: playerId => {
     set({ playerId });
-    useSocketStore.setState({ playerId });
   },
 
   setPhase: phase => set({ phase }),

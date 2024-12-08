@@ -67,21 +67,31 @@ export default class GameResponseGenerator {
     this.socket.on("connect", async () => {
       console.log("Connected to socket server");
       this.login();
-      console.log("Creating or joining room", serverUrl + "/rooms/create-or-join-room");
-      const response = await fetch(serverUrl + "/rooms/create-or-join-room", {
+      console.log("Creating or joining room", serverUrl + "/rooms/join-room/room1");
+      const response = await fetch(serverUrl + "/rooms/join-room/room1", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          //roomId: "1234",
-          player: 7,
+          playerId: `first_ai`,
         }),
       });
 
       const responseData = await response.json();
       console.log("Response:", responseData);
-      this.socket!.emit("ready", { message: "Game started" });
+
+
+      this.socket!.auth = { playerId: "first_ai" };
+      this.socket!.emit("join-room", "room1");
+
+      this.socket!.emit("ready", {
+        type: "ready",
+        playerId: "first_ai",
+        payload: {
+          message: "ready",
+        },
+      });
     });
 
     // Add listeners for the specified event types

@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import PlayerList from "./PlayerList";
 import TimerProgress from "./TimerProgress";
 import { CardHeader, CardTitle } from "@/components/ui/card";

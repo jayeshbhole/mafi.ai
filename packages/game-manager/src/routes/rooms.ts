@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import type { APIResponse } from "@mafia/types/api";
 import type { GameState, GameSettings } from "@mafia/types/game";
 import { randomUUID } from "crypto";
-import { gameDb } from "../db/index.js";
+import { gameCollection } from "../db/mongo.js";
 import type { Player } from "@mafia/types/player";
 
 dotenv.config();
@@ -38,7 +38,7 @@ router.post("/create-room/:roomId?", async c => {
     }
 
     // Create new room if roomId wasn't provided or room wasn't found
-    const newRoomId = roomId || randomUUID();
+    const newRoomId = "room1";
     const newPlayer: Player = {
       id: playerId,
       address: playerId,
@@ -62,7 +62,7 @@ router.post("/create-room/:roomId?", async c => {
       settings: DEFAULT_SETTINGS,
     };
 
-    await gameDb.insert(gameState);
+    await gameCollection.insertOne(gameState);
 
     return c.json<APIResponse>({
       success: true,
@@ -83,96 +83,34 @@ router.post("/create-room/:roomId?", async c => {
   }
 });
 
-// Join a room
 router.post("/join-room/:roomId", async c => {
-  try {
-    const data = await c.req.json<{
-      playerId?: string;
-    }>();
+  const roomId = c.req.param("roomId");
+  const data = await c.req.json<{
+    playerId: string;
+  }>();
 
-    const { playerId } = data || {};
+  const { playerId } = data;
 
-    if (!playerId) {
-      return c.json<APIResponse>({
-        success: false,
-        error: "Player ID is required",
-      });
-    }
-
-    const roomId = c.req.param("roomId");
-
-    const gameState = await gameDb.findOne<GameState>({ roomId });
-
-    if (!gameState) {
-      return c.json<APIResponse>({
-        success: false,
-        error: "Room not found",
-      });
-    }
-
-    const newPlayer: Player = {
-      id: playerId,
-      address: playerId,
-      maciData: {},
-      name: "",
-      isAlive: true,
-      isReady: false,
-      role: "VILLAGER",
-    };
-    gameState.players.push(newPlayer);
-
-    await gameDb.update({ roomId }, gameState);
-
+  const room = await gameCollection.findOne({ roomId });
+  if (!room) {
     return c.json<APIResponse>({
-      success: true,
-      data: { roomId: gameState.roomId, message: "Successfully joined room" },
+      success: false,
+      error: "Room not found",
     });
-  } catch (error) {
-    console.error("Error joining room:", error);
-    return c.json<APIResponse>(
-      {
-        success: false,
-        error: "Failed to join room",
-      },
-      500,
-    );
   }
+
+  return c.json<APIResponse>({
+    success: true,
+    data: {
+      roomId: room.roomId,
+      message: "Successfully joined room",
+    },
+  });
 });
 
-// Get room info
-router.get("/room/:roomId", async c => {
-  try {
-    const roomId = c.req.param("roomId");
-    const gameState = await gameDb.findOne<GameState>({ roomId });
-
-    if (!gameState) {
-      return c.json<APIResponse>(
-        {
-          success: false,
-          error: "Room not found",
-        },
-        404,
-      );
-    }
-
-    return c.json<APIResponse>({
-      success: true,
-      data: { gameState },
-    });
-  } catch (error) {
-    console.error("Error fetching room:", error);
-    return c.json<APIResponse>(
-      {
-        success: false,
-        error: "Failed to fetch room",
-      },
-      500,
-    );
-  }
-});
-
-router.get("/", async c => {
-  const rooms = await gameDb.find<GameState>({});
+// Get all rooms
+router.get("/all", async c => {
+  const rooms = await gameCollection.find({}).toArray();
   return c.json<APIResponse>({
     success: true,
     data: { rooms },

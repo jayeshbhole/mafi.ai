@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useGameController } from "../../hooks/useGameController";
 import GameHeader from "./GameHeader";
 import OverlayCard from "./OverlayCard";
@@ -21,11 +21,21 @@ const GameChatRoom = () => {
 
   const connect = useSocketStore(state => state.connect);
   const disconnect = useSocketStore(state => state.disconnect);
+  const sendReady = useSocketStore(state => state.sendReady);
 
   useEffect(() => {
     connect(roomId);
-    return () => disconnect();
-  }, [roomId, connect, disconnect]);
+    // Send ready event after connecting
+    const timer = setTimeout(() => {
+      console.log("Sending ready event...");
+      sendReady();
+    }, 1000); // Wait for connection to establish
+
+    return () => {
+      clearTimeout(timer);
+      disconnect();
+    };
+  }, [roomId, connect, disconnect, sendReady]);
 
   const { overlayCard, handleVote } = useGameController(roomId);
 

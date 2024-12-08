@@ -5,12 +5,12 @@ const API_URL = "http://localhost:9999";
 export const roomService = {
   // Get all active rooms
   getActiveRooms: async (): Promise<GameState[]> => {
-    const response = await fetch(`${API_URL}/rooms`);
-    const data: { rooms: GameState[]; success: boolean; message: string } = await response.json();
+    const response = await fetch(`${API_URL}/rooms/all`);
+    const data: APIResponse<{ rooms: GameState[] }> = await response.json();
 
-    if (!data.success) throw new Error(data.message);
+    if (!data.success || !data.data) throw new Error(data.error);
 
-    return data.rooms;
+    return data.data.rooms;
   },
 
   // Create a new room
@@ -38,19 +38,4 @@ export const roomService = {
 
     return data.data;
   },
-
-  // // Send a chat message
-  // sendChatMessage: async (content: string): Promise<void> => {
-  //   useSocketStore.getState().sendMessage(content);
-  // },
-
-  // // Send a vote
-  // sendVote: async (targetPlayerId: GameMessage<MessageType.VOTE>): Promise<void> => {
-  //   useSocketStore.getState().sendVote(targetPlayerId);
-  // },
-
-  // // Leave room
-  // leaveRoom: (roomId: string) => {
-  //   useSocketStore.getState().disconnect();
-  // },
 };

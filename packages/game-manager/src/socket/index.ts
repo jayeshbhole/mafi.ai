@@ -5,19 +5,18 @@ import { MessageType, type GameMessage } from "@mafia/types/rtc";
 import { v4 as uuid } from "uuid";
 
 export const handleIoServer = (io: Server) => {
-  console.log("🔌 io server initialized");
-
   io.on("connection", async (socket: Socket) => {
-    console.log("🔌 Socket connected:", socket.id);
+    const playerId = socket.handshake.auth.playerId;
+    console.log("🔌 Socket connected:", { socketId: socket.id, playerId });
     console.log("Current rooms:", socket.rooms);
 
     // Handle joining a room
     socket.on("join-room", async (roomId: string) => {
-      console.log("📥 join-room event received", { socketId: socket.id, roomId });
+      console.log("📥 join-room event received", { socketId: socket.id, playerId, roomId });
       try {
         // Add player to game and get updated game state
         console.log("Adding player to game...");
-        const gameState = await addPlayerToGame(roomId, socket.id);
+        const gameState = await addPlayerToGame(roomId, playerId);
         console.log("Game state after adding player:", {
           roomId,
           playerCount: gameState.players.length,
@@ -50,7 +49,7 @@ export const handleIoServer = (io: Server) => {
           type: MessageType.SYSTEM_CHAT,
           playerId: "system",
           payload: {
-            message: `Player ${socket.id} has joined the room`,
+            message: `Player ${playerId} has joined the room`,
           },
         });
 
@@ -67,6 +66,7 @@ export const handleIoServer = (io: Server) => {
       } catch (error) {
         console.error("❌ Error joining room:", {
           socketId: socket.id,
+          playerId,
           roomId,
           error: error instanceof Error ? error.message : error,
         });
@@ -84,7 +84,7 @@ export const handleIoServer = (io: Server) => {
 
     // Handle player ready state
     socket.on(MessageType.READY, async (payload: { ready: boolean }) => {
-      console.log("📥 Ready event received:", { socketId: socket.id, payload });
+      console.log("📥 Ready event received:", { socketId: socket.id, playerId, payload });
       try {
         // Get the room this socket is in (should only be in one room)
         const roomId = Array.from(socket.rooms).find(room => room !== socket.id);
@@ -107,7 +107,7 @@ export const handleIoServer = (io: Server) => {
         const gameManager = new GameManager(roomId, gameState, gameState.settings);
 
         console.log("Handling player ready state...");
-        await gameManager.handlePlayerReady(socket.id);
+        await gameManager.handlePlayerReady(playerId);
 
         // Broadcast ready state
         console.log("📤 Broadcasting ready state");
@@ -115,7 +115,7 @@ export const handleIoServer = (io: Server) => {
           id: uuid(),
           timestamp: Date.now(),
           type: MessageType.READY,
-          playerId: socket.id,
+          playerId,
           payload: {
             message: "ready",
           },
@@ -154,6 +154,7 @@ export const handleIoServer = (io: Server) => {
       } catch (error) {
         console.error("❌ Error handling ready state:", {
           socketId: socket.id,
+          playerId,
           error: error instanceof Error ? error.message : error,
         });
         socket.emit(MessageType.SYSTEM_ALERT, {
@@ -170,7 +171,7 @@ export const handleIoServer = (io: Server) => {
 
     // Handle disconnection
     socket.on("disconnect", () => {
-      console.log("🔌 Socket disconnected:", socket.id);
+      console.log("🔌 Socket disconnected:", { socketId: socket.id, playerId });
       console.log("Rooms at disconnect:", socket.rooms);
 
       // Broadcast to rooms this socket was in
@@ -183,7 +184,7 @@ export const handleIoServer = (io: Server) => {
             type: MessageType.SYSTEM_CHAT,
             playerId: "system",
             payload: {
-              message: `Player ${socket.id} has left the room`,
+              message: `Player ${playerId} has left the room`,
             },
           });
         }

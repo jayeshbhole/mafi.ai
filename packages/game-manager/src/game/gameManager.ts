@@ -1,7 +1,8 @@
 import type { GameState, GameSettings, GamePhase } from "@mafia/types/game";
 import { MessageType, type GameMessage } from "@mafia/types/rtc";
-import { gameDb } from "../db/index.js";
+import { updateGame, addMessageToGame, updatePlayerInGame } from "../db/dbhandler.js";
 import { randomUUID } from "crypto";
+import type { Player } from "@mafia/types/player";
 
 export class GameManager {
   private roomId: string;
@@ -60,7 +61,13 @@ export class GameManager {
       "\n",
     );
 
-    this.gameState.players[playerIndex].isReady = true;
+    // Update player ready state
+    const updatedPlayer = {
+      ...this.gameState.players[playerIndex],
+      isReady: true,
+    };
+    await updatePlayerInGame(this.roomId, playerId, updatedPlayer);
+    this.gameState.players[playerIndex] = updatedPlayer;
 
     const message: GameMessage = {
       id: randomUUID(),
@@ -325,24 +332,39 @@ export class GameManager {
       "\n",
     );
 
-    // Update specific fields instead of the entire gameState
-    await gameDb.update(
-      { roomId: this.roomId },
-      {
-        $set: {
-          phase: this.gameState.phase,
-          round: this.gameState.round,
-          votes: this.gameState.votes,
-          roles: this.gameState.roles,
-          updatedAt: Date.now(),
-        },
-      },
-    );
+    // Remove any duplicate players before saving
+    const uniquePlayers = this.gameState.players.reduce((acc: Player[], current: Player) => {
+      const exists = acc.find(p => p.id === current.id);
+      if (!exists) {
+        acc.push(current);
+      } else {
+        console.log(`\n⚠️ Prevented duplicate player: ${current.id}\n`);
+      }
+      return acc;
+    }, [] as typeof this.gameState.players);
 
-    // Update players array separately to avoid race conditions
-    if (this.gameState.players.length > 0) {
-      await gameDb.update({ roomId: this.roomId }, { $set: { players: this.gameState.players } });
+    if (uniquePlayers.length !== this.gameState.players.length) {
+      console.log(
+        "\n🔄 Removed duplicate players",
+        {
+          before: this.gameState.players.length,
+          after: uniquePlayers.length,
+          players: uniquePlayers.map((p: Player) => ({ id: p.id, isReady: p.isReady })),
+        },
+        "\n",
+      );
+      this.gameState.players = uniquePlayers;
     }
+
+    // Update game state in database
+    await updateGame(this.roomId, {
+      phase: this.gameState.phase,
+      round: this.gameState.round,
+      votes: this.gameState.votes,
+      roles: this.gameState.roles,
+      players: this.gameState.players,
+      updatedAt: Date.now(),
+    });
   }
 
   private async saveMessage(message: GameMessage): Promise<void> {
@@ -355,6 +377,6 @@ export class GameManager {
       },
       "\n",
     );
-    await gameDb.update({ roomId: this.roomId }, { $push: { messages: message } });
+    await addMessageToGame(this.roomId, message);
   }
 }

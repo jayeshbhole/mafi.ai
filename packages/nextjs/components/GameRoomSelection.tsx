@@ -1,11 +1,13 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { roomService } from "../services/roomService";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSocketStore } from "@/services/socketService";
+import { useGameStore } from "@/services/store/gameStore";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 
@@ -21,6 +23,16 @@ const RoomSkeleton = () => (
 const GameRoomSelection = () => {
   const router = useRouter();
   const { address } = useAccount();
+
+  const playerId = useGameStore(state => state.playerId);
+  const setPlayerId = useGameStore(state => state.setPlayerId);
+
+  // Set player ID when address changes
+  useEffect(() => {
+    if (address) {
+      setPlayerId(address);
+    }
+  }, [address, setPlayerId]);
 
   // Query active rooms
   const { data: rooms, isLoading } = useQuery({

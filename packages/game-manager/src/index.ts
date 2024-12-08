@@ -1,32 +1,36 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import { createMiddleware } from "hono/factory";
-import { Server } from "socket.io";
-import roomsRouter from "./routes/rooms.js";
-import { handleIoServer } from "./socket/index.js";
 import { cors } from "hono/cors";
-
-const port = 9999;
+import { Server } from "socket.io";
+import { handleIoServer } from "./socket/index.js";
+import { connectToDatabase, disconnectFromDatabase } from "./db/mongo.js";
+import roomsRouter from "./routes/rooms.js";
+import messagesRouter from "./routes/messages.js";
+import { createMiddleware } from "hono/factory";
 
 const app = new Hono();
 
-// hono cors
 app.use(
   "*",
   cors({
-    origin: ["http://localhost:3000"],
-    credentials: true,
-    maxAge: 600,
+    origin: "*",
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   }),
 );
-const server = serve({ fetch: app.fetch, port }, info => {
-  console.log(`Server is running on http://localhost:${info.port}`);
+
+app.route("/rooms", roomsRouter);
+app.route("/messages", messagesRouter);
+
+const port = process.env.PORT || 9999;
+
+const server = serve({
+  fetch: app.fetch,
+  port: Number(port),
 });
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: "*",
   },
 });
 
@@ -43,9 +47,25 @@ const varMiddleware = createMiddleware<{
   await next();
 });
 
-app.use(varMiddleware);
+app.use("*", varMiddleware);
 
-// Mount routers
-app.route("/rooms", roomsRouter);
+// Initialize MongoDB connection
+await connectToDatabase();
 
-export default app;
+// Handle socket.io connections
+handleIoServer(io);
+
+console.log(`Server running on port ${port}`);
+
+// Handle graceful shutdown
+process.on("SIGTERM", async () => {
+  console.log("\n🛑 Received SIGTERM signal. Shutting down gracefully...\n");
+  await disconnectFromDatabase();
+  process.exit(0);
+});
+
+process.on("SIGINT", async () => {
+  console.log("\n🛑 Received SIGINT signal. Shutting down gracefully...\n");
+  await disconnectFromDatabase();
+  process.exit(0);
+});
