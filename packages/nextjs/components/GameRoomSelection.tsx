@@ -1,11 +1,13 @@
 "use client";
 
-import { useCallback } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { roomService } from "../services/roomService";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useSocketStore } from "@/services/socketService";
+import { useGameStore } from "@/services/store/gameStore";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 
@@ -22,6 +24,16 @@ const GameRoomSelection = () => {
   const router = useRouter();
   const { address } = useAccount();
 
+  const playerId = useGameStore(state => state.playerId);
+  const setPlayerId = useGameStore(state => state.setPlayerId);
+
+  // Set player ID when address changes
+  useEffect(() => {
+    if (address) {
+      setPlayerId(address);
+    }
+  }, [address, setPlayerId]);
+
   // Query active rooms
   const { data: rooms, isLoading } = useQuery({
     queryKey: ["active rooms"],
@@ -29,34 +41,27 @@ const GameRoomSelection = () => {
   });
 
   // Join room mutation
-  const joinRoomMutation = useMutation({
+  const { mutateAsync: joinRoom, isPending: isJoining } = useMutation({
     mutationKey: ["join room"],
     mutationFn: async (roomId?: string) => {
       if (!address) throw new Error("Not connected");
       if (!roomId) {
         // Create and join a new room if no roomId provided
-        const room = await roomService.createRoom();
+        const room = await roomService.createRoom({ playerId: address });
         console.log("Created room. Joining", room);
-
-        return roomService.joinRoom(room.roomId, address);
+        return room;
       }
+
       return roomService.joinRoom(roomId, address);
     },
     onSuccess: ({ roomId }) => {
+      useSocketStore.getState().sendReady();
       router.push(`/game/${roomId}`);
     },
     onError: error => {
       console.error(error);
     },
   });
-
-  const joinRoom = useCallback(
-    (roomId?: string) => {
-      if (!address) return;
-      joinRoomMutation.mutate(roomId);
-    },
-    [address, joinRoomMutation],
-  );
 
   return (
     <div className="grid gap-4 p-4">
@@ -68,8 +73,8 @@ const GameRoomSelection = () => {
           // Show message and auto-join if no rooms
           <Card className="p-4 col-span-full text-center w-64">
             <h3 className="text-lg font-bold mb-4">No Active Rooms</h3>
-            <Button onClick={() => joinRoomMutation.mutate(undefined)} disabled={joinRoomMutation.isPending}>
-              {joinRoomMutation.isPending ? "Creating Room..." : "Create & Join Room"}
+            <Button onClick={() => joinRoom(undefined)} disabled={isJoining}>
+              {isJoining ? "Creating Room..." : "Create & Join Room"}
             </Button>
           </Card>
         ) : (
@@ -80,13 +85,13 @@ const GameRoomSelection = () => {
               <p className="text-sm text-muted-foreground">
                 Players: {room.players.length}/{room.settings.maxPlayers}
               </p>
-              <p className="text-sm text-muted-foreground">Phase: {room.gameState.phase}</p>
+              <p className="text-sm text-muted-foreground">Phase: {room.phase}</p>
               <Button
                 className="mt-4 w-full"
                 onClick={() => joinRoom(room.roomId)}
-                disabled={joinRoomMutation.isPending || room.players.length >= room.settings.maxPlayers}
+                disabled={isJoining || room.players.length >= room.settings.maxPlayers}
               >
-                {joinRoomMutation.isPending ? "Joining..." : "Join Room"}
+                {isJoining ? "Joining..." : "Join Room"}
               </Button>
             </Card>
           ))

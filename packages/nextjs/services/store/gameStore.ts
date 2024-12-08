@@ -1,6 +1,7 @@
-import { GameMessage, MessageType } from "@mafia/types";
-import type { GamePhase, GameState, Player } from "@mafia/types/game";
-import { randomUUID } from "crypto";
+import { useSocketStore } from "../socketService";
+import { GameMessage, MessageType, Player } from "@mafia/types";
+import type { GamePhase, GameState } from "@mafia/types/game";
+import { v4 as uuid } from "uuid";
 import { create } from "zustand";
 
 export const PHASE_DURATION: Record<GamePhase, number> = {
@@ -28,26 +29,8 @@ export const NIGHT_MESSAGES = [
 ];
 
 interface GameStore {
-  // Connection State
-  socket: WebSocket | null;
-  connected: boolean;
-  roomId: string | null;
   playerId: string;
-
-  // Game State
   messages: GameMessage[];
-  currentPhase: GamePhase;
-  gameState: GameState | null;
-
-  // Actions
-  connect: (roomId: string) => void;
-  disconnect: () => void;
-  sendMessage: (content: string) => void;
-  sendVote: (targetId: string) => void;
-  setReady: (ready: boolean) => void;
-  setPlayerId: (playerId: string) => void;
-
-  // Game State
   phase: GamePhase;
   timeLeft: number;
   round: number;
@@ -55,9 +38,10 @@ interface GameStore {
   players: Player[];
   overlayCard: GamePhase | null;
   nightMessage: string;
-  killedPlayer: Player | null;
+  killedPlayer: string | null;
 
   // Game Actions
+  setPlayerId: (playerId: string) => void;
   setPhase: (phase: GamePhase) => void;
   setTimeLeft: (time: number) => void;
   setRound: (round: number) => void;
@@ -67,17 +51,14 @@ interface GameStore {
   addMessage: (message: Omit<GameMessage, "id" | "timestamp">) => void;
   updatePlayer: (id: string, updates: Partial<Player>) => void;
   updateAllPlayers: (updates: Partial<Player>) => void;
+  setPlayers: (players: Player[]) => void;
   voteForPlayer: (id: string) => void;
   resetVotes: () => void;
-  eliminatePlayer: (id: string) => void;
-  setKilledPlayer: (killedPlayer: Player | null) => void;
+  setEliminatedPlayer: (id: string | undefined) => void;
+  setKilledPlayer: (killedPlayer: string | null) => void;
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
-  // Initial State
-  socket: null,
-  connected: false,
-  roomId: null,
   playerId: "",
   messages: [
     {
@@ -88,131 +69,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
       timestamp: Date.now(),
     },
   ],
-  currentPhase: "LOBBY",
-  gameState: null,
-  // Initial Connection State
-
-  // Initial Game State
-  phase: "DAY",
+  phase: "LOBBY",
   round: 0,
   timeLeft: PHASE_DURATION.DAY,
   isTimerActive: true,
   players: [],
-
   overlayCard: null,
   nightMessage: "",
   killedPlayer: null,
 
-  // Connection Actions
-  connect: (roomId: string) => {
-    set({ roomId });
-    const ws = new WebSocket(`ws://localhost:9999/rtc?roomId=${roomId}`);
-
-    ws.onopen = () => {
-      set({ connected: true, socket: ws });
-    };
-
-    ws.onmessage = event => {
-      try {
-        const message = JSON.parse(event.data) as GameMessage;
-
-        switch (message.type) {
-          case MessageType.PHASE_CHANGE:
-            set({ phase: (message.payload.message as GamePhase) || "LOBBY" });
-            break;
-          case MessageType.SYSTEM_ALERT:
-            set(state => ({
-              messages: [...state.messages, message],
-            }));
-            break;
-          case MessageType.SYSTEM_SUCCESS:
-            set(state => ({
-              messages: [...state.messages, message],
-              isTimerActive: false,
-              timeLeft: PHASE_DURATION.END,
-            }));
-            break;
-          case MessageType.VOTE_RESULT:
-            set(state => ({
-              messages: [...state.messages, message],
-              eliminatedPlayer: state.players.find(p => p.id === message.payload.eliminatedPlayerId),
-            }));
-            break;
-          default:
-            set(state => ({
-              messages: [...state.messages, message],
-            }));
-        }
-      } catch (error) {
-        console.error("Error processing message:", error);
-      }
-    };
-
-    ws.onerror = error => {
-      console.error("WebSocket error:", error);
-    };
-
-    ws.onclose = () => {
-      set({ connected: false, socket: null });
-    };
+  setPlayerId: playerId => {
+    set({ playerId });
   },
 
-  disconnect: () => {
-    const { socket } = get();
-    if (socket) {
-      socket.close();
-      set({ socket: null, connected: false, roomId: null });
-    }
-  },
-
-  sendMessage: (content: string) => {
-    const { socket, playerId, addMessage } = get();
-    if (!socket) return;
-
-    const message: GameMessage = {
-      type: MessageType.CHAT,
-      payload: { message: content },
-      id: randomUUID(),
-      timestamp: Date.now(),
-      playerId,
-    };
-
-    socket.send(JSON.stringify(message));
-    addMessage(message);
-  },
-
-  sendVote: (targetId: string) => {
-    const { socket, playerId } = get();
-    if (!socket) return;
-
-    const message: GameMessage = {
-      type: MessageType.VOTE,
-      payload: { vote: targetId },
-      id: randomUUID(),
-      timestamp: Date.now(),
-      playerId,
-    };
-
-    socket.send(JSON.stringify(message));
-  },
-
-  setReady: (ready: boolean) => {
-    const { socket } = get();
-    if (!socket) return;
-
-    const message: GameMessage = {
-      type: MessageType.READY,
-      payload: { message: ready ? "ready" : "notReady" },
-      id: randomUUID(),
-      timestamp: Date.now(),
-      playerId: get().playerId,
-    };
-
-    socket.send(JSON.stringify(message));
-  },
-
-  // Game Actions
-  setPlayerId: playerId => set({ playerId }),
   setPhase: phase => set({ phase }),
   setTimeLeft: timeLeft => set({ timeLeft }),
   setRound: round => set({ round }),
@@ -226,7 +95,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         ...state.messages,
         {
           ...message,
-          id: randomUUID(),
+          id: uuid(),
           timestamp: Date.now(),
         } as GameMessage,
       ],
@@ -242,6 +111,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       players: state.players.map(p => ({ ...p, ...updates })),
     })),
 
+  setPlayers: players => set({ players }),
+
   voteForPlayer: id =>
     set(state => ({
       players: state.players.map(p => ({
@@ -255,7 +126,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       players: state.players.map(p => ({ ...p, votes: 0 })),
     })),
 
-  eliminatePlayer: id =>
+  setEliminatedPlayer: id =>
     set(state => ({
       players: state.players.map(p => (p.id === id ? { ...p, isAlive: false } : p)),
     })),

@@ -1,25 +1,28 @@
 import { Hono } from "hono";
 import { GameManager } from "../game/gameManager.js";
-import { gameDb } from "../db/index.js";
-import type { GameRoom } from "@mafia/types/api";
+import { gameCollection } from "../db/mongo.js";
+import type { GameState } from "@mafia/types/game";
+import type { APIResponse } from "@mafia/types/api";
+import { MessageType, type GameMessage } from "@mafia/types/rtc";
+
 const router = new Hono();
 
+interface NewMessageRequest {
+  type: "player" | "vote";
+  sender: string;
+  content: string;
+  target?: string;
+}
+
 // Post a message
-router.post("/:roomId/new-message", async c => {
+router.post("/room/:roomId", async c => {
   try {
     const roomId = c.req.param("roomId");
-    const { type, sender, content, target } = await c.req.json();
+    const data = await c.req.json<NewMessageRequest>();
 
-    // Get room and game state
-    const room: GameRoom | null = await new Promise((resolve, reject) => {
-      gameDb.findOne({ roomId }, (err, doc) => {
-        if (err) reject(err);
-        else resolve(doc);
-      });
-    });
-
-    if (!room) {
-      return c.json(
+    const game = await gameCollection.findOne({ roomId });
+    if (!game) {
+      return c.json<APIResponse>(
         {
           success: false,
           error: "Room not found",
@@ -28,62 +31,29 @@ router.post("/:roomId/new-message", async c => {
       );
     }
 
-    const gameManager = new GameManager(roomId, room.gameState, room.settings);
+    const message: GameMessage = {
+      id: crypto.randomUUID(),
+      timestamp: Date.now(),
+      type: data.type === "vote" ? MessageType.VOTE : MessageType.CHAT,
+      playerId: data.sender,
+      payload: {
+        message: data.content,
+        ...(data.target && { target: data.target }),
+      },
+    } as GameMessage;
 
-    switch (type) {
-      case "player":
-        const success = await gameManager.handlePlayerMessage(sender, content);
-        if (!success) {
-          return c.json(
-            {
-              success: false,
-              error: "Cannot send message at this time",
-            },
-            400,
-          );
-        }
-        break;
+    await gameCollection.updateOne({ roomId }, { $push: { messages: message } });
 
-      case "vote":
-        if (!target) {
-          return c.json(
-            {
-              success: false,
-              error: "Vote target required",
-            },
-            400,
-          );
-        }
-        const voteSuccess = await gameManager.handleVote(sender, target);
-        if (!voteSuccess) {
-          return c.json(
-            {
-              success: false,
-              error: "Invalid vote",
-            },
-            400,
-          );
-        }
-        break;
-
-      default:
-        return c.json(
-          {
-            success: false,
-            error: "Invalid message type",
-          },
-          400,
-        );
-    }
-
-    return c.json({
+    return c.json<APIResponse>({
       success: true,
+      data: { message },
     });
   } catch (error) {
-    return c.json(
+    console.error("Error posting message:", error);
+    return c.json<APIResponse>(
       {
         success: false,
-        error: "Failed to process message",
+        error: "Failed to post message",
       },
       500,
     );
@@ -91,19 +61,13 @@ router.post("/:roomId/new-message", async c => {
 });
 
 // Get messages for a room
-router.get("/:roomId/get-messages", async c => {
+router.get("/room/:roomId", async c => {
   try {
     const roomId = c.req.param("roomId");
+    const game = await gameCollection.findOne({ roomId });
 
-    const room: GameRoom | null = await new Promise((resolve, reject) => {
-      gameDb.findOne({ roomId }, (err, doc) => {
-        if (err) reject(err);
-        else resolve(doc);
-      });
-    });
-
-    if (!room) {
-      return c.json(
+    if (!game) {
+      return c.json<APIResponse>(
         {
           success: false,
           error: "Room not found",
@@ -112,12 +76,13 @@ router.get("/:roomId/get-messages", async c => {
       );
     }
 
-    return c.json({
+    return c.json<APIResponse>({
       success: true,
-      messages: room.messages,
+      data: { messages: game.messages || [] },
     });
   } catch (error) {
-    return c.json(
+    console.error("Error fetching messages:", error);
+    return c.json<APIResponse>(
       {
         success: false,
         error: "Failed to fetch messages",

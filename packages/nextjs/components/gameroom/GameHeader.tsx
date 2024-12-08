@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import PlayerList from "./PlayerList";
 import TimerProgress from "./TimerProgress";
 import { CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,7 +48,7 @@ const getPhaseStyles = (phase: GamePhase): PhaseStyle => {
 };
 
 const GameHeader = memo(() => {
-  const roomId = useSearchParams().get("roomId") ?? "room-id";
+  const roomId = useParams().roomId as string;
 
   const phase = useGameStore(state => state.phase);
   const phaseStyles = getPhaseStyles(phase);

@@ -1,33 +1,57 @@
 import { useCallback, useEffect, useRef } from "react";
+import { useSocketStore } from "@/services/socketService";
 import { NIGHT_MESSAGES, PHASE_DURATION, useGameStore } from "@/services/store/gameStore";
-import { MessageType, Player } from "@mafia/types";
+import { GameMessage, MessageType } from "@mafia/types";
+import type { GameState } from "@mafia/types/game";
+
+interface GameStatePayload {
+  gameState: GameState;
+  messages: GameMessage[];
+}
 
 export const useGameController = (gameId: string) => {
   // Game state from store
-  const phase = useGameStore(state => state.currentPhase);
+  const phase = useGameStore(state => state.phase);
   const players = useGameStore(state => state.players);
   const overlayCard = useGameStore(state => state.overlayCard);
   const nightMessage = useGameStore(state => state.nightMessage);
   const addMessage = useGameStore(state => state.addMessage);
   const voteForPlayer = useGameStore(state => state.voteForPlayer);
   const resetVotes = useGameStore(state => state.resetVotes);
-  const eliminatePlayer = useGameStore(state => state.eliminatePlayer);
+  const setEliminatedPlayer = useGameStore(state => state.setEliminatedPlayer);
   const setPhase = useGameStore(state => state.setPhase);
   const setOverlayCard = useGameStore(state => state.setOverlayCard);
   const setNightMessage = useGameStore(state => state.setNightMessage);
   const setTimeLeft = useGameStore(state => state.setTimeLeft);
   const setKilledPlayer = useGameStore(state => state.setKilledPlayer);
+  const updatePlayer = useGameStore(state => state.updatePlayer);
+  const setPlayers = useGameStore(state => state.setPlayers);
+  const socket = useSocketStore(state => state.socket);
+
   const timerRef = useRef<NodeJS.Timeout>();
+
+  // Set overlay card when phase changes
+  useEffect(() => {
+    if (phase === "LOBBY") {
+      setOverlayCard("LOBBY");
+    }
+  }, [phase, setOverlayCard]);
 
   const transitionToVoting = useCallback(() => {
     setPhase("VOTING");
     setOverlayCard("VOTING");
   }, [setPhase, setOverlayCard]);
 
-  const transitionToResult = useCallback(() => {
-    setPhase("VOTING_RESULT");
-    setOverlayCard("VOTING_RESULT");
-  }, [setPhase, setOverlayCard]);
+  const transitionToResult = useCallback(
+    (eliminatedPlayerId: string | undefined) => {
+      setPhase("VOTING_RESULT");
+      setOverlayCard("VOTING_RESULT");
+      if (eliminatedPlayerId) {
+        setEliminatedPlayer(eliminatedPlayerId);
+      }
+    },
+    [setPhase, setOverlayCard, setEliminatedPlayer],
+  );
 
   const transitionToNight = useCallback(() => {
     setPhase("NIGHT");
@@ -38,12 +62,12 @@ export const useGameController = (gameId: string) => {
       (prev, current) => (!prev || (current.votes || 0) > (prev.votes || 0) ? current : prev),
       players[0],
     );
-    eliminatePlayer(votedOutPlayer.name);
+    setEliminatedPlayer(votedOutPlayer.name);
     resetVotes();
-  }, [players, setPhase, setOverlayCard, setNightMessage, eliminatePlayer, resetVotes]);
+  }, [players, setPhase, setOverlayCard, setNightMessage, setEliminatedPlayer, resetVotes]);
 
   const transitionToDay = useCallback(
-    (killedPlayer: Player | undefined) => {
+    (killedPlayer: string | undefined) => {
       if (killedPlayer) {
         // Show death overlay first
         setOverlayCard("DEATH");
@@ -71,7 +95,7 @@ export const useGameController = (gameId: string) => {
 
   // Phase end handler
   const handlePhaseEnd = useCallback(
-    ({ data }: { data: { killedPlayer?: Player } }) => {
+    ({ data }: { data: { killedPlayer?: string; eliminatedPlayerId?: string } }) => {
       stopTimer();
 
       switch (phase) {
@@ -79,7 +103,7 @@ export const useGameController = (gameId: string) => {
           transitionToVoting();
           break;
         case "VOTING":
-          transitionToResult();
+          transitionToResult(data.eliminatedPlayerId);
           break;
         case "VOTING_RESULT":
           transitionToNight();
@@ -120,56 +144,85 @@ export const useGameController = (gameId: string) => {
 
   // Start timer when phase changes
   useEffect(() => {
-    setTimeLeft(PHASE_DURATION[phase]);
-    startTimer();
+    if (phase !== "LOBBY") {
+      setTimeLeft(PHASE_DURATION[phase]);
+      startTimer();
+    }
 
     return () => stopTimer();
   }, [phase, setTimeLeft, startTimer, stopTimer]);
 
-  // Check game end conditions
-  const checkGameEnd = useCallback(() => {
-    const alivePlayers = players.filter(p => p.isAlive);
-    const mafiaCount = alivePlayers.filter(p => p.role === "AI_MAFIA").length;
-    const villagerCount = alivePlayers.filter(p => p.role === "VILLAGER").length;
+  useEffect(() => {
+    if (!socket) return;
 
-    if (mafiaCount === 0) {
-      addMessage({
-        playerId: "System",
-        payload: {
-          message: "🎉 Village wins! All mafia have been eliminated.",
-        },
-        type: MessageType.SYSTEM_SUCCESS,
-      });
-      return true;
-    }
+    socket.on(MessageType.CHAT, (message: GameMessage) => {
+      addMessage(message);
+    });
 
-    if (mafiaCount >= villagerCount) {
-      addMessage({
-        playerId: "System",
-        payload: {
-          message: "🎭 Mafia wins! They have taken over the village.",
-        },
-        type: MessageType.SYSTEM_ALERT,
-      });
-      return true;
-    }
+    socket.on(MessageType.SYSTEM_CHAT, (message: GameMessage) => {
+      addMessage(message);
+    });
 
-    return false;
-  }, [players, addMessage]);
+    socket.on(MessageType.SYSTEM_ALERT, (message: GameMessage) => {
+      addMessage(message);
+    });
+
+    socket.on("game-state", (data: { gameState: GameState; messages: GameMessage[] }) => {
+      setPlayers(data.gameState.players);
+      data.messages.forEach(message => addMessage(message));
+    });
+
+    socket.on(MessageType.PHASE_CHANGE, (message: GameMessage) => {
+      if (message.type === MessageType.PHASE_CHANGE) {
+        addMessage(message);
+        handlePhaseEnd({
+          data: {
+            killedPlayer: message.payload.killedPlayer,
+            eliminatedPlayerId: message.payload.eliminatedPlayer,
+          },
+        });
+      }
+    });
+
+    socket.on(MessageType.VOTE, (message: GameMessage) => {
+      if (message.type === MessageType.VOTE) {
+        addMessage(message);
+        handleVote(message.payload.vote);
+      }
+    });
+
+    socket.on(MessageType.GAME_START, (message: GameMessage) => {
+      addMessage(message);
+      setPhase("STARTING");
+      setTimeout(() => {
+        transitionToNight();
+      }, PHASE_DURATION.STARTING * 1000);
+    });
+
+    socket.on(MessageType.READY, (message: GameMessage) => {
+      if (message.type === MessageType.READY) {
+        addMessage(message);
+        updatePlayer(message.playerId, { isReady: true });
+      }
+    });
+
+    return () => {
+      socket.off(MessageType.CHAT);
+      socket.off(MessageType.SYSTEM_CHAT);
+      socket.off(MessageType.SYSTEM_ALERT);
+      socket.off(MessageType.PHASE_CHANGE);
+      socket.off(MessageType.VOTE);
+      socket.off(MessageType.GAME_START);
+      socket.off(MessageType.READY);
+      socket.off("game-state");
+    };
+  }, [socket, addMessage, transitionToNight, handlePhaseEnd, handleVote, setPhase, updatePlayer, setPlayers]);
 
   return {
-    // Game state
     phase,
     players,
     overlayCard,
     nightMessage,
-
-    // Game actions
     handleVote,
-    checkGameEnd,
-    // Phase info
-    isNightPhase: phase === "NIGHT",
-    isVotingPhase: phase === "VOTING",
-    isDayPhase: phase === "DAY",
   };
 };

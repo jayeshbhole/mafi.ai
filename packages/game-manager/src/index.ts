@@ -1,29 +1,40 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { createMiddleware } from "hono/factory";
-import roomsRouter from "./routes/rooms.js";
-import rtcRouter from "./routes/rtc.js";
 import { Server } from "socket.io";
-import { handle } from "hono/cloudflare-pages";
 import { handleIoServer } from "./socket/index.js";
-
-// import { cleanupOldRooms } from "./db/index.js";
-const port = 9999;
+import { connectToDatabase, disconnectFromDatabase } from "./db/mongo.js";
+import roomsRouter from "./routes/rooms.js";
+import messagesRouter from "./routes/messages.js";
+import { createMiddleware } from "hono/factory";
 
 const app = new Hono();
-const server = serve({ fetch: app.fetch, port }, info => {
-  console.log(`Server is running on http://localhost:${info.port}`);
+
+app.use(
+  "*",
+  cors({
+    origin: "*",
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  }),
+);
+
+app.route("/rooms", roomsRouter);
+app.route("/messages", messagesRouter);
+
+const port = process.env.PORT || 9999;
+
+const server = serve({
+  fetch: app.fetch,
+  port: Number(port),
 });
 
 const io = new Server(server, {
   cors: {
     origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
   },
 });
 
-handleIoServer(io, "123");
+handleIoServer(io);
 
 const varMiddleware = createMiddleware<{
   Variables: {
@@ -36,19 +47,25 @@ const varMiddleware = createMiddleware<{
   await next();
 });
 
-app.use(varMiddleware);
+app.use("*", varMiddleware);
 
-// Add CORS middleware
-// app.use(
-//   "/*",
-//   cors({
-//     origin: ["http://localhost:3000"],
-//     credentials: true,
-//     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-//     maxAge: 600,
-//   }),
-// );
+// Initialize MongoDB connection
+await connectToDatabase();
 
-// Mount routers
-app.route("/rooms", roomsRouter);
-app.route("/rtc", rtcRouter);
+// Handle socket.io connections
+handleIoServer(io);
+
+console.log(`Server running on port ${port}`);
+
+// Handle graceful shutdown
+process.on("SIGTERM", async () => {
+  console.log("\n🛑 Received SIGTERM signal. Shutting down gracefully...\n");
+  await disconnectFromDatabase();
+  process.exit(0);
+});
+
+process.on("SIGINT", async () => {
+  console.log("\n🛑 Received SIGINT signal. Shutting down gracefully...\n");
+  await disconnectFromDatabase();
+  process.exit(0);
+});

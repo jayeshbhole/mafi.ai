@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ScaffoldEthAppWithProviders } from "@/components/ScaffoldEthAppWithProviders";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { FaucetButton } from "@/components/scaffold-eth";
+import { Toaster } from "@/components/ui/sonner";
 import "@/styles/globals.css";
 import { getMetadata } from "@/utils/scaffold-eth/getMetadata";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
@@ -13,9 +14,6 @@ export const metadata = getMetadata({ title: "mafia.ai", description: "mafia.ai 
 const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
   return (
     <html suppressHydrationWarning>
-      <head>
-        <script src="https://unpkg.com/react-scan/dist/auto.global.js" async />
-      </head>
       <body>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <ScaffoldEthAppWithProviders>
@@ -29,6 +27,7 @@ const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
             </header>
 
             {children}
+            <Toaster />
           </ScaffoldEthAppWithProviders>
         </ThemeProvider>
       </body>

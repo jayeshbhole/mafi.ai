@@ -4,7 +4,7 @@ import { Player } from "@mafia/types";
 interface PlayerListProps {
   players: Player[];
   onVote?: (playerName: string) => void;
-  variant?: "compact" | "voting";
+  variant?: "compact" | "voting" | "lobby";
 }
 
 const PlayerList = memo(({ players, onVote, variant = "compact" }: PlayerListProps) => {

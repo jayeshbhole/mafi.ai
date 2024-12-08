@@ -1,0 +1,22 @@
+{
+  "name": "mafia-agent",
+  "version": "1.0.0",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "packageManager": "yarn@3.2.3",
+  "scripts": {
+    "start": "ts-node src/ai-agent-class.ts"
+  },
+  "dependencies": {
+    "@lit-protocol/lit-node-client": "^7.0.1",
+    "dotenv": "^16.4.7",
+    "ethers": "^6.13.4",
+    "openai": "^4.76.0",
+    "socket.io-client": "^4.8.1",
+    "ts-node": "^10.9.2",
+    "viem": "^2.21.54"
+  }
+}

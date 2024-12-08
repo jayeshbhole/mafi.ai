@@ -3,7 +3,7 @@ import PlayerList from "./PlayerList";
 import TimerProgress from "./TimerProgress";
 import { Card, CardTitle } from "@/components/ui/card";
 import { PHASE_DURATION, useGameStore } from "@/services/store/gameStore";
-import { Gavel, Moon, Skull, Users } from "lucide-react";
+import { Gavel, Loader2, Moon, Skull, Users } from "lucide-react";
 
 interface OverlayCardProps {
   onVote?: (playerName: string) => void;
@@ -19,6 +19,30 @@ const OverlayCard = memo(({ onVote }: OverlayCardProps) => {
   const duration = PHASE_DURATION[phase];
   const timeLeft = useGameStore(state => state.timeLeft);
 
+  // Show waiting overlay if game hasn't started
+  if (phase === "LOBBY") {
+    const readyPlayers = players.filter(p => p.isReady).length;
+    const minPlayers = 3; // Minimum players required to start
+
+    return (
+      <div className="absolute inset-0 z-10 animate-in fade-in zoom-in duration-300">
+        <Card className="w-full h-full flex flex-col items-center justify-center text-white relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900">
+          <div className="relative z-10 flex flex-col items-center">
+            <Loader2 className="w-24 h-24 mb-8 text-indigo-300 animate-spin" />
+            <CardTitle className="text-2xl mb-4 text-center">Waiting for Players</CardTitle>
+            <p className="text-lg text-center px-6 text-indigo-200">
+              {readyPlayers} / {minPlayers} players ready
+            </p>
+            {readyPlayers < minPlayers && (
+              <p className="text-sm mt-4 text-indigo-300">Need {minPlayers - readyPlayers} more players to start</p>
+            )}
+            <PlayerList players={players} variant="lobby" />
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   if (overlayCard === "DEATH") {
     return (
       <div className="absolute inset-0 z-10 animate-in fade-in zoom-in duration-1000">
@@ -30,7 +54,7 @@ const OverlayCard = memo(({ onVote }: OverlayCardProps) => {
             <CardTitle className="text-4xl mb-6 text-center font-serif text-red-500">A Body Was Found</CardTitle>
             <p className="text-2xl text-center px-6 text-red-200 font-serif max-w-lg leading-relaxed">
               As dawn breaks, the villagers discover the lifeless body of{" "}
-              <span className="text-red-400 font-semibold">{killedPlayer?.name}</span>
+              <span className="text-red-400 font-semibold">{killedPlayer}</span>
             </p>
           </div>
 

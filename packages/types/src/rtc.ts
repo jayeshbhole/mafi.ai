@@ -93,13 +93,13 @@ interface VoteResultMessage extends BaseMessage {
 }
 
 // Death message
-interface DeathMessage extends BaseMessage {
-  type: MessageType.DEATH;
-  playerId: "system";
-  payload: {
-    playerId: string;
-  };
-}
+// interface DeathMessage extends BaseMessage {
+//   type: MessageType.DEATH;
+//   playerId: "system";
+//   payload: {
+//     playerId: string;
+//   };
+// }
 
 // Phase change message
 interface PhaseChangeMessage extends BaseMessage {
@@ -107,6 +107,8 @@ interface PhaseChangeMessage extends BaseMessage {
   playerId: "system";
   payload: {
     message: GamePhase;
+    killedPlayer?: string;
+    eliminatedPlayer?: string;
   };
 }
 
@@ -130,7 +132,6 @@ export type GameMessage<T extends MessageType = MessageType> = T extends any
       | SystemSuccessMessage
       | VoteMessage
       | VoteResultMessage
-      | DeathMessage
       | PhaseChangeMessage
       | KillMessage,
       { type: T }

@@ -7,5 +7,6 @@ export interface Player {
   name: string;
   role: PlayerRole;
   isAlive: boolean;
+  isReady: boolean;
   votes?: number;
 }
