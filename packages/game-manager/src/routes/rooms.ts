@@ -4,7 +4,7 @@ import type { APIResponse } from "@mafia/types/api";
 import type { GameState, GameSettings } from "@mafia/types/game";
 import { randomUUID } from "crypto";
 import { gameCollection } from "../db/mongo.js";
-import type { Player } from "@mafia/types/player";
+import type { Player, PlayerRole } from "@mafia/types/player";
 
 dotenv.config();
 
@@ -87,9 +87,17 @@ router.post("/join-room/:roomId", async c => {
   const roomId = c.req.param("roomId");
   const data = await c.req.json<{
     playerId: string;
+    role?: string;
   }>();
 
-  const { playerId } = data;
+  const { playerId, role } = data;
+
+  if (!playerId) {
+    return c.json<APIResponse>({
+      success: false,
+      error: "Player ID is required",
+    });
+  }
 
   const room = await gameCollection.findOne({ roomId });
   if (!room) {
@@ -98,6 +106,17 @@ router.post("/join-room/:roomId", async c => {
       error: "Room not found",
     });
   }
+  const newPlayer: Player = {
+    id: playerId,
+    address: playerId,
+    maciData: {},
+    name: "",
+    isAlive: true,
+    isReady: false,
+    role: (role || "VILLAGER") as PlayerRole,
+  };
+
+  await gameCollection.updateOne({ roomId }, { $push: { players: newPlayer } });
 
   return c.json<APIResponse>({
     success: true,

@@ -107,7 +107,8 @@ export class GameManager {
       },
       "\n",
     );
-    return readyPlayers.length >= this.settings.minPlayers;
+    return true;
+    // return readyPlayers.length >= this.settings.minPlayers;
   }
 
   async startGame(): Promise<void> {
