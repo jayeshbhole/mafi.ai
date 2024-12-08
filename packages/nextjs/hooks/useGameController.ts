@@ -2,10 +2,37 @@ import { useCallback, useEffect, useRef } from "react";
 import { useSocketStore } from "@/services/socketService";
 import { NIGHT_MESSAGES, PHASE_DURATION, useGameStore } from "@/services/store/gameStore";
 import { GameMessage, MessageType } from "@mafia/types";
+import type { GameState } from "@mafia/types/game";
+
+interface PhaseChangePayload {
+  killedPlayer?: string;
+  eliminatedPlayerId?: string;
+}
+
+interface VotePayload {
+  vote: string;
+}
+
+interface ReadyPayload {
+  message: "ready" | "notReady";
+}
+
+interface GameStartPayload {
+  timestamp: number;
+}
+
+interface GameStatePayload {
+  gameState: GameState;
+  messages: GameMessage[];
+}
+
+type TypedGameMessage<T> = Omit<GameMessage, "payload"> & {
+  payload: T;
+};
 
 export const useGameController = (gameId: string) => {
   // Game state from store
-  const phase = useGameStore(state => state.currentPhase);
+  const phase = useGameStore(state => state.phase);
   const players = useGameStore(state => state.players);
   const overlayCard = useGameStore(state => state.overlayCard);
   const nightMessage = useGameStore(state => state.nightMessage);
@@ -18,9 +45,18 @@ export const useGameController = (gameId: string) => {
   const setNightMessage = useGameStore(state => state.setNightMessage);
   const setTimeLeft = useGameStore(state => state.setTimeLeft);
   const setKilledPlayer = useGameStore(state => state.setKilledPlayer);
+  const updatePlayer = useGameStore(state => state.updatePlayer);
+  const setPlayers = useGameStore(state => state.setPlayers);
   const socket = useSocketStore(state => state.socket);
 
   const timerRef = useRef<NodeJS.Timeout>();
+
+  // Set overlay card when phase changes
+  useEffect(() => {
+    if (phase === "LOBBY") {
+      setOverlayCard("LOBBY");
+    }
+  }, [phase, setOverlayCard]);
 
   const transitionToVoting = useCallback(() => {
     setPhase("VOTING");
@@ -31,7 +67,9 @@ export const useGameController = (gameId: string) => {
     (eliminatedPlayerId: string | undefined) => {
       setPhase("VOTING_RESULT");
       setOverlayCard("VOTING_RESULT");
-      setEliminatedPlayer(eliminatedPlayerId);
+      if (eliminatedPlayerId) {
+        setEliminatedPlayer(eliminatedPlayerId);
+      }
     },
     [setPhase, setOverlayCard, setEliminatedPlayer],
   );
@@ -127,15 +165,17 @@ export const useGameController = (gameId: string) => {
 
   // Start timer when phase changes
   useEffect(() => {
-    setTimeLeft(PHASE_DURATION[phase]);
-    startTimer();
+    if (phase !== "LOBBY") {
+      setTimeLeft(PHASE_DURATION[phase]);
+      startTimer();
+    }
 
     return () => stopTimer();
   }, [phase, setTimeLeft, startTimer, stopTimer]);
 
   useEffect(() => {
     if (!socket) return;
-    // Listen for all message types
+
     socket.on(MessageType.CHAT, (message: GameMessage) => {
       addMessage(message);
     });
@@ -149,74 +189,70 @@ export const useGameController = (gameId: string) => {
     });
 
     socket.on(MessageType.PHASE_CHANGE, (message: GameMessage) => {
-      addMessage(message);
-      handlePhaseEnd({
-        data: {
-          killedPlayer: message.payload.killedPlayer,
-          eliminatedPlayerId: message.payload.eliminatedPlayerId,
-        },
-      });
+      if (message.type === MessageType.PHASE_CHANGE) {
+        addMessage(message);
+        handlePhaseEnd({
+          data: {
+            killedPlayer: message.payload.killedPlayer,
+            eliminatedPlayerId: message.payload.eliminatedPlayer,
+          },
+        });
+      }
     });
 
     socket.on(MessageType.VOTE, (message: GameMessage) => {
-      addMessage(message);
-      handleVote(message.payload.vote);
+      if (message.type === MessageType.VOTE) {
+        addMessage(message);
+        handleVote(message.payload.vote);
+      }
     });
 
     socket.on(MessageType.GAME_START, (message: GameMessage) => {
       addMessage(message);
-      transitionToNight();
+      setPhase("STARTING");
+      setTimeout(() => {
+        transitionToNight();
+      }, PHASE_DURATION.STARTING * 1000);
     });
 
     socket.on(MessageType.READY, (message: GameMessage) => {
-      addMessage(message);
+      if (message.type === MessageType.READY) {
+        addMessage(message);
+        updatePlayer(message.playerId, { isReady: true });
+      }
     });
-  }, [socket, addMessage, transitionToNight, handlePhaseEnd, handleVote]);
 
-  // Check game end conditions
-  const checkGameEnd = useCallback(() => {
-    const alivePlayers = players.filter(p => p.isAlive);
-    const mafiaCount = alivePlayers.filter(p => p.role === "AI_MAFIA").length;
-    const villagerCount = alivePlayers.filter(p => p.role === "VILLAGER").length;
+    // Handle game state updates
+    socket.on("game-state", ({ gameState }: GameStatePayload) => {
+      // Update local game state
+      setPhase(gameState.phase);
+      setPlayers(gameState.players);
 
-    if (mafiaCount === 0) {
-      addMessage({
-        playerId: "System",
-        payload: {
-          message: "🎉 Village wins! All mafia have been eliminated.",
-        },
-        type: MessageType.SYSTEM_SUCCESS,
-      });
-      return true;
-    }
+      // If there are messages, add them
+      if (gameState.messages?.length) {
+        gameState.messages.forEach(message => {
+          addMessage(message);
+        });
+      }
+    });
 
-    if (mafiaCount >= villagerCount) {
-      addMessage({
-        playerId: "System",
-        payload: {
-          message: "🎭 Mafia wins! They have taken over the village.",
-        },
-        type: MessageType.SYSTEM_ALERT,
-      });
-      return true;
-    }
-
-    return false;
-  }, [players, addMessage]);
+    return () => {
+      socket.off(MessageType.CHAT);
+      socket.off(MessageType.SYSTEM_CHAT);
+      socket.off(MessageType.SYSTEM_ALERT);
+      socket.off(MessageType.PHASE_CHANGE);
+      socket.off(MessageType.VOTE);
+      socket.off(MessageType.GAME_START);
+      socket.off(MessageType.READY);
+      socket.off("game-state");
+    };
+  }, [socket, addMessage, transitionToNight, handlePhaseEnd, handleVote, setPhase, updatePlayer, setPlayers]);
 
   return {
-    // Game state
     phase,
     players,
     overlayCard,
     nightMessage,
-
-    // Game actions
     handleVote,
-    checkGameEnd,
-    // Phase info
-    isNightPhase: phase === "NIGHT",
-    isVotingPhase: phase === "VOTING",
-    isDayPhase: phase === "DAY",
   };
 };

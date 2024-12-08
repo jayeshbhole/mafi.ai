@@ -30,13 +30,7 @@ export const NIGHT_MESSAGES = [
 
 interface GameStore {
   playerId: string;
-
-  // Game State
   messages: GameMessage[];
-  currentPhase: GamePhase;
-  gameState: GameState | null;
-
-  // Game State
   phase: GamePhase;
   timeLeft: number;
   round: number;
@@ -57,6 +51,7 @@ interface GameStore {
   addMessage: (message: Omit<GameMessage, "id" | "timestamp">) => void;
   updatePlayer: (id: string, updates: Partial<Player>) => void;
   updateAllPlayers: (updates: Partial<Player>) => void;
+  setPlayers: (players: Player[]) => void;
   voteForPlayer: (id: string) => void;
   resetVotes: () => void;
   setEliminatedPlayer: (id: string | undefined) => void;
@@ -74,10 +69,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       timestamp: Date.now(),
     },
   ],
-  currentPhase: "LOBBY",
-  gameState: null,
-
-  phase: "DAY",
+  phase: "LOBBY",
   round: 0,
   timeLeft: PHASE_DURATION.DAY,
   isTimerActive: true,
@@ -119,6 +111,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set(state => ({
       players: state.players.map(p => ({ ...p, ...updates })),
     })),
+
+  setPlayers: players => set({ players }),
 
   voteForPlayer: id =>
     set(state => ({

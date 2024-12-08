@@ -15,7 +15,7 @@ interface GameChatProps {
 export function GameChat({ playerId }: GameChatProps) {
   const [message, setMessage] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const { messages, currentPhase } = useGameStore();
+  const { messages, phase } = useGameStore();
 
   const { mutate: sendChatMessage } = useMutation({
     mutationKey: ["sendChatMessage"],
@@ -44,7 +44,7 @@ export function GameChat({ playerId }: GameChatProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Phase Banner */}
-      <div className="bg-primary/10 p-2 text-center text-primary font-semibold">Current Phase: {currentPhase}</div>
+      <div className="bg-primary/10 p-2 text-center text-primary font-semibold">Current Phase: {phase}</div>
 
       {/* Chat Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
