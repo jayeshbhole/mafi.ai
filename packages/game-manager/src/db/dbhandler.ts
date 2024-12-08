@@ -23,8 +23,8 @@ export const findGame = async (roomId: string) => {
 export const addPlayerToGame = async (roomId: string, playerId: string) => {
   const game = await findGame(roomId);
 
-  // Check if player is already in the game
-  if (game.players.some(p => p.id === playerId)) {
+  // Simple check for duplicate player
+  if (game.players.find(p => p.id === playerId)) {
     return game;
   }
 
