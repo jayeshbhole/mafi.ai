@@ -19,70 +19,31 @@ const DEFAULT_SETTINGS: GameSettings = {
   votingDuration: 10,
 };
 
-// Create or join a room
-router.post("/create-or-join-room", async c => {
+// Create a room
+router.post("/create-room/:roomId?", async c => {
   try {
-    const { roomId, player } = await c.req.json<{
-      roomId?: string;
-      player: Omit<Player, "isAlive" | "isReady" | "role">;
+    const data = await c.req.json<{
+      playerId?: string;
     }>();
 
-    // Try to join existing room if roomId is provided
-    if (roomId) {
-      const existingRoom = await gameDb.findOne<GameState>({ roomId });
-      if (existingRoom) {
-        // Check if room is full
-        if (existingRoom.players.length >= existingRoom.settings.maxPlayers) {
-          return c.json<APIResponse>(
-            {
-              success: false,
-              error: "Room is full",
-            },
-            400,
-          );
-        }
+    const roomId = c.req.param("roomId");
 
-        // Check if game has already started
-        if (existingRoom.phase !== "LOBBY") {
-          return c.json<APIResponse>(
-            {
-              success: false,
-              error: "Game has already started",
-            },
-            400,
-          );
-        }
+    const { playerId } = data || {};
 
-        // Add player to room
-        const newPlayer: Player = {
-          ...player,
-          isAlive: true,
-          isReady: false,
-          role: "VILLAGER", // Default role, will be assigned properly when game starts
-        };
-
-        await gameDb.update(
-          { roomId },
-          {
-            $push: { players: newPlayer },
-            $set: { updatedAt: Date.now() },
-          },
-        );
-
-        return c.json<APIResponse>({
-          success: true,
-          data: {
-            roomId,
-            message: "Successfully joined room",
-          },
-        });
-      }
+    if (!playerId) {
+      return c.json<APIResponse>({
+        success: false,
+        error: "Player ID is required",
+      });
     }
 
     // Create new room if roomId wasn't provided or room wasn't found
     const newRoomId = roomId || randomUUID();
     const newPlayer: Player = {
-      ...player,
+      id: playerId,
+      address: playerId,
+      maciData: {},
+      name: "",
       isAlive: true,
       isReady: false,
       role: "VILLAGER", // Default role, will be assigned properly when game starts
@@ -122,6 +83,62 @@ router.post("/create-or-join-room", async c => {
   }
 });
 
+// Join a room
+router.post("/join-room/:roomId", async c => {
+  try {
+    const data = await c.req.json<{
+      playerId?: string;
+    }>();
+
+    const { playerId } = data || {};
+
+    if (!playerId) {
+      return c.json<APIResponse>({
+        success: false,
+        error: "Player ID is required",
+      });
+    }
+
+    const roomId = c.req.param("roomId");
+
+    const gameState = await gameDb.findOne<GameState>({ roomId });
+
+    if (!gameState) {
+      return c.json<APIResponse>({
+        success: false,
+        error: "Room not found",
+      });
+    }
+
+    const newPlayer: Player = {
+      id: playerId,
+      address: playerId,
+      maciData: {},
+      name: "",
+      isAlive: true,
+      isReady: false,
+      role: "VILLAGER",
+    };
+    gameState.players.push(newPlayer);
+
+    await gameDb.update({ roomId }, gameState);
+
+    return c.json<APIResponse>({
+      success: true,
+      data: { roomId: gameState.roomId, message: "Successfully joined room" },
+    });
+  } catch (error) {
+    console.error("Error joining room:", error);
+    return c.json<APIResponse>(
+      {
+        success: false,
+        error: "Failed to join room",
+      },
+      500,
+    );
+  }
+});
+
 // Get room info
 router.get("/room/:roomId", async c => {
   try {
@@ -152,6 +169,14 @@ router.get("/room/:roomId", async c => {
       500,
     );
   }
+});
+
+router.get("/", async c => {
+  const rooms = await gameDb.find<GameState>({});
+  return c.json<APIResponse>({
+    success: true,
+    data: { rooms },
+  });
 });
 
 export default router;

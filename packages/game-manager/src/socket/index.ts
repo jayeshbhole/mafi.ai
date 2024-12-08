@@ -1,9 +1,17 @@
-import type { Server, Socket } from "socket.io";
+import { Server, Socket } from "socket.io";
 import { GameManager } from "../game/gameManager.js";
 import { gameDb } from "../db/index.js";
 import { MessageType, type GameMessage } from "@mafia/types/rtc";
 import type { GameState } from "@mafia/types/game";
-import { randomUUID } from "crypto";
+import { v4 as uuid } from "uuid";
+
+const io = new Server({
+  cors: {
+    origin: "http://localhost:3000",
+  },
+});
+
+io.listen(4000);
 
 export const handleIoServer = (io: Server) => {
   io.on("connection", async (socket: Socket) => {
@@ -15,7 +23,7 @@ export const handleIoServer = (io: Server) => {
         const gameState = await gameDb.findOne<GameState>({ roomId });
         if (!gameState) {
           socket.emit(MessageType.SYSTEM_ALERT, {
-            id: randomUUID(),
+            id: uuid(),
             timestamp: Date.now(),
             type: MessageType.SYSTEM_ALERT,
             playerId: "system",
@@ -42,7 +50,7 @@ export const handleIoServer = (io: Server) => {
 
         // Broadcast system message for new player
         io.to(roomId).emit(MessageType.SYSTEM_CHAT, {
-          id: randomUUID(),
+          id: uuid(),
           timestamp: Date.now(),
           type: MessageType.SYSTEM_CHAT,
           playerId: "system",
@@ -59,7 +67,7 @@ export const handleIoServer = (io: Server) => {
       } catch (error) {
         console.error("Error joining room:", error);
         socket.emit(MessageType.SYSTEM_ALERT, {
-          id: randomUUID(),
+          id: uuid(),
           timestamp: Date.now(),
           type: MessageType.SYSTEM_ALERT,
           playerId: "system",
@@ -81,7 +89,7 @@ export const handleIoServer = (io: Server) => {
 
         // Broadcast ready state
         io.to(roomId).emit(MessageType.READY, {
-          id: randomUUID(),
+          id: uuid(),
           timestamp: Date.now(),
           type: MessageType.READY,
           playerId: socket.id,
@@ -94,7 +102,7 @@ export const handleIoServer = (io: Server) => {
         if (gameManager.canStartGame()) {
           await gameManager.startGame();
           io.to(roomId).emit(MessageType.GAME_START, {
-            id: randomUUID(),
+            id: uuid(),
             timestamp: Date.now(),
             type: MessageType.GAME_START,
             playerId: "system",
@@ -120,7 +128,7 @@ export const handleIoServer = (io: Server) => {
         if (success) {
           // Broadcast chat message
           io.to(roomId).emit(MessageType.CHAT, {
-            id: randomUUID(),
+            id: uuid(),
             timestamp: Date.now(),
             type: MessageType.CHAT,
             playerId: socket.id,
@@ -146,7 +154,7 @@ export const handleIoServer = (io: Server) => {
         if (success) {
           // Broadcast vote
           io.to(roomId).emit(MessageType.VOTE, {
-            id: randomUUID(),
+            id: uuid(),
             timestamp: Date.now(),
             type: MessageType.VOTE,
             playerId: socket.id,
@@ -161,7 +169,7 @@ export const handleIoServer = (io: Server) => {
             if (eliminatedPlayer) {
               // Broadcast death message
               io.to(roomId).emit(MessageType.DEATH, {
-                id: randomUUID(),
+                id: uuid(),
                 timestamp: Date.now(),
                 type: MessageType.DEATH,
                 playerId: "system",
@@ -184,7 +192,7 @@ export const handleIoServer = (io: Server) => {
       socket.rooms.forEach(roomId => {
         if (roomId !== socket.id) {
           io.to(roomId).emit(MessageType.SYSTEM_CHAT, {
-            id: randomUUID(),
+            id: uuid(),
             timestamp: Date.now(),
             type: MessageType.SYSTEM_CHAT,
             playerId: "system",

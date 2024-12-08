@@ -1,7 +1,7 @@
 "use client";
 
 import { type PropsWithChildren, createContext, useContext } from "react";
-import { useWebSocketStore } from "@/services/websocketService";
+import { useSocketStore } from "@/services/socketService";
 
 interface WebSocketContextType {
   connected: boolean;
@@ -12,7 +12,7 @@ const WebSocketContext = createContext<WebSocketContextType>({
 });
 
 export function WebSocketProvider({ children }: PropsWithChildren) {
-  const { connected } = useWebSocketStore();
+  const connected = useSocketStore(state => state.connected);
 
   return (
     <WebSocketContext.Provider

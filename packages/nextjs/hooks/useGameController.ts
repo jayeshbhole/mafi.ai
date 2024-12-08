@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
+import { useSocketStore } from "@/services/socketService";
 import { NIGHT_MESSAGES, PHASE_DURATION, useGameStore } from "@/services/store/gameStore";
-import { MessageType, Player } from "@mafia/types";
+import { GameMessage, MessageType } from "@mafia/types";
 
 export const useGameController = (gameId: string) => {
   // Game state from store
@@ -11,12 +12,14 @@ export const useGameController = (gameId: string) => {
   const addMessage = useGameStore(state => state.addMessage);
   const voteForPlayer = useGameStore(state => state.voteForPlayer);
   const resetVotes = useGameStore(state => state.resetVotes);
-  const eliminatePlayer = useGameStore(state => state.eliminatePlayer);
+  const setEliminatedPlayer = useGameStore(state => state.setEliminatedPlayer);
   const setPhase = useGameStore(state => state.setPhase);
   const setOverlayCard = useGameStore(state => state.setOverlayCard);
   const setNightMessage = useGameStore(state => state.setNightMessage);
   const setTimeLeft = useGameStore(state => state.setTimeLeft);
   const setKilledPlayer = useGameStore(state => state.setKilledPlayer);
+  const socket = useSocketStore(state => state.socket);
+
   const timerRef = useRef<NodeJS.Timeout>();
 
   const transitionToVoting = useCallback(() => {
@@ -24,10 +27,14 @@ export const useGameController = (gameId: string) => {
     setOverlayCard("VOTING");
   }, [setPhase, setOverlayCard]);
 
-  const transitionToResult = useCallback(() => {
-    setPhase("VOTING_RESULT");
-    setOverlayCard("VOTING_RESULT");
-  }, [setPhase, setOverlayCard]);
+  const transitionToResult = useCallback(
+    (eliminatedPlayerId: string | undefined) => {
+      setPhase("VOTING_RESULT");
+      setOverlayCard("VOTING_RESULT");
+      setEliminatedPlayer(eliminatedPlayerId);
+    },
+    [setPhase, setOverlayCard, setEliminatedPlayer],
+  );
 
   const transitionToNight = useCallback(() => {
     setPhase("NIGHT");
@@ -38,12 +45,12 @@ export const useGameController = (gameId: string) => {
       (prev, current) => (!prev || (current.votes || 0) > (prev.votes || 0) ? current : prev),
       players[0],
     );
-    eliminatePlayer(votedOutPlayer.name);
+    setEliminatedPlayer(votedOutPlayer.name);
     resetVotes();
-  }, [players, setPhase, setOverlayCard, setNightMessage, eliminatePlayer, resetVotes]);
+  }, [players, setPhase, setOverlayCard, setNightMessage, setEliminatedPlayer, resetVotes]);
 
   const transitionToDay = useCallback(
-    (killedPlayer: Player | undefined) => {
+    (killedPlayer: string | undefined) => {
       if (killedPlayer) {
         // Show death overlay first
         setOverlayCard("DEATH");
@@ -71,7 +78,7 @@ export const useGameController = (gameId: string) => {
 
   // Phase end handler
   const handlePhaseEnd = useCallback(
-    ({ data }: { data: { killedPlayer?: Player } }) => {
+    ({ data }: { data: { killedPlayer?: string; eliminatedPlayerId?: string } }) => {
       stopTimer();
 
       switch (phase) {
@@ -79,7 +86,7 @@ export const useGameController = (gameId: string) => {
           transitionToVoting();
           break;
         case "VOTING":
-          transitionToResult();
+          transitionToResult(data.eliminatedPlayerId);
           break;
         case "VOTING_RESULT":
           transitionToNight();
@@ -125,6 +132,46 @@ export const useGameController = (gameId: string) => {
 
     return () => stopTimer();
   }, [phase, setTimeLeft, startTimer, stopTimer]);
+
+  useEffect(() => {
+    if (!socket) return;
+    // Listen for all message types
+    socket.on(MessageType.CHAT, (message: GameMessage) => {
+      addMessage(message);
+    });
+
+    socket.on(MessageType.SYSTEM_CHAT, (message: GameMessage) => {
+      addMessage(message);
+    });
+
+    socket.on(MessageType.SYSTEM_ALERT, (message: GameMessage) => {
+      addMessage(message);
+    });
+
+    socket.on(MessageType.PHASE_CHANGE, (message: GameMessage) => {
+      addMessage(message);
+      handlePhaseEnd({
+        data: {
+          killedPlayer: message.payload.killedPlayer,
+          eliminatedPlayerId: message.payload.eliminatedPlayerId,
+        },
+      });
+    });
+
+    socket.on(MessageType.VOTE, (message: GameMessage) => {
+      addMessage(message);
+      handleVote(message.payload.vote);
+    });
+
+    socket.on(MessageType.GAME_START, (message: GameMessage) => {
+      addMessage(message);
+      transitionToNight();
+    });
+
+    socket.on(MessageType.READY, (message: GameMessage) => {
+      addMessage(message);
+    });
+  }, [socket, addMessage, transitionToNight, handlePhaseEnd, handleVote]);
 
   // Check game end conditions
   const checkGameEnd = useCallback(() => {

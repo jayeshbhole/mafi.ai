@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ScaffoldEthAppWithProviders } from "@/components/ScaffoldEthAppWithProviders";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { FaucetButton } from "@/components/scaffold-eth";
+import { Toaster } from "@/components/ui/sonner";
 import "@/styles/globals.css";
 import { getMetadata } from "@/utils/scaffold-eth/getMetadata";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
@@ -29,6 +30,7 @@ const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
             </header>
 
             {children}
+            <Toaster />
           </ScaffoldEthAppWithProviders>
         </ThemeProvider>
       </body>

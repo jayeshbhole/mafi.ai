@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { socket } from "@/services/socketService";
 import { useGameStore } from "@/services/store/gameStore";
 import { MessageType } from "@mafia/types/rtc";
+import { useMutation } from "@tanstack/react-query";
 
 interface GameChatProps {
   roomId: string;
@@ -14,7 +15,14 @@ interface GameChatProps {
 export function GameChat({ playerId }: GameChatProps) {
   const [message, setMessage] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const { messages, currentPhase, sendMessage, sendVote } = useGameStore();
+  const { messages, currentPhase } = useGameStore();
+
+  const { mutate: sendChatMessage } = useMutation({
+    mutationKey: ["sendChatMessage"],
+    mutationFn: async (message: string) => {
+      socket.emit(MessageType.CHAT, { message });
+    },
+  });
 
   // Auto scroll to bottom when new messages arrive
   useEffect(() => {
@@ -26,18 +34,10 @@ export function GameChat({ playerId }: GameChatProps) {
     if (!message.trim()) return;
 
     try {
-      sendMessage(message);
+      sendChatMessage(message);
       setMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
-    }
-  };
-
-  const handleVote = async (targetPlayerId: string) => {
-    try {
-      sendVote(targetPlayerId);
-    } catch (error) {
-      console.error("Error sending vote:", error);
     }
   };
 
