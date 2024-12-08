@@ -83,8 +83,13 @@ export default class GameResponseGenerator {
       console.log("Response:", responseData);
 
 
-      this.socket!.auth = { playerId: "first_ai" };
+      console.log("emitting join-room");
+
       this.socket!.emit("join-room", "room1");
+      
+      this.socket!.auth = { playerId: "first_ai" };
+
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       this.socket!.emit("ready", {
         type: "ready",

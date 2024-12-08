@@ -110,7 +110,13 @@ const ChatInput = () => {
   });
 
   return (
-    <form onSubmit={() => sendMessage()} className="p-4 flex gap-2">
+    <form
+      onSubmit={e => {
+        e.preventDefault();
+        sendMessage();
+      }}
+      className="p-4 flex gap-2"
+    >
       <Input
         value={input}
         onChange={e => setInput(e.target.value)}

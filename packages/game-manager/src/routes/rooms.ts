@@ -26,6 +26,13 @@ router.post("/create-or-join-room/:roomId?", async c => {
       playerId: string;
     }>();
 
+    if (!data.playerId) {
+      return c.json<APIResponse>({
+        success: false,
+        error: "Player ID is required",
+      });
+    }
+
     // const roomId = c.req.param("roomId");
     // const newRoomId = "room1";
     const roomId = "room1";

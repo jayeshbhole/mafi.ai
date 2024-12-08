@@ -39,7 +39,7 @@ export const handleIoServer = (io: Server) => {
 
         // Initialize game manager for this room
         console.log("Initializing game manager...");
-        const gameManager = new GameManager(roomId, gameState, gameState.settings);
+        // const gameManager = new GameManager(roomId, gameState, gameState.settings);
 
         // Broadcast system message for new player
         console.log("📤 Broadcasting system message for new player");
