@@ -4,31 +4,10 @@ import { NIGHT_MESSAGES, PHASE_DURATION, useGameStore } from "@/services/store/g
 import { GameMessage, MessageType } from "@mafia/types";
 import type { GameState } from "@mafia/types/game";
 
-interface PhaseChangePayload {
-  killedPlayer?: string;
-  eliminatedPlayerId?: string;
-}
-
-interface VotePayload {
-  vote: string;
-}
-
-interface ReadyPayload {
-  message: "ready" | "notReady";
-}
-
-interface GameStartPayload {
-  timestamp: number;
-}
-
 interface GameStatePayload {
   gameState: GameState;
   messages: GameMessage[];
 }
-
-type TypedGameMessage<T> = Omit<GameMessage, "payload"> & {
-  payload: T;
-};
 
 export const useGameController = (gameId: string) => {
   // Game state from store
@@ -188,6 +167,11 @@ export const useGameController = (gameId: string) => {
       addMessage(message);
     });
 
+    socket.on("game-state", (data: { gameState: GameState; messages: GameMessage[] }) => {
+      setPlayers(data.gameState.players);
+      data.messages.forEach(message => addMessage(message));
+    });
+
     socket.on(MessageType.PHASE_CHANGE, (message: GameMessage) => {
       if (message.type === MessageType.PHASE_CHANGE) {
         addMessage(message);
@@ -219,20 +203,6 @@ export const useGameController = (gameId: string) => {
       if (message.type === MessageType.READY) {
         addMessage(message);
         updatePlayer(message.playerId, { isReady: true });
-      }
-    });
-
-    // Handle game state updates
-    socket.on("game-state", ({ gameState }: GameStatePayload) => {
-      // Update local game state
-      setPhase(gameState.phase);
-      setPlayers(gameState.players);
-
-      // If there are messages, add them
-      if (gameState.messages?.length) {
-        gameState.messages.forEach(message => {
-          addMessage(message);
-        });
       }
     });
 

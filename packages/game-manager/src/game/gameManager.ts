@@ -9,6 +9,16 @@ export class GameManager {
   private settings: GameSettings;
 
   constructor(roomId: string, gameState: GameState, settings: GameSettings) {
+    console.log(
+      "\n🎮 Initializing GameManager",
+      {
+        roomId,
+        playerCount: gameState.players.length,
+        settings,
+      },
+      "\n",
+    );
+
     this.roomId = roomId;
     this.gameState = gameState;
     this.settings = settings;
@@ -16,16 +26,39 @@ export class GameManager {
     // Initialize game state if needed
     if (!this.gameState.votes) {
       this.gameState.votes = {};
+      console.log("Initialized votes object\n");
     }
     if (!this.gameState.roles) {
       this.gameState.roles = {};
+      console.log("Initialized roles object\n");
     }
   }
 
   // Player Management
   async handlePlayerReady(playerId: string): Promise<boolean> {
+    console.log(
+      "\n🎯 Handling player ready state",
+      {
+        playerId,
+        roomId: this.roomId,
+      },
+      "\n",
+    );
+
     const playerIndex = this.gameState.players.findIndex(p => p.id === playerId);
-    if (playerIndex === -1) return false;
+    if (playerIndex === -1) {
+      console.log("❌ Player not found in game state", { playerId }, "\n");
+      return false;
+    }
+
+    console.log(
+      "Current player ready state:",
+      {
+        playerId,
+        wasReady: this.gameState.players[playerIndex].isReady,
+      },
+      "\n",
+    );
 
     this.gameState.players[playerIndex].isReady = true;
 
@@ -39,17 +72,48 @@ export class GameManager {
       },
     };
 
+    console.log("Saving ready message and updating game state...\n");
     await this.saveMessage(message);
     await this.saveGameState();
+
+    console.log(
+      "✅ Player ready state updated",
+      {
+        playerId,
+        readyPlayers: this.gameState.players.filter(p => p.isReady).length,
+        totalPlayers: this.gameState.players.length,
+      },
+      "\n",
+    );
     return true;
   }
 
   canStartGame(): boolean {
     const readyPlayers = this.gameState.players.filter(p => p.isReady);
+    console.log(
+      "\n🎲 Checking if game can start",
+      {
+        readyPlayers: readyPlayers.length,
+        minPlayers: this.settings.minPlayers,
+        totalPlayers: this.gameState.players.length,
+        readyPlayerIds: readyPlayers.map(p => p.id),
+      },
+      "\n",
+    );
     return readyPlayers.length >= this.settings.minPlayers;
   }
 
   async startGame(): Promise<void> {
+    console.log(
+      "\n🎮 Starting game",
+      {
+        roomId: this.roomId,
+        playerCount: this.gameState.players.length,
+        readyPlayers: this.gameState.players.filter(p => p.isReady).length,
+      },
+      "\n",
+    );
+
     this.gameState.phase = "STARTING";
     this.gameState.round = 1;
 
@@ -63,9 +127,11 @@ export class GameManager {
       },
     };
 
+    console.log("Saving game start message and updating game state...\n");
     await this.saveMessage(message);
     await this.saveGameState();
     await this.startDay();
+    console.log("✅ Game started successfully\n");
   }
 
   // Phase Management
@@ -234,10 +300,10 @@ export class GameManager {
     const message: GameMessage = {
       id: randomUUID(),
       timestamp: Date.now(),
-      type: MessageType.DEATH,
-      playerId: "system",
+      type: MessageType.KILL,
+      playerId: "system_ai",
       payload: {
-        playerId,
+        targetId: playerId,
       },
     };
 
@@ -247,10 +313,48 @@ export class GameManager {
 
   // Database Operations
   private async saveGameState(): Promise<void> {
-    await gameDb.update({ roomId: this.roomId }, { $set: { gameState: this.gameState } });
+    console.log(
+      "\n💾 Saving game state",
+      {
+        roomId: this.roomId,
+        phase: this.gameState.phase,
+        playerCount: this.gameState.players.length,
+        round: this.gameState.round,
+        players: this.gameState.players.map(p => ({ id: p.id, isReady: p.isReady })),
+      },
+      "\n",
+    );
+
+    // Update specific fields instead of the entire gameState
+    await gameDb.update(
+      { roomId: this.roomId },
+      {
+        $set: {
+          phase: this.gameState.phase,
+          round: this.gameState.round,
+          votes: this.gameState.votes,
+          roles: this.gameState.roles,
+          updatedAt: Date.now(),
+        },
+      },
+    );
+
+    // Update players array separately to avoid race conditions
+    if (this.gameState.players.length > 0) {
+      await gameDb.update({ roomId: this.roomId }, { $set: { players: this.gameState.players } });
+    }
   }
 
   private async saveMessage(message: GameMessage): Promise<void> {
+    console.log(
+      "\n💬 Saving message",
+      {
+        roomId: this.roomId,
+        messageType: message.type,
+        playerId: message.playerId,
+      },
+      "\n",
+    );
     await gameDb.update({ roomId: this.roomId }, { $push: { messages: message } });
   }
 }

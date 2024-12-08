@@ -1,9 +1,10 @@
-import { type GameMessage, MessageType } from "@mafia/types";
+import { useGameStore } from "./store/gameStore";
+import { type GameMessage, GameState, MessageType } from "@mafia/types";
 import { type Socket, io } from "socket.io-client";
 import { v4 as uuid } from "uuid";
 import { create } from "zustand";
 
-const URL = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4000";
+const URL = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:9999";
 
 interface ServerToClientEvents {
   [MessageType.CHAT]: (message: GameMessage) => void;
@@ -14,6 +15,7 @@ interface ServerToClientEvents {
   [MessageType.GAME_START]: (message: GameMessage) => void;
   [MessageType.READY]: (message: GameMessage) => void;
   [MessageType.DEATH]: (message: GameMessage) => void;
+  "game-state": (data: { gameState: GameState; messages: GameMessage[] }) => void;
 }
 
 interface ClientToServerEvents {
@@ -30,10 +32,7 @@ interface SocketStore {
   playerId: string;
   connect: (roomId: string) => void;
   disconnect: () => void;
-  // sendMessage: (payload: GameMessage<MessageType.CHAT>) => void;
-  // sendVote: (payload: GameMessage<MessageType.VOTE>) => void;
-  // setReady: (payload: GameMessage<MessageType.READY>) => void;
-  // setPlayerId: (id: string) => void;
+  sendReady: () => void;
 }
 
 export const socket = io(URL, {
@@ -59,6 +58,11 @@ export const useSocketStore = create<SocketStore>((set, get) => ({
       console.log("Connected to socket server");
     });
 
+    socket.on("game-state", data => {
+      const { gameState } = data;
+      useGameStore.getState().setPlayers(gameState.players);
+    });
+
     socket.on("disconnect", () => {
       set({ connected: false });
       console.log("Disconnected from socket server");
@@ -72,30 +76,9 @@ export const useSocketStore = create<SocketStore>((set, get) => ({
     }
   },
 
-  // sendMessage: (content: GameMessage) => {
-  //   if (socket) {
-  //     // const payload: GameMessage = {
-  //     //   type: MessageType.CHAT,
-  //     //   id: uuid(),
-  //     //   payload: {
-  //     //     message: content,
-  //     //   },
-  //     //   playerId: get().playerId,
-  //     //   timestamp: Date.now(),
-  //     // };
-  //     socket.emit(MessageType.CHAT, content);
-  //   }
-  // },
-
-  // sendVote: (payload: GameMessage<MessageType.VOTE>) => {
-  //   if (socket) {
-  //     socket.emit(MessageType.VOTE, payload);
-  //   }
-  // },
-
-  // setReady: (payload: GameMessage<MessageType.READY>) => {
-  //   if (socket) {
-  //     socket.emit(MessageType.READY, payload);
-  //   }
-  // },
+  sendReady: () => {
+    if (socket) {
+      socket.emit(MessageType.READY, { ready: true });
+    }
+  },
 }));

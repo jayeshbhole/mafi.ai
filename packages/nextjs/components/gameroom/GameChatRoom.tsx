@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useGameController } from "../../hooks/useGameController";
 import GameHeader from "./GameHeader";
 import OverlayCard from "./OverlayCard";
@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
 
 const GameChatRoom = () => {
-  const roomId = useSearchParams().get("roomId") ?? "room-id";
+  const roomId = useParams().roomId as string;
 
   const connect = useSocketStore(state => state.connect);
   const disconnect = useSocketStore(state => state.disconnect);

@@ -4,39 +4,46 @@ import { addPlayerToGame, findGame } from "../db/dbhandler.js";
 import { MessageType, type GameMessage } from "@mafia/types/rtc";
 import { v4 as uuid } from "uuid";
 
-const io = new Server({
-  cors: {
-    origin: "http://localhost:3000",
-  },
-});
-
-io.listen(4000);
-
 export const handleIoServer = (io: Server) => {
+  console.log("🔌 io server initialized");
+
   io.on("connection", async (socket: Socket) => {
-    console.log("A user connected", socket.id);
+    console.log("🔌 Socket connected:", socket.id);
+    console.log("Current rooms:", socket.rooms);
 
     // Handle joining a room
     socket.on("join-room", async (roomId: string) => {
+      console.log("📥 join-room event received", { socketId: socket.id, roomId });
       try {
         // Add player to game and get updated game state
+        console.log("Adding player to game...");
         const gameState = await addPlayerToGame(roomId, socket.id);
+        console.log("Game state after adding player:", {
+          roomId,
+          playerCount: gameState.players.length,
+          players: gameState.players.map(p => ({ id: p.id, isReady: p.isReady })),
+        });
 
         // Leave all other rooms first
+        console.log("Current rooms before leaving:", socket.rooms);
         socket.rooms.forEach(room => {
           if (room !== socket.id) {
             socket.leave(room);
+            console.log(`Left room: ${room}`);
           }
         });
 
         // Join the new room
         socket.join(roomId);
-        console.log("User joined room", roomId);
+        console.log("Joined new room:", roomId);
+        console.log("Current rooms after joining:", socket.rooms);
 
         // Initialize game manager for this room
+        console.log("Initializing game manager...");
         const gameManager = new GameManager(roomId, gameState, gameState.settings);
 
         // Broadcast system message for new player
+        console.log("📤 Broadcasting system message for new player");
         io.to(roomId).emit(MessageType.SYSTEM_CHAT, {
           id: uuid(),
           timestamp: Date.now(),
@@ -48,12 +55,21 @@ export const handleIoServer = (io: Server) => {
         });
 
         // Send current game state to all players
+        console.log("📤 Broadcasting game state to all players:", {
+          roomId,
+          playerCount: gameState.players.length,
+          players: gameState.players.map(p => ({ id: p.id, isReady: p.isReady })),
+        });
         io.to(roomId).emit("game-state", {
           gameState,
           messages: gameState.messages,
         });
       } catch (error) {
-        console.error("Error joining room:", error);
+        console.error("❌ Error joining room:", {
+          socketId: socket.id,
+          roomId,
+          error: error instanceof Error ? error.message : error,
+        });
         socket.emit(MessageType.SYSTEM_ALERT, {
           id: uuid(),
           timestamp: Date.now(),
@@ -67,13 +83,34 @@ export const handleIoServer = (io: Server) => {
     });
 
     // Handle player ready state
-    socket.on(MessageType.READY, async (roomId: string) => {
+    socket.on(MessageType.READY, async (payload: { ready: boolean }) => {
+      console.log("📥 Ready event received:", { socketId: socket.id, payload });
       try {
+        // Get the room this socket is in (should only be in one room)
+        const roomId = Array.from(socket.rooms).find(room => room !== socket.id);
+        console.log("Current rooms for socket:", socket.rooms);
+
+        if (!roomId) {
+          throw new Error("Player not in any room");
+        }
+        console.log("Found room for ready event:", roomId);
+
+        console.log("Fetching game state...");
         const gameState = await findGame(roomId);
+        console.log("Current game state:", {
+          roomId,
+          playerCount: gameState.players.length,
+          players: gameState.players.map(p => ({ id: p.id, isReady: p.isReady })),
+        });
+
+        console.log("Initializing game manager...");
         const gameManager = new GameManager(roomId, gameState, gameState.settings);
+
+        console.log("Handling player ready state...");
         await gameManager.handlePlayerReady(socket.id);
 
         // Broadcast ready state
+        console.log("📤 Broadcasting ready state");
         io.to(roomId).emit(MessageType.READY, {
           id: uuid(),
           timestamp: Date.now(),
@@ -84,9 +121,24 @@ export const handleIoServer = (io: Server) => {
           },
         });
 
+        // Send updated game state to all players
+        const updatedGameState = await findGame(roomId);
+        console.log("📤 Broadcasting updated game state:", {
+          roomId,
+          playerCount: updatedGameState.players.length,
+          players: updatedGameState.players.map(p => ({ id: p.id, isReady: p.isReady })),
+        });
+        io.to(roomId).emit("game-state", {
+          gameState: updatedGameState,
+          messages: updatedGameState.messages,
+        });
+
         // Check if game can start
+        console.log("Checking if game can start...");
         if (gameManager.canStartGame()) {
+          console.log("🎮 Game can start! Starting game...");
           await gameManager.startGame();
+          console.log("📤 Broadcasting game start event");
           io.to(roomId).emit(MessageType.GAME_START, {
             id: uuid(),
             timestamp: Date.now(),
@@ -96,9 +148,14 @@ export const handleIoServer = (io: Server) => {
               timestamp: Date.now(),
             },
           });
+        } else {
+          console.log("Game cannot start yet. Waiting for more players or ready states.");
         }
       } catch (error) {
-        console.error("Error handling ready state:", error);
+        console.error("❌ Error handling ready state:", {
+          socketId: socket.id,
+          error: error instanceof Error ? error.message : error,
+        });
         socket.emit(MessageType.SYSTEM_ALERT, {
           id: uuid(),
           timestamp: Date.now(),
@@ -113,10 +170,13 @@ export const handleIoServer = (io: Server) => {
 
     // Handle disconnection
     socket.on("disconnect", () => {
-      console.log("User disconnected", socket.id);
+      console.log("🔌 Socket disconnected:", socket.id);
+      console.log("Rooms at disconnect:", socket.rooms);
+
       // Broadcast to rooms this socket was in
       socket.rooms.forEach(roomId => {
         if (roomId !== socket.id) {
+          console.log("📤 Broadcasting disconnect message to room:", roomId);
           io.to(roomId).emit(MessageType.SYSTEM_CHAT, {
             id: uuid(),
             timestamp: Date.now(),

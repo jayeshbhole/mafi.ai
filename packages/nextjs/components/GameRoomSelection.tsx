@@ -5,6 +5,7 @@ import { roomService } from "../services/roomService";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useSocketStore } from "@/services/socketService";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 
@@ -42,6 +43,7 @@ const GameRoomSelection = () => {
       return roomService.joinRoom(roomId, address);
     },
     onSuccess: ({ roomId }) => {
+      useSocketStore.getState().sendReady();
       router.push(`/game/${roomId}`);
     },
     onError: error => {
